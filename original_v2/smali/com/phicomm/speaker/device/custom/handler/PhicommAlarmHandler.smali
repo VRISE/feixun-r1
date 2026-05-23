@@ -1,0 +1,202 @@
+.class public Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;
+.super Lcom/unisound/vui/handler/session/memo/DefaultAlarmHandler;
+.source "PhicommAlarmHandler.java"
+
+
+# static fields
+.field private static final TAG:Ljava/lang/String; = "PhicommAlarmHandler"
+
+
+# instance fields
+.field private mLightController:Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
+
+
+# direct methods
+.method public constructor <init>(Landroid/content/Context;)V
+    .registers 3
+    .param p1, "context"    # Landroid/content/Context;
+
+    .prologue
+    .line 17
+    invoke-direct {p0, p1}, Lcom/unisound/vui/handler/session/memo/DefaultAlarmHandler;-><init>(Landroid/content/Context;)V
+
+    .line 18
+    new-instance v0, Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
+
+    invoke-direct {v0, p1}, Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;-><init>(Landroid/content/Context;)V
+
+    iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;->mLightController:Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
+
+    .line 19
+    return-void
+.end method
+
+
+# virtual methods
+.method public dealWithSetMemo(Lnluparser/scheme/Intent;Landroid/content/Context;)Ljava/lang/String;
+    .registers 7
+    .param p1, "intent"    # Lnluparser/scheme/Intent;
+    .param p2, "mAndroidContext"    # Landroid/content/Context;
+
+    .prologue
+    .line 24
+    move-object v0, p1
+
+    check-cast v0, Lnluparser/scheme/AlarmIntent;
+
+    .line 25
+    .local v0, "alarmIntent":Lnluparser/scheme/AlarmIntent;
+    invoke-virtual {v0}, Lnluparser/scheme/AlarmIntent;->getType()I
+
+    move-result v1
+
+    const/4 v2, 0x1
+
+    if-ne v1, v2, :cond_45
+
+    .line 26
+    const-string v1, "PhicommAlarmHandler"
+
+    new-instance v2, Ljava/lang/StringBuilder;
+
+    invoke-direct {v2}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v3, "dealWithSetMemo countDown:"
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    invoke-virtual {v0}, Lnluparser/scheme/AlarmIntent;->getCountDown()I
+
+    move-result v3
+
+    invoke-virtual {v2, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v2
+
+    invoke-virtual {v2}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v2
+
+    invoke-static {v1, v2}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 27
+    invoke-virtual {v0}, Lnluparser/scheme/AlarmIntent;->getCountDown()I
+
+    move-result v1
+
+    const/16 v2, 0x2710
+
+    if-ge v1, v2, :cond_35
+
+    .line 28
+    sget v1, Lcom/phicomm/speaker/device/R$string;->tts_countdown_set_too_short:I
+
+    invoke-virtual {p2, v1}, Landroid/content/Context;->getString(I)Ljava/lang/String;
+
+    move-result-object v1
+
+    .line 34
+    :goto_34
+    return-object v1
+
+    .line 30
+    :cond_35
+    invoke-virtual {v0}, Lnluparser/scheme/AlarmIntent;->getCountDown()I
+
+    move-result v1
+
+    const v2, 0x5265c00
+
+    if-le v1, v2, :cond_45
+
+    .line 31
+    sget v1, Lcom/phicomm/speaker/device/R$string;->tts_countdown_set_too_long:I
+
+    invoke-virtual {p2, v1}, Landroid/content/Context;->getString(I)Ljava/lang/String;
+
+    move-result-object v1
+
+    goto :goto_34
+
+    .line 34
+    :cond_45
+    invoke-super {p0, p1, p2}, Lcom/unisound/vui/handler/session/memo/DefaultAlarmHandler;->dealWithSetMemo(Lnluparser/scheme/Intent;Landroid/content/Context;)Ljava/lang/String;
+
+    move-result-object v1
+
+    goto :goto_34
+.end method
+
+.method public onTTSEventPlayingEnd(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+    .registers 4
+    .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
+
+    .prologue
+    const/4 v1, 0x0
+
+    .line 40
+    iget-boolean v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;->eventReceived:Z
+
+    if-nez v0, :cond_7
+
+    move v0, v1
+
+    .line 49
+    :goto_6
+    return v0
+
+    .line 43
+    :cond_7
+    sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;->NEED_SUPPLEMENT:Lcom/unisound/vui/util/AttributeKey;
+
+    invoke-interface {p1, v0}, Lcom/unisound/vui/engine/ANTHandlerContext;->hasAttr(Lcom/unisound/vui/util/AttributeKey;)Z
+
+    move-result v0
+
+    if-eqz v0, :cond_21
+
+    sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;->NEED_SUPPLEMENT:Lcom/unisound/vui/util/AttributeKey;
+
+    invoke-interface {p1, v0}, Lcom/unisound/vui/engine/ANTHandlerContext;->attr(Lcom/unisound/vui/util/AttributeKey;)Lcom/unisound/vui/util/Attribute;
+
+    move-result-object v0
+
+    invoke-interface {v0}, Lcom/unisound/vui/util/Attribute;->getAndRemove()Ljava/lang/Object;
+
+    move-result-object v0
+
+    check-cast v0, Ljava/lang/Boolean;
+
+    invoke-virtual {v0}, Ljava/lang/Boolean;->booleanValue()Z
+
+    move-result v0
+
+    if-nez v0, :cond_26
+
+    .line 44
+    :cond_21
+    invoke-super {p0, p1}, Lcom/unisound/vui/handler/session/memo/DefaultAlarmHandler;->onTTSEventPlayingEnd(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+
+    move-result v0
+
+    goto :goto_6
+
+    .line 46
+    :cond_26
+    invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;->reset()V
+
+    .line 47
+    invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->enterASR()V
+
+    .line 48
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;->mLightController:Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
+
+    invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;->turnOnWakeupLastLight()V
+
+    move v0, v1
+
+    .line 49
+    goto :goto_6
+.end method

@@ -1,0 +1,148 @@
+.class Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;
+.super Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$SteadyState;
+.source "SceneStateMachine.java"
+
+
+# annotations
+.annotation system Ldalvik/annotation/EnclosingClass;
+    value = Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+.end annotation
+
+.annotation system Ldalvik/annotation/InnerClass;
+    accessFlags = 0x0
+    name = "NetConfigState"
+.end annotation
+
+
+# instance fields
+.field final synthetic this$0:Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+
+# direct methods
+.method constructor <init>(Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;)V
+    .registers 2
+    .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+    .prologue
+    .line 271
+    iput-object p1, p0, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;->this$0:Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+    .line 272
+    invoke-direct {p0, p1}, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$SteadyState;-><init>(Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;)V
+
+    .line 273
+    return-void
+.end method
+
+
+# virtual methods
+.method public enter()V
+    .registers 3
+
+    .prologue
+    .line 277
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;->this$0:Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+    const/4 v1, 0x2
+
+    # setter for: Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->mCurrentScene:I
+    invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->access$002(Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;I)I
+
+    .line 278
+    invoke-super {p0}, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$SteadyState;->enter()V
+
+    .line 279
+    return-void
+.end method
+
+.method public processMessage(Landroid/os/Message;)Z
+    .registers 5
+    .param p1, "msg"    # Landroid/os/Message;
+
+    .prologue
+    .line 283
+    const-string v0, "SceneStateMachine"
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v2, "NetConfigState process "
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget v2, p1, Landroid/os/Message;->what:I
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, " msg."
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 284
+    iget v0, p1, Landroid/os/Message;->what:I
+
+    sparse-switch v0, :sswitch_data_40
+
+    .line 292
+    const/4 v0, 0x0
+
+    .line 294
+    :goto_26
+    return v0
+
+    .line 286
+    :sswitch_27
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;->this$0:Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+    iget-object v1, p0, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;->this$0:Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+    # getter for: Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->mExitingNetConfigState:Lcom/android/internal/util/State;
+    invoke-static {v1}, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->access$2900(Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;)Lcom/android/internal/util/State;
+
+    move-result-object v1
+
+    # invokes: Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->transitionTo(Lcom/android/internal/util/IState;)V
+    invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->access$3000(Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;Lcom/android/internal/util/IState;)V
+
+    .line 294
+    :goto_32
+    const/4 v0, 0x1
+
+    goto :goto_26
+
+    .line 289
+    :sswitch_34
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;->this$0:Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+    iget-object v1, p0, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;->this$0:Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;
+
+    # getter for: Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->mReadyState:Lcom/android/internal/util/State;
+    invoke-static {v1}, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->access$1600(Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;)Lcom/android/internal/util/State;
+
+    move-result-object v1
+
+    # invokes: Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->transitionTo(Lcom/android/internal/util/IState;)V
+    invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;->access$3100(Lcom/phicomm/speaker/device/custom/status/SceneStateMachine;Lcom/android/internal/util/IState;)V
+
+    goto :goto_32
+
+    .line 284
+    :sswitch_data_40
+    .sparse-switch
+        0x12 -> :sswitch_27
+        0x6a -> :sswitch_34
+    .end sparse-switch
+.end method
