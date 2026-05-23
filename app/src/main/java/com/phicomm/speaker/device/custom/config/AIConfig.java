@@ -45,7 +45,7 @@ public class AIConfig {
     // 默认配置
     private static final String DEFAULT_PROVIDER = "openai";
     private static final String DEFAULT_BASE_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
-    private static final String DEFAULT_API_KEY = "2e9d919870cc4192bcd87c82cfa0aab6.mKIdxAhsmcuNOU8b";
+    private static final String DEFAULT_API_KEY = "2e9d919870cc4192bcd87c82cfa0aab6";
     private static final String DEFAULT_MODEL = "GLM-4.5-Flash";
     private static final float DEFAULT_TEMPERATURE = 0.7f;
     private static final int DEFAULT_MAX_TOKENS = 2048;
