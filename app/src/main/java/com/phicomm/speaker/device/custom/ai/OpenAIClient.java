@@ -26,9 +26,19 @@ public class OpenAIClient {
     private static final String TAG = "OpenAIClient";
     
     // 超时设置
-    private static final int CONNECT_TIMEOUT = 10000;  // 10秒
-    private static final int READ_TIMEOUT = 30000;     // 30秒(大模型响应慢)
-    
+    //
+    // ⚠️ READ_TIMEOUT 原来是 30 秒，实测不够用：
+    //    GLM-4.7-Flash 是混合思考模型，开思考时一次请求要 27 秒，
+    //    服务端繁忙时甚至到 75 秒 —— 30 秒必然 SocketTimeout，表现为"调用失败"。
+    //    音箱是语音交互，用户等得起几十秒（有 TTS 兜底），等不起失败，所以放宽。
+    private static final int CONNECT_TIMEOUT = 15000;   // 15秒
+    private static final int READ_TIMEOUT = 90000;      // 90秒(大模型响应可能很慢)
+
+    /** 遇到限流(429) / 服务端错误(5xx) / 超时时的重试次数(总尝试次数) */
+    private static final int MAX_ATTEMPTS = 3;
+    /** 重试等待基数: 第 n 次重试等待 BASE * n 毫秒 */
+    private static final long RETRY_BACKOFF_MS = 3000L;
+
     private AIConfig config;
     
     public OpenAIClient(AIConfig config) {
@@ -161,7 +171,19 @@ public class OpenAIClient {
             
             // max_tokens
             json.put("max_tokens", config.getMaxTokens());
-            
+
+            // thinking: 智谱"混合思考模型"专用开关。
+            //   disabled = 关闭思考(推荐): 音箱是语音短交互,不需要深度推理,
+            //     关掉后省掉 600+ reasoning tokens,响应明显变快。
+            //   enabled  = 打开思考; auto = 不发送该字段(兼容 OpenAI 等非智谱端点)。
+            String thinking = config.getThinking();
+            if (thinking != null && !thinking.trim().isEmpty()
+                    && !"auto".equalsIgnoreCase(thinking.trim())) {
+                JSONObject thinkingObj = new JSONObject();
+                thinkingObj.put("type", thinking.trim());
+                json.put("thinking", thinkingObj);
+            }
+
             return json.toString();
             
         } catch (Exception e) {
@@ -218,11 +240,53 @@ public class OpenAIClient {
      * HTTP POST JSON 请求
      * 复用 NetEaseMusicClient 的模式
      */
+    /** 单次请求的结果封装(用于判断是否值得重试) */
+    private static class HttpResult {
+        String body;        // 成功时为响应体, 失败时为 null
+        boolean retryable;  // 限流/超时/服务端错误 → 可重试
+        String summary;     // 失败原因简述
+    }
+
+    /**
+     * HTTP POST JSON 请求(带重试)
+     *
+     * 免费额度下智谱会返回 429「账户已达到速率限制」, 偶发超时也常见,
+     * 所以这里对可恢复的错误做退避重试, 避免用户一句话就说"调用失败"。
+     */
     private String httpPostJson(String urlStr, String jsonBody) {
+        HttpResult last = null;
+
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            HttpResult r = httpPostJsonOnce(urlStr, jsonBody);
+            if (r.body != null) {
+                return r.body;
+            }
+
+            last = r;
+            if (!r.retryable || attempt >= MAX_ATTEMPTS) {
+                break;
+            }
+
+            long waitMs = RETRY_BACKOFF_MS * attempt;
+            LogMgr.d(TAG, "调用失败(" + r.summary + "), " + waitMs + "ms 后第 " + (attempt + 1) + " 次尝试");
+            try {
+                Thread.sleep(waitMs);
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        LogMgr.e(TAG, "大模型调用最终失败: " + (last == null ? "unknown" : last.summary));
+        return null;
+    }
+
+    private HttpResult httpPostJsonOnce(String urlStr, String jsonBody) {
+        HttpResult result = new HttpResult();
         HttpURLConnection conn = null;
         BufferedReader reader = null;
         OutputStream os = null;
-        
+
         try {
             URL url = new URL(urlStr);
             conn = (HttpURLConnection) url.openConnection();
@@ -266,10 +330,15 @@ public class OpenAIClient {
                     errorReader.close();
                     errorBody = errorSB.toString();
                 } catch (Exception ignored) {}
-                LogMgr.e(TAG, "httpPostJson failed: " + responseCode + ", error body: " + errorBody);
-                return null;
+
+                // 429 限流 / 5xx 服务端错误 → 重试有意义; 4xx 参数或鉴权错误 → 重试无意义
+                result.retryable = (responseCode == 429 || responseCode >= 500);
+                result.summary = "HTTP " + responseCode + " " + errorBody;
+                LogMgr.e(TAG, "httpPostJson failed: " + responseCode + ", error body: " + errorBody
+                        + (result.retryable ? " (可重试)" : " (不可重试)"));
+                return result;
             }
-            
+
             // 读取响应
             StringBuilder response = new StringBuilder();
             reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
@@ -277,13 +346,22 @@ public class OpenAIClient {
             while ((line = reader.readLine()) != null) {
                 response.append(line);
             }
-            
-            return response.toString();
-            
+
+            result.body = response.toString();
+            return result;
+
+        } catch (java.net.SocketTimeoutException e) {
+            // 读取超时: 大模型慢或网络抖动, 重试往往能成
+            result.retryable = true;
+            result.summary = "超时: " + e;
+            LogMgr.e(TAG, "httpPostJson timeout: " + e);
+            return result;
         } catch (Exception e) {
+            result.retryable = true;   // 网络类异常一般可重试
+            result.summary = e.toString();
             LogMgr.e(TAG, "httpPostJson error: " + e);
             e.printStackTrace();
-            return null;
+            return result;
         } finally {
             // 关闭资源
             try {

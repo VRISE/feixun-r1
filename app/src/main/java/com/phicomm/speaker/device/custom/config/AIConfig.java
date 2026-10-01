@@ -21,21 +21,27 @@ import java.io.InputStreamReader;
  * [AI]
  * provider = openai
  * base_url = https://open.bigmodel.cn/api/paas/v4/chat/completions
- * api_key = xxx
- * model = graph LR
-    A[用户说: 李白是谁] --> B[设备ASR识别]
-    B --> C[发送到云之声NLU云端]
-    C --> D[云端返回NLU结果]
-    D --> E{Pipeline分发}
-    E --> F[PhicommChatHandler 拦截]
-    F --> G[调用智谱GLM API]
-    G --> H[HTTP 400 失败]
-    H --> I[TTS: 模型调用失败]
-    D --> J[DefaultChatHandler]
-    J --> K[本来要播报云端答案]
-    K --> L[被PhicommChat抢先消费]
+ * api_key = 你自己的智谱 API Key（别提交到 git）
+ * model = GLM-4.5-Flash
  * temperature = 0.7
- * max_tokens = 2048
+ * max_tokens = 1024
+ * thinking = disabled
+ * config_version = 5
+ *
+ * ── 取值优先级（重要）──────────────────────────────────────────
+ *   1. FORCE_* 开关打开的字段   → 无条件用代码里的值（打包者想强制下发时用）
+ *   2. ai_config.ini 里有值     → 用文件里的值（用户自己填的，最高优先）
+ *   3. 以上都没有               → 用代码里的 DEFAULT_* 值
+ *
+ *   也就是说：**代码里打上的值，只要设备上没人为改过（或开了 FORCE），就一定生效。**
+ *   文件里某一项缺失 / 为空 / 填错（数字解析失败），都会自动退回代码默认值，不会留空。
+ *
+ * 调用链路:
+ *   用户说话 → 设备 ASR → 云知声 NLU 云端 → Pipeline 分发
+ *     → PhicommChatHandler 拦截 → 调智谱 GLM API → TTS 播报
+ * （DefaultChatHandler 本要播报云端答案, 被 PhicommChat 抢先消费）
+ *
+ * 账号注册 / 获取 Key / 打包部署教程见 README.MD 顶部。
  */
 public class AIConfig {
     private static final String TAG = "AIConfig";
@@ -43,13 +49,72 @@ public class AIConfig {
     private static final String SECTION_AI = "[AI]";
     
     // 默认配置
+    //
+    // ⚠️ 不要把真实 API Key 写进这里！仓库是公开的，key 一旦提交所有人都拿去用，很快就会被限流/封掉。
+    //    正确做法: 自己去智谱开放平台注册(免费),拿到 key 后填进设备上的 ai_config.ini。
+    //    注册地址/教程见 README.MD 顶部「大模型配置」一节。
     private static final String DEFAULT_PROVIDER = "openai";
     private static final String DEFAULT_BASE_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
-    private static final String DEFAULT_API_KEY = "2e9d919870cc4192bcd87c82cfa0aab6";
+    /** 占位用的假 key,必须替换成自己的（见 README 顶部教程） */
+    private static final String DEFAULT_API_KEY = "YOUR_ZHIPU_API_KEY_HERE";
+    /**
+     * ⚠️ 实测结论(2026-10-02, 用本项目账户真机验证): 别换成 GLM-4.7-Flash!
+     *
+     *   同一个问题「用一句话介绍李白」, 各模型实测耗时:
+     *     GLM-4.5-Flash → 0.5 ~ 0.95 秒  ✅ 稳定秒回(连测 4 次全部 200)
+     *     GLM-4.7-Flash → 27 ~ 68 秒     ❌ 慢 85 倍, 远超 READ_TIMEOUT, 表现就是"调用失败"
+     *     glm-5.3-flash → 400 不支持关闭思考
+     *     glm-4.5-air   → 1113 余额不足(非免费)
+     *
+     *   虽然官方公告 GLM-4.5-Flash 于 2026-01-30 下线, 但实测该名称仍可正常调用
+     *   (服务端会自动路由), 而且快得多。音箱是实时语音交互, 速度就是可用性,
+     *   所以保持 4.5-Flash。以后换模型前务必先测耗时。
+     */
     private static final String DEFAULT_MODEL = "GLM-4.5-Flash";
     private static final float DEFAULT_TEMPERATURE = 0.7f;
-    private static final int DEFAULT_MAX_TOKENS = 2048;
-    
+    /**
+     * GLM-4.x 是"混合思考模型":默认会先生成一大段 reasoning_content 再给正式回答。
+     * 实测: 开思考时一次请求要 27 秒, 服务端忙时到 75 秒, 而且思考能吃掉 600+ tokens。
+     * 音箱是语音短交互, 既不需要深度推理, 也等不了那么久(原 READ_TIMEOUT 只有 30 秒,
+     * 超时就直接表现为"调用失败")。所以默认**关闭思考**, 响应快很多。
+     *
+     * 取值: disabled(关闭, 推荐) / enabled(打开) / auto(不发送该字段, 兼容非智谱端点)。
+     */
+    private static final String DEFAULT_THINKING = "disabled";
+
+    /**
+     * 音箱是 TTS 播报, 回答太长用户也听不完, 而且生成越久越容易超时。
+     * 关闭思考后 1024 足够(实测一次普通回答只用了 42 tokens)。
+     */
+    private static final int DEFAULT_MAX_TOKENS = 1024;
+
+    /**
+     * ── 强制下发开关 ──────────────────────────────────────────────
+     * 默认 false = 「设备配置优先」：用户自己在 ai_config.ini 里填的值说了算，
+     * 代码默认值只在文件没填时才兜底（这样用户改过的 key / 模型不会被升级覆盖掉）。
+     *
+     * 如果你打包时想让**代码里的值无条件生效**（例如要把配好的 Key 一起打进包里
+     * 分发给别人、或强制全量升级模型名），把对应开关改成 true 即可,
+     * 每次启动都会用代码值覆盖文件值。
+     *
+     * 改完开关记得把下面的 CURRENT_CONFIG_VERSION +1,让老设备立刻迁移一次。
+     */
+    private static final boolean FORCE_PROVIDER = false;
+    private static final boolean FORCE_BASE_URL = false;
+    private static final boolean FORCE_API_KEY = false;
+    private static final boolean FORCE_MODEL = false;
+    private static final boolean FORCE_TEMPERATURE = false;
+    private static final boolean FORCE_MAX_TOKENS = false;
+    private static final boolean FORCE_THINKING = false;
+
+    /**
+     * 配置版本号。设备上已有的 ai_config.ini 里存着用户自己的 key,
+     * 升级默认值时不能直接覆盖整个文件(那样会把 key 冲掉),
+     * 而是靠这个版本号触发"只更新模型参数、保留 key"的迁移。
+     * 以后再换模型: 改上面的默认值 + 把这里 +1。
+     */
+    private static final int CURRENT_CONFIG_VERSION = 5;
+
     // 配置项
     private String provider;
     private String baseUrl;
@@ -57,6 +122,8 @@ public class AIConfig {
     private String model;
     private float temperature;
     private int maxTokens;
+    private String thinking;
+    private int configVersion;
     
     /**
      * 加载配置文件
@@ -64,16 +131,120 @@ public class AIConfig {
      */
     public static AIConfig load(Context context) {
         File configFile = new File(context.getFilesDir(), CONFIG_FILE);
-        
+
         if (!configFile.exists()) {
             LogMgr.d(TAG, "Config file not found, creating default config");
             createDefaultConfig(context);
         }
-        
+
+        // readFromFile 的规则: 先把代码里的 DEFAULT_* 全部铺上,
+        // 再用文件里的值逐字段覆盖 —— 所以文件里缺的 / 空的 / 填错的项,
+        // 自动落回代码默认值,不会留空。
         AIConfig config = new AIConfig();
         config.readFromFile(configFile);
-        
+
+        boolean changed = false;
+
+        // 1) 配置版本落后 → 迁移默认值。
+        //    关键: 迁移只刷模型相关字段, api_key / base_url 保持文件里的原值不动,
+        //    否则用户自己填的 key 会被默认值覆盖掉。
+        if (config.configVersion < CURRENT_CONFIG_VERSION) {
+            LogMgr.d(TAG, "Config version " + config.configVersion + " -> " + CURRENT_CONFIG_VERSION
+                    + ", migrating (keeping api_key)");
+            config.migrate();
+            changed = true;
+        }
+
+        // 2) 强制下发: 打开 FORCE_* 开关的字段, 每次启动都用代码值覆盖文件值
+        if (config.applyForcedDefaults()) {
+            changed = true;
+        }
+
+        // 3) 文件里还是占位符、但代码里配了真 Key → 采用代码里的值
+        if (isPlaceholder(config.apiKey) && !isPlaceholder(DEFAULT_API_KEY)) {
+            LogMgr.d(TAG, "api_key is placeholder, adopting DEFAULT_API_KEY from code");
+            config.apiKey = DEFAULT_API_KEY;
+            changed = true;
+        }
+
+        if (changed) {
+            config.configVersion = CURRENT_CONFIG_VERSION;
+            config.save(context);
+        }
+
+        if (isPlaceholder(config.apiKey)) {
+            LogMgr.e(TAG, "API Key 未配置! 请按 README.MD 顶部教程申请智谱 Key, "
+                    + "再填入 " + configFile.getAbsolutePath());
+        }
+
+        LogMgr.d(TAG, "Config loaded: provider=" + config.provider + ", model=" + config.model
+                + ", max_tokens=" + config.maxTokens + ", thinking=" + config.thinking
+                + ", version=" + config.configVersion);
         return config;
+    }
+
+    /** 占位符 / 空值判定 */
+    private static boolean isPlaceholder(String key) {
+        return key == null || key.trim().isEmpty() || DEFAULT_API_KEY.equals(key.trim());
+    }
+
+    /**
+     * 迁移: 把模型相关默认值刷成最新, 但保留用户自己的 api_key / base_url。
+     */
+    private void migrate() {
+        this.provider = DEFAULT_PROVIDER;
+        this.model = DEFAULT_MODEL;
+        this.temperature = DEFAULT_TEMPERATURE;
+        this.maxTokens = DEFAULT_MAX_TOKENS;
+        this.thinking = DEFAULT_THINKING;
+        this.configVersion = CURRENT_CONFIG_VERSION;
+
+        // 只有为空时才填默认, 避免覆盖用户自定义端点
+        if (this.baseUrl == null || this.baseUrl.isEmpty()) {
+            this.baseUrl = DEFAULT_BASE_URL;
+        }
+        if (this.apiKey == null || this.apiKey.isEmpty()) {
+            this.apiKey = DEFAULT_API_KEY;
+        }
+    }
+
+    /**
+     * 应用 FORCE_* 开关: 打开的字段无条件用代码默认值覆盖。
+     * @return 是否有字段被改动
+     */
+    private boolean applyForcedDefaults() {
+        boolean changed = false;
+
+        if (FORCE_PROVIDER && !eq(provider, DEFAULT_PROVIDER)) {
+            provider = DEFAULT_PROVIDER; changed = true;
+        }
+        if (FORCE_BASE_URL && !eq(baseUrl, DEFAULT_BASE_URL)) {
+            baseUrl = DEFAULT_BASE_URL; changed = true;
+        }
+        if (FORCE_API_KEY && !eq(apiKey, DEFAULT_API_KEY)) {
+            apiKey = DEFAULT_API_KEY; changed = true;
+        }
+        if (FORCE_MODEL && !eq(model, DEFAULT_MODEL)) {
+            model = DEFAULT_MODEL; changed = true;
+        }
+        if (FORCE_TEMPERATURE && temperature != DEFAULT_TEMPERATURE) {
+            temperature = DEFAULT_TEMPERATURE; changed = true;
+        }
+        if (FORCE_MAX_TOKENS && maxTokens != DEFAULT_MAX_TOKENS) {
+            maxTokens = DEFAULT_MAX_TOKENS; changed = true;
+        }
+        if (FORCE_THINKING && !eq(thinking, DEFAULT_THINKING)) {
+            thinking = DEFAULT_THINKING; changed = true;
+        }
+
+        if (changed) {
+            LogMgr.d(TAG, "Applied forced defaults from code (FORCE_* switches)");
+        }
+        return changed;
+    }
+
+    private static boolean eq(String a, String b) {
+        return a == null ? b == null : a.equals(b);
     }
     
     /**
@@ -93,6 +264,8 @@ public class AIConfig {
             sb.append("model = ").append(model).append("\n");
             sb.append("temperature = ").append(temperature).append("\n");
             sb.append("max_tokens = ").append(maxTokens).append("\n");
+            sb.append("thinking = ").append(thinking).append("\n");
+            sb.append("config_version = ").append(configVersion).append("\n");
             
             fos.write(sb.toString().getBytes("UTF-8"));
             fos.close();
@@ -114,6 +287,8 @@ public class AIConfig {
         this.model = DEFAULT_MODEL;
         this.temperature = DEFAULT_TEMPERATURE;
         this.maxTokens = DEFAULT_MAX_TOKENS;
+        this.thinking = DEFAULT_THINKING;
+        this.configVersion = 0;   // 0 = 老配置文件(还没有版本字段), 会触发迁移
         
         try {
             FileInputStream fis = new FileInputStream(configFile);
@@ -146,18 +321,19 @@ public class AIConfig {
                         String key = parts[0].trim();
                         String value = parts[1].trim();
                         
+                        // 文件里写了但值为空 → 视为没写, 回退到代码默认值
                         switch (key) {
                             case "provider":
-                                this.provider = value;
+                                if (!value.isEmpty()) this.provider = value;
                                 break;
                             case "base_url":
-                                this.baseUrl = value;
+                                if (!value.isEmpty()) this.baseUrl = value;
                                 break;
                             case "api_key":
-                                this.apiKey = value;
+                                if (!value.isEmpty()) this.apiKey = value;
                                 break;
                             case "model":
-                                this.model = value;
+                                if (!value.isEmpty()) this.model = value;
                                 break;
                             case "temperature":
                                 try {
@@ -171,6 +347,16 @@ public class AIConfig {
                                     this.maxTokens = Integer.parseInt(value);
                                 } catch (NumberFormatException e) {
                                     LogMgr.e(TAG, "Invalid max_tokens value: " + value);
+                                }
+                                break;
+                            case "thinking":
+                                if (!value.isEmpty()) this.thinking = value;
+                                break;
+                            case "config_version":
+                                try {
+                                    this.configVersion = Integer.parseInt(value);
+                                } catch (NumberFormatException e) {
+                                    LogMgr.e(TAG, "Invalid config_version value: " + value);
                                 }
                                 break;
                         }
@@ -198,6 +384,8 @@ public class AIConfig {
         config.model = DEFAULT_MODEL;
         config.temperature = DEFAULT_TEMPERATURE;
         config.maxTokens = DEFAULT_MAX_TOKENS;
+        config.thinking = DEFAULT_THINKING;
+        config.configVersion = CURRENT_CONFIG_VERSION;
         
         config.save(context);
         LogMgr.d(TAG, "Default config created");
@@ -228,6 +416,18 @@ public class AIConfig {
     public int getMaxTokens() {
         return maxTokens;
     }
+
+    public int getConfigVersion() {
+        return configVersion;
+    }
+
+    /**
+     * 思考模式: disabled(关闭) / enabled(打开) / auto(不发送该字段)。
+     * 音箱默认关闭 —— 开思考会慢 3 倍以上, 还容易撞上超时和限流。
+     */
+    public String getThinking() {
+        return thinking;
+    }
     
     // Setter 方法(供后续修改配置使用)
     
@@ -253,5 +453,9 @@ public class AIConfig {
     
     public void setMaxTokens(int maxTokens) {
         this.maxTokens = maxTokens;
+    }
+
+    public void setThinking(String thinking) {
+        this.thinking = thinking;
     }
 }

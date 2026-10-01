@@ -405,7 +405,7 @@ public final class NLUDispatcher extends ANTEventDispatcher {
                 LogMgr.d("NLUDispatcher", "Published PersonaActivationEvent for: " + trim);
             } else {
                 LogMgr.w("NLUDispatcher", "[DEBUG] No persona found for wakeup word: '" + trim + "'");
-                LogMgr.w("NLUDispatcher", "[DEBUG] Available wakeup words: 小讯小讯, 交接手续, 捣蛋鬼, 英语陪练师, 成语接龙");
+                LogMgr.w("NLUDispatcher", "[DEBUG] Available wakeup words: 你好小迪, 小讯小讯, 交接手续, 捣蛋鬼, 英语陪练师, 成语接龙");
             }
             
             return false;  // 放行,进入语音识别

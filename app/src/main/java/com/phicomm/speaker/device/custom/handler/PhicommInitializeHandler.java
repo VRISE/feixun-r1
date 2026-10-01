@@ -39,6 +39,8 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
     private static final String FX_KEY_OTA_MODE = "fxotamode";
     private static final String FX_OTA_MODE_VALUE_SILENT = "silent";
     private static final String FX_SYSTEM_PRIVATE = "FXSystemPrivate";
+    /** 主唤醒词（自定义）。USC 引擎走 JSGF 词槽本地编译，支持 2-6 个中文字，改这里即可 */
+    private static final String MAIN_WAKEUP_WORD = "你好小迪";
     private static final String TAG = PhicommInitializeHandler.class.getSimpleName();
     private boolean isFristBoot = false;
     private ANTEngine mANTEngine;
@@ -178,7 +180,7 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
         initCustomUDIDProcess();
         initCustomMatchProcess();
         PhicommDeviceStatusProcessor.getInstance().startMonitorStatus();
-        // 初始化自定义唤醒词 "二师兄"
+        // 初始化自定义唤醒词（MAIN_WAKEUP_WORD）
         initCustomWakeupWord();
         
         // ⭐ 初始化多人格唤醒词
@@ -196,11 +198,11 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
     }
 
     /**
-     * 设置自定义唤醒词 "二师兄"
+     * 设置自定义唤醒词（MAIN_WAKEUP_WORD）
      * 原理: 通过 JSGF 词槽本地编译,无需云端训练,即时生效
      */
     private void initCustomWakeupWord() {
-        String customWakeupWord = "二师兄";
+        String customWakeupWord = MAIN_WAKEUP_WORD;
         
         // 检查是否已经设置过,避免重复设置
         List<String> currentWords = UserPerferenceUtil.getMainWakeupWord(this.mContext);
@@ -244,7 +246,11 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
      */
     private void initMultiPersonaWakeupWords() {
         List<String> newWakeupWords = new ArrayList<>();
-        
+
+        // ⭐ 必须带上主唤醒词：本方法在 initCustomWakeupWord() 之后执行，
+        // 且 setWakeupWord 是整体覆盖写入，不加上这里的话主唤醒词会被冲掉、根本不生效。
+        newWakeupWords.add(MAIN_WAKEUP_WORD);
+
         // 添加所有被动人格的唤醒词
         List<PersonaConfig> passivePersonas = PersonaConfig.getPassivePersonas();
         for (PersonaConfig config : passivePersonas) {

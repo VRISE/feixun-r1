@@ -15,9 +15,20 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # 配置
-PROJECT_DIR="/Users/fang/Desktop/R1_DEVICE-main"
-JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
-DX_TOOL="/Users/fang/Library/Android/sdk/build-tools/29.0.3/dx"
+# 自动定位为脚本所在目录，避免写死绝对路径
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# JDK 11（Gradle 6.5 / AGP 4.1.1 需要 JDK 8 或 11，不能用 JDK 21）
+# 取值顺序: 外部传入的 JAVA_HOME → macOS 上自动找 11 → 最后的兜底路径(改成你自己的)
+if [ -z "${JAVA_HOME}" ] && [ -x /usr/libexec/java_home ]; then
+    JAVA_HOME="$(/usr/libexec/java_home -v 11 2>/dev/null || true)"
+fi
+JAVA_HOME="${JAVA_HOME:-/Users/kaixin/Library/Java/JavaVirtualMachines/zulu-11.jdk/Contents/Home}"
+
+# dx 工具: 取值顺序: 外部传入的 DX_TOOL → local.properties 里的 sdk.dir → $ANDROID_HOME
+if [ -z "${DX_TOOL}" ]; then
+    _SDK_DIR="$(sed -n 's/^sdk\.dir=//p' "${PROJECT_DIR}/local.properties" 2>/dev/null | tail -1 | tr -d '\r')"
+    DX_TOOL="${_SDK_DIR:-${ANDROID_HOME}}/build-tools/29.0.3/dx"
+fi
 BAKSMALI_JAR="${PROJECT_DIR}/baksmali.jar"
 SMALI_JAR="${PROJECT_DIR}/smali.jar"
 BUILD_SCRIPT="${PROJECT_DIR}/build_janus_v2.py"
@@ -45,6 +56,8 @@ cd "${PROJECT_DIR}"
 # ========================================
 echo -e "${YELLOW}[1/9] 清理并编译...${NC}"
 export JAVA_HOME="${JAVA_HOME}"
+# baksmali/smali 也必须用同一个 JDK 11，否则会用到系统默认的 JDK 21
+export PATH="${JAVA_HOME}/bin:${PATH}"
 ./gradlew clean :app:assembleRelease
 
 if [ $? -ne 0 ]; then

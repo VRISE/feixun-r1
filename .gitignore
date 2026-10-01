@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+app/build/
+
+# 本地 SDK 路径（每人不同，不要提交）
+local.properties
+
+# 本地生成的签名文件（含私钥，不要提交）
+key.jks
+*.jks
+
+# 打包产物
+*.dex
+janus_*.apk
+classes_new_v*.dex
+
+# Python
+__pycache__/

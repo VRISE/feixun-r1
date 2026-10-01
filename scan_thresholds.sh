@@ -4,7 +4,7 @@
 
 set -e
 
-PROJECT="/Users/fang/Desktop/R1_DEVICE-main"
+PROJECT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VAD_FILE="${PROJECT}/app/src/main/java/com/phicomm/speaker/device/custom/engine/VadAudioDetector.java"
 RESULT="${PROJECT}/scan_result.txt"
 

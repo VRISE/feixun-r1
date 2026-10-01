@@ -1,5 +1,115 @@
 # R1 智能音箱天气意图改造 — 卡死根因与方案对比
 
+## 🔑 先做这件事：申请你自己的大模型 API Key（免费）
+
+本项目的「闲聊 / 成语接龙 / 英语陪练」等对话能力，走的是**智谱 GLM-4.5-Flash**（免费模型）。
+代码里**不含任何 Key**，你需要自己去注册一个，否则装上后对话功能不可用。
+
+**注册与接入教程**：<https://www.zhipuai.cn/zh/news/148>
+（GLM-4.7-Flash 发布公告，文内有体验中心 / 使用指南 / 接口文档入口）
+
+- 开放平台：<https://bigmodel.cn> — 注册登录后在「API Keys」里生成，Key 形如 `xxxxxxxx.yyyyyyyy`（`id.secret` 两段，**都要复制**）
+- 模型文档：<https://docs.bigmodel.cn/cn/guide/models/free/glm-4.7-flash>
+- 接口地址：`https://open.bigmodel.cn/api/paas/v4/chat/completions`
+
+拿到 Key 后填到设备上（**不要写进代码、不要提交到 git**）：
+
+```ini
+# /data/data/com.phicomm.speaker.device/files/ai_config.ini
+[AI]
+provider = openai
+base_url = https://open.bigmodel.cn/api/paas/v4/chat/completions
+api_key = 你自己的Key
+model = GLM-4.5-Flash
+temperature = 0.7
+max_tokens = 1024
+thinking = disabled     # 关闭思考：音箱是语音短交互，开思考会慢几十倍
+config_version = 5
+```
+
+```bash
+adb shell "run-as com.phicomm.speaker.device cat /data/data/com.phicomm.speaker.device/files/ai_config.ini"  # 查看当前配置
+```
+
+> ⚠️ **把 Key 提交到公开仓库等于送给全天下用，很快就会被限流或封号。**
+> 代码里的 `AIConfig.DEFAULT_API_KEY` 是占位符 `YOUR_ZHIPU_API_KEY_HERE`，保持原样即可。
+>
+> ⚠️ **别换成 GLM-4.7-Flash**（实测血泪教训）：同一个问题「用一句话介绍李白」，
+> `GLM-4.5-Flash` 只要 **0.5~0.95 秒**，而 `GLM-4.7-Flash` 要 **27~68 秒**——慢 85 倍，
+> 直接超过客户端超时上限，现象就是「模型调用失败」。虽然官方公告 4.5 已下线，
+> 但实测该名称仍可正常调用且快得多。音箱是实时语音交互，**速度就是可用性**。
+>
+> 另外 GLM-4.x 默认是「混合思考模型」，会先吐一大段思考再回答（吃掉 600+ tokens）。
+> 已通过 `thinking = disabled` 关掉，响应快很多。`max_tokens` 给 1024 足够（TTS 播报说不了太长）。
+
+### 三种改配置的方式（按优先级从高到低）
+
+| 场景 | 怎么做 | 生效时机 |
+|---|---|---|
+| **① 改设备上的 ini**（推荐，Key 不进仓库） | `adb shell` 改 `/data/data/com.phicomm.speaker.device/files/ai_config.ini` | 重启 App 后生效，优先级最高 |
+| **② 改代码默认值再打包** | 改 `AIConfig` 里的 `DEFAULT_*`，并把 `CURRENT_CONFIG_VERSION` **+1** | 装包后靠版本迁移刷进设备（不会冲掉你填的 Key） |
+| **③ 强制下发** | 把 `AIConfig` 里对应的 `FORCE_*` 开关改成 `true` | 每次启动都用代码值覆盖 ini，最霸道 |
+
+> 取值规则一句话：**ini 里有值就用 ini 的；ini 里没有/为空/填错，就用代码里的默认值；开了 `FORCE_*` 的字段无条件用代码值。**
+> 所以代码里打上的值，只要没人手动改过 ini，就一定生效。
+>
+> 想打包时把配好的 Key 一起打进包里分发：填 `DEFAULT_API_KEY` + `FORCE_API_KEY = true`。
+> ⚠️ 但**别提交到公开仓库**——Key 一公开就会被所有人拿去用，很快限流/封号。
+
+---
+
+## 📦 打包与部署（从代码到音箱）
+
+详细版见 [`一键打包脚本使用说明.md`](一键打包脚本使用说明.md)，这里是精简流程。
+
+### 1. 准备环境（只需做一次）
+
+| 依赖 | 要求 | 说明 |
+|---|---|---|
+| JDK | **11**（不是 21！） | Gradle 6.5 + AGP 4.1.1 在 JDK 21 上起不来。已在 `gradle.properties` 里用 `org.gradle.java.home` 指死，装上即可 |
+| Android SDK | `platforms;android-30` + `build-tools;29.0.3` | `sdkmanager "platforms;android-30" "build-tools;29.0.3"` |
+| `local.properties` | `sdk.dir=` 指向你自己的 SDK 路径 | 仓库里那份是别人机器的路径，必须改 |
+| Rosetta 2 | Apple Silicon 必装 | `softwareupdate --install-rosetta --agree-to-license`（aapt2 29.0.3 只有 x86_64 版） |
+
+另外 `key.jks` 签名文件不在仓库里，用项目的 alias/密码（`echo` / `123456`）自己生成一个即可。
+
+### 2. 连上音箱
+
+```bash
+adb connect 192.168.5.9:5555     # 换成你音箱的 IP
+adb devices                       # 看到 device 就算连上
+```
+
+> 连不上报 `No route to host` 时：音箱空闲会休眠，先 `ping` 唤醒它，
+> 再 `adb kill-server && adb start-server`，然后重连。
+
+### 3. 一键打包 + 安装
+
+```bash
+./build_and_deploy.sh 66          # 数字是版本号，每次递增
+```
+
+脚本 9 步全自动：编译 → 提取 class → 转 dex → 转 smali → **注入 smali** → 注册 Handler
+→ 合并 dex → 打包签名 → 推送安装并重启。全程约 3-5 分钟，最后一步会 `adb reboot`，等 1-2 分钟。
+
+产物：`janus_unisound_<版本号>.apk`
+
+### 4. ⚠️ 只有这些代码会真正进包
+
+脚本**不是**把你编译的所有 class 都塞进设备，只注入这几处 smali：
+
+- `com/phicomm/speaker/device/custom/` 整个目录
+- `ExampleANTEngineInitializer`
+- `NLUDispatcher*`
+- `MqttTransportChannel*`
+
+**改 `custom/` 下的代码 → 直接生效；改了其他包的 Java 文件 → 不会进包**，
+得先把它加进 `build_and_deploy.sh` 的注入清单。
+
+> 另外每次打包都会重写 `original_v2` 下已跟踪的 smali，`git status` 会一堆 `M`，推代码前别误带上。
+
+---
+
 > 目标:语音说"杭州天气"时拦截原厂回复,改为播报真实天气 API 的内容。  
 > 设备:斐讯 R1(Android 5.1,精简版 adb )。  
 > **代码源**: `/Users/fang/Desktop/R1_DEVICE-main`（唯一代码修改和编译位置）
