@@ -21,12 +21,18 @@ import java.io.InputStreamReader;
  * [AI]
  * provider = openai
  * base_url = https://open.bigmodel.cn/api/paas/v4/chat/completions
- * api_key = 你自己的智谱 API Key（别提交到 git）
+ * api_key = 你自己的 API Key（别提交到 git）
  * model = GLM-4.5-Flash
  * temperature = 0.7
  * max_tokens = 1024
  * thinking = disabled
  * config_version = 5
+ *
+ * 任何 OpenAI 兼容端点都能用，例如火山方舟豆包:
+ *   base_url = https://ark.cn-beijing.volces.com/api/v3/chat/completions
+ *   model    = doubao-seed-2-0-lite-260215
+ *   thinking = disabled   （Ark 同样接受 {"type":"disabled"} 格式，实测 OK）
+ * 本地模板见仓库根目录 ai_config.example.ini，推送脚本 ./push_ai_config.sh。
  *
  * ── 取值优先级（重要）──────────────────────────────────────────
  *   1. FORCE_* 开关打开的字段   → 无条件用代码里的值（打包者想强制下发时用）

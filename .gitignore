@@ -17,3 +17,8 @@ classes_new_v*.dex
 
 # Python
 __pycache__/
+
+# 本地 AI 配置（含私人 API Key，绝对不要提交！）
+# 复制 ai_config.example.ini 为 ai_config.local.ini 后填入你自己的 Key
+ai_config.local.ini
+*.local.ini
