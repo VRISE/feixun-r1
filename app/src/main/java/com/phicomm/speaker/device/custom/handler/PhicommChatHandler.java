@@ -8,6 +8,7 @@ import com.phicomm.speaker.device.custom.ai.ConversationHistory;
 import com.phicomm.speaker.device.custom.ai.OpenAIClient;
 import com.phicomm.speaker.device.custom.ai.PersonaConversationManager;
 import com.phicomm.speaker.device.custom.config.AIConfig;
+import com.phicomm.speaker.device.custom.engine.PlaybackStateMonitor;
 import com.phicomm.speaker.device.custom.persona.PersonaConfig;
 import com.phicomm.speaker.device.custom.persona.PersonaManager;
 import com.phicomm.speaker.device.custom.teaser.PostDialogueTeaser;
@@ -153,7 +154,17 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
             LogMgr.d(TAG, "service 不是 chat, 放行");
             return false;
         }
-        
+
+        // ⭐ v86: 用户新交互到达 → 未播的调侃立即作废(调侃绝不跟用户抢话)
+        PostDialogueTeaser.get().cancelPending();
+
+        // ⭐ v86: 调侃 TTS 播放防护窗内收到的 chat 事件,是麦克风把自己的调侃收进去的
+        //    回声 —— 消费掉但在 eventReceived 里直接吞掉, 绝不调大模型"自己回答自己"。
+        if (PostDialogueTeaser.isEchoGuardActive()) {
+            LogMgr.d(TAG, "[TEASE] 调侃播放窗口内收到 chat 事件(疑似自听回声), 吞掉: " + text);
+            return true;
+        }
+
         // 快速判断:是否应该放行给其他 Handler?
         if (text != null && !text.isEmpty()) {
             // 成语接龙模式下,不拦截任何输入(全部消费) ✅ 最高优先级
@@ -197,7 +208,15 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
     @Override
     public void eventReceived(final NLU evt, final ANTHandlerContext ctx) throws Exception {
         super.eventReceived(evt, ctx);
-        
+
+        // ⭐ v86: 调侃播放窗口内的 chat 事件 = 机器自己调侃的回声, 吞掉不处理,
+        //    否则就会"听到自己的调侃,又把它回答一遍"
+        if (PostDialogueTeaser.isEchoGuardActive()) {
+            LogMgr.d(TAG, "[TEASE] 吞掉调侃回声, 不调大模型: " + evt.getText());
+            reset();
+            return;
+        }
+
         final String userInput = evt.getText();
         this.lastUserInput = userInput;
         LogMgr.d(TAG, "chat intent: " + userInput + ", isIdiomGameMode=" + isIdiomGameMode);
@@ -438,14 +457,22 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
         LogMgr.d(TAG, "handleTtsPlayingEnd, isIdiomGameMode=" + isIdiomGameMode + 
                  ", isMultiTurnMode=" + isMultiTurnMode);
         
+        // ⭐ v85 修复调侃失效: InitializeHandler 收不到 TTS 事件, setTTSPlaying(false) 是死代码,
+        //    ttsPlaying 要等 30s 兜底超时才复位 → 调侃在 TTS 后 1.2s 检查时永远看到"音频在播"而 skip。
+        //    ChatHandler 的 TTS 结束回调每轮都可靠触发, 在这里复位最稳。
+        PlaybackStateMonitor.setTTSPlaying(false);
+
+        // ⭐ v86: 先把调侃素材抓下来(reset() 会清掉 currentResponse/pendingTease)。
+        //    调侃不再紧跟 TTS 播完就播 —— 那时引擎马上要进 ASR"监听下一句",
+        //    调侃插在中间会被麦克风收走变成自问自答。
+        final boolean teaseAfterAnswer = pendingTease && !isIdiomGameMode
+                && currentResponse != null && lastUserInput != null;
+        final String teaseUser = lastUserInput;
+        final String teaseReply = currentResponse;
+
         // ⭐ v83/v84: 只调侃【大模型成功回复】的对话轮(pendingTease 在 playTTS 前置位,
         //    此处一次性消费)。传统指令(音乐/音量/关机等)不走大模型, 永远不会置位。
-        boolean shouldTease = pendingTease;
         pendingTease = false;
-        if (shouldTease && !isIdiomGameMode && currentResponse != null && lastUserInput != null) {
-            PostDialogueTeaser.get().maybeTease(ctx != null ? ctx.androidContext() : null,
-                    lastUserInput, currentResponse);
-        }
         
         if (isIdiomGameMode) {
             // 成语接龙模式:直接进入 ASR,继续聆听
@@ -493,6 +520,15 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                         ctx.enterWakeup(false);
                         // 重置交互时间, 让插嘴引擎在空闲阈值后接管
                         PersonaManager.recordInteraction();
+
+                        // ⭐ v86: 引擎此刻已退回唤醒态(不再监听普通语音), 用户这轮对话
+                        //    彻底结束 —— 这时调侃才开口, 不会插在"监听下一句"的中间,
+                        //    也不会被 ASR 收走变成自问自答。中途只要用户说话, 本定时器
+                        //    就会被 eventReceived 取消, 调侃顺延到下一轮结束再算。
+                        if (teaseAfterAnswer) {
+                            PostDialogueTeaser.get().maybeTease(ctx.androidContext(),
+                                    teaseUser, teaseReply, 800);
+                        }
                     }
                 }
             };
@@ -511,6 +547,17 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
             // 普通模式:正常退出,回到唤醒状态
             LogMgr.d(TAG, "普通模式:退出到唤醒状态");
             exit();
+
+            // ⭐ v86: 唤醒态只听唤醒词, 延迟 2.5s 再调侃, 让引擎先安静回到待命
+            if (teaseAfterAnswer) {
+                final Context appCtx = (ctx != null) ? ctx.androidContext() : null;
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        PostDialogueTeaser.get().maybeTease(appCtx, teaseUser, teaseReply, 0);
+                    }
+                }, 2500);
+            }
             return true;
         }
     }
@@ -553,8 +600,10 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
     public void doInterrupt(ANTHandlerContext ctx, String interruptType) {
         // 打断处理
         if (eventReceived) {
-            LogMgr.d(TAG, "doInterrupt, isIdiomGameMode=" + isIdiomGameMode + 
+            LogMgr.d(TAG, "doInterrupt, isIdiomGameMode=" + isIdiomGameMode +
                      ", isMultiTurnMode=" + isMultiTurnMode);
+            // ⭐ v86: 用户打断 = 新交互开始, 未播的调侃立即作废
+            PostDialogueTeaser.get().cancelPending();
             ctx.cancelTTS();
             
             // 取消超时定时器

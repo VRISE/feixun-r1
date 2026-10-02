@@ -20,15 +20,27 @@
 # instance fields
 .field final synthetic this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
+.field final synthetic val$teaseAfterAnswer:Z
+
+.field final synthetic val$teaseReply:Ljava/lang/String;
+
+.field final synthetic val$teaseUser:Ljava/lang/String;
+
 
 # direct methods
-.method constructor <init>(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)V
-    .registers 2
+.method constructor <init>(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;ZLjava/lang/String;Ljava/lang/String;)V
+    .registers 5
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     .prologue
-    .line 486
+    .line 513
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
+
+    iput-boolean p2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->val$teaseAfterAnswer:Z
+
+    iput-object p3, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->val$teaseUser:Ljava/lang/String;
+
+    iput-object p4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->val$teaseReply:Ljava/lang/String;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -38,12 +50,12 @@
 
 # virtual methods
 .method public run()V
-    .registers 4
+    .registers 7
 
     .prologue
     const/4 v2, 0x0
 
-    .line 489
+    .line 516
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isMultiTurnMode:Z
@@ -51,22 +63,22 @@
 
     move-result v0
 
-    if-eqz v0, :cond_27
+    if-eqz v0, :cond_42
 
-    .line 490
+    .line 517
     const-string v0, "PhicommChat"
 
     const-string v1, "\u591a\u8f6e\u5bf9\u8bdd\u8d85\u65f6 15000ms,\u9000\u51fa\u591a\u8f6e\u6a21\u5f0f"
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 491
+    .line 518
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isMultiTurnMode:Z
     invoke-static {v0, v2}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$702(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 492
+    .line 519
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v1, 0x0
@@ -74,7 +86,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->conversationHistory:Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
     invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$802(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;)Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
 
-    .line 493
+    .line 520
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
@@ -84,10 +96,39 @@
 
     invoke-interface {v0, v2}, Lcom/unisound/vui/engine/ANTHandlerContext;->enterWakeup(Z)V
 
-    .line 495
+    .line 522
     invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->recordInteraction()V
 
-    .line 497
-    :cond_27
+    .line 528
+    iget-boolean v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->val$teaseAfterAnswer:Z
+
+    if-eqz v0, :cond_42
+
+    .line 529
+    invoke-static {}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->get()Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
+
+    move-result-object v0
+
+    iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
+
+    # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
+    invoke-static {v1}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$1100(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)Lcom/unisound/vui/engine/ANTHandlerContext;
+
+    move-result-object v1
+
+    invoke-interface {v1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
+
+    move-result-object v1
+
+    iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->val$teaseUser:Ljava/lang/String;
+
+    iget-object v3, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;->val$teaseReply:Ljava/lang/String;
+
+    const-wide/16 v4, 0x320
+
+    invoke-virtual/range {v0 .. v5}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->maybeTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;J)V
+
+    .line 533
+    :cond_42
     return-void
 .end method

@@ -43,7 +43,7 @@
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     .prologue
-    .line 130
+    .line 170
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;->this$0:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     iput-object p2, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;->val$appContext:Landroid/content/Context;
@@ -68,7 +68,7 @@
     .end annotation
 
     .prologue
-    .line 130
+    .line 170
     invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;->call()Ljava/lang/String;
 
     move-result-object v0
@@ -85,13 +85,13 @@
     .end annotation
 
     .prologue
-    .line 133
+    .line 173
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;->this$0:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;->val$appContext:Landroid/content/Context;
 
     # invokes: Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->getLLM(Landroid/content/Context;)Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
-    invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$100(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;)Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
+    invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$200(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;)Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
 
     move-result-object v0
 

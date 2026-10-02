@@ -16,6 +16,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * v83: 事后调侃(PostDialogueTeaser) —— 取代已删除的"捣蛋鬼持续监听"体系。
@@ -48,6 +49,14 @@ public class PostDialogueTeaser {
 
     private static volatile PostDialogueTeaser sInstance;
 
+    /** v86: 调侃任务代号。每次 maybeTease 递增、cancelPending 也递增,
+     *  到点执行时代号对不上 = 已被取消/被新一轮取代, 直接放弃。 */
+    private static final AtomicInteger sGen = new AtomicInteger(0);
+
+    /** v86: 自听自答防护窗。调侃 TTS 播放期间麦克风可能把自己的调侃收进 ASR,
+     *  这个窗口内到达的 chat 事件由 ChatHandler 直接吞掉, 绝不调大模型回答。 */
+    private static volatile long sEchoGuardUntil = 0L;
+
     public static PostDialogueTeaser get() {
         if (sInstance == null) {
             synchronized (PostDialogueTeaser.class) {
@@ -69,28 +78,38 @@ public class PostDialogueTeaser {
 
     /**
      * 一轮正常对话(用户提问 → 机器回复 TTS 播完)结束后调用。
+     * 默认延迟(仅普通模式兜底用);多轮模式由 ChatHandler 在静音超时、引擎回到唤醒态后再调。
      * 任何条件不满足都直接静默返回,绝不抛异常影响主流程。
      */
     public void maybeTease(final Context context, final String userText, final String replyText) {
+        maybeTease(context, userText, replyText, TEASE_DELAY_MS);
+    }
+
+    /**
+     * v86: 带延迟版本。调用方保证此刻引擎不在"监听用户下一句"的状态(否则调侃会被
+     * 麦克风收走变成自问自答)。中途任何新交互都会经 cancelPending() 作废本任务。
+     */
+    public void maybeTease(final Context context, final String userText, final String replyText,
+                           final long delayMs) {
         try {
-            if (context == null || !busy.compareAndSet(false, true)) {
+            if (context == null) {
                 return;
             }
+            // v86: 新一轮调侃登记代号, 旧的未播调侃自动作废
+            final int gen = sGen.incrementAndGet();
+
             // 冷却窗口
             long now = System.currentTimeMillis();
             if (now - lastTeaseAt < TEASE_COOLDOWN_MS) {
                 LogMgr.d(TAG, "[TEASE] cooldown, skip (" + (TEASE_COOLDOWN_MS - (now - lastTeaseAt)) + "ms left)");
-                busy.set(false);
                 return;
             }
             // 有效性过滤
             if (effectiveLen(userText) < MIN_USER_LEN || effectiveLen(replyText) < MIN_REPLY_LEN) {
                 LogMgr.d(TAG, "[TEASE] text too short, skip");
-                busy.set(false);
                 return;
             }
             if (replyText.contains("模型调用失败") || replyText.equals(lastTeaseText)) {
-                busy.set(false);
                 return;
             }
 
@@ -100,16 +119,37 @@ public class PostDialogueTeaser {
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    // v86: 到点后核对代号, 被取消/被取代的调侃就此作废
+                    if (sGen.get() != gen) {
+                        LogMgr.d(TAG, "[TEASE] superseded/cancelled (gen " + gen
+                                + " -> " + sGen.get() + "), skip");
+                        return;
+                    }
                     runTease(context.getApplicationContext(), u, r);
                 }
-            }, TEASE_DELAY_MS);
+            }, delayMs);
         } catch (Throwable t) {
             LogMgr.e(TAG, "[TEASE] maybeTease error: " + t);
-            busy.set(false);
         }
     }
 
+    /** v86: 取消还没播出去的调侃(用户又开口/打断时调用, 保证调侃绝不插话) */
+    public void cancelPending() {
+        sGen.incrementAndGet();
+        LogMgr.d(TAG, "[TEASE] pending tease cancelled");
+    }
+
+    /** v86: 调侃 TTS 播放防护窗是否生效(窗口内 chat 事件按"调侃回声"处理) */
+    public static boolean isEchoGuardActive() {
+        return System.currentTimeMillis() < sEchoGuardUntil;
+    }
+
     private void runTease(final Context appContext, final String userText, final String replyText) {
+        // v86: busy 挪到这里 —— 等待窗口期不再占住 busy, 新一轮调侃可以随时取代旧的
+        if (!busy.compareAndSet(false, true)) {
+            LogMgr.d(TAG, "[TEASE] busy, skip");
+            return;
+        }
         try {
             // 有音频在播(音乐/其他 TTS)就闭嘴,不抢话筒(延迟 1.2s 后再查,避免与播放状态竞态)
             if (PlaybackStateMonitor.isTTSPlaying() || PlaybackStateMonitor.isMusicPlaying()) {
@@ -166,15 +206,21 @@ public class PostDialogueTeaser {
             lastTeaseAt = System.currentTimeMillis();
             LogMgr.i(TAG, "[TEASE] play: \"" + teaseText + "\"");
 
+            // ⭐ v86: 开启自听自答防护窗(播放中麦克风可能把自己的调侃收进 ASR)
+            sEchoGuardUntil = System.currentTimeMillis() + 25000;
+
             // ---- 播一句就结束(一次性,不重入) ----
             getTTS().synthesizeAndPlay(appContext, teaseText, new XfyunTtsClient.TtsCallback() {
                 @Override
                 public void onSuccess(String audioPath) {
+                    // 播完(或开始播)把防护窗收紧到 2 秒余量, 尽快还用户正常对话
+                    sEchoGuardUntil = System.currentTimeMillis() + 2000;
                     LogMgr.d(TAG, "[TEASE] tts ok: " + audioPath);
                 }
 
                 @Override
                 public void onError(String error) {
+                    sEchoGuardUntil = System.currentTimeMillis() + 2000;
                     LogMgr.e(TAG, "[TEASE] tts error: " + error);
                 }
             });

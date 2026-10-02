@@ -27,7 +27,7 @@
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     .prologue
-    .line 170
+    .line 213
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$3;->this$0:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -38,11 +38,23 @@
 
 # virtual methods
 .method public onError(Ljava/lang/String;)V
-    .registers 5
+    .registers 6
     .param p1, "error"    # Ljava/lang/String;
 
     .prologue
-    .line 178
+    .line 223
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+
+    move-result-wide v0
+
+    const-wide/16 v2, 0x7d0
+
+    add-long/2addr v0, v2
+
+    # setter for: Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sEchoGuardUntil:J
+    invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$302(J)J
+
+    .line 224
     const-string v0, "PostTeaser"
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -65,16 +77,28 @@
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 179
+    .line 225
     return-void
 .end method
 
 .method public onSuccess(Ljava/lang/String;)V
-    .registers 5
+    .registers 6
     .param p1, "audioPath"    # Ljava/lang/String;
 
     .prologue
-    .line 173
+    .line 217
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+
+    move-result-wide v0
+
+    const-wide/16 v2, 0x7d0
+
+    add-long/2addr v0, v2
+
+    # setter for: Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sEchoGuardUntil:J
+    invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$302(J)J
+
+    .line 218
     const-string v0, "PostTeaser"
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -97,6 +121,6 @@
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 174
+    .line 219
     return-void
 .end method

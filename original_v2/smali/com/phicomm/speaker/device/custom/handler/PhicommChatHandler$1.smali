@@ -31,7 +31,7 @@
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     .prologue
-    .line 211
+    .line 230
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     iput-object p2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$userInput:Ljava/lang/String;
@@ -49,7 +49,7 @@
     .registers 16
 
     .prologue
-    .line 214
+    .line 233
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x1
@@ -57,7 +57,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isProcessingRequest:Z
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$002(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 219
+    .line 238
     :try_start_6
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
@@ -82,7 +82,7 @@
 
     const-string v13, "\u5f00\u59cb\u6210\u8bed"
 
-    .line 220
+    .line 239
     invoke-virtual {v12, v13}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
     move-result v12
@@ -93,14 +93,14 @@
 
     const-string v13, "\u6210\u8bed\u6e38\u620f"
 
-    .line 221
+    .line 240
     invoke-virtual {v12, v13}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
     move-result v12
 
     if-eqz v12, :cond_113
 
-    .line 223
+    .line 242
     :cond_2c
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
@@ -109,7 +109,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$102(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 224
+    .line 243
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -117,7 +117,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->idiomGameTurn:I
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$202(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;I)I
 
-    .line 225
+    .line 244
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -125,17 +125,17 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->lastUserIdiom:Ljava/lang/String;
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$302(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 227
+    .line 246
     const-string v12, "PhicommChat"
 
     const-string v13, "\u6210\u8bed\u63a5\u9f99\u6e38\u620f\u542f\u52a8"
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 230
+    .line 249
     const-string v10, "\u672c\u6b21\u5f00\u59cb\u6210\u8bed\u63a5\u9f99\u6e38\u620f,\u4f60\u5148\u51fa\u4e00\u4e2a\u6210\u8bed\u3002\u8981\u6c42:\n1. \u7b2c\u4e00\u4e2a\u6210\u8bed\u96be\u5ea6\u522b\u592a\u9ad8,\u7528\u5e38\u89c1\u7684\u6210\u8bed\n2. \u53ea\u56de\u590d\u6210\u8bed\u672c\u8eab,\u4e0d\u8981\u89e3\u91ca,\u4e0d\u8981\u5176\u4ed6\u5185\u5bb9\n3. \u5fc5\u987b\u662f\u56db\u5b57\u6210\u8bed\n4. \u53ea\u56de\u590d\u4e00\u4e2a\u6210\u8bed,\u4e0d\u8981\u56de\u590d\u591a\u4e2a"
 
-    .line 237
+    .line 256
     .local v10, "prompt":Ljava/lang/String;
     const-string v12, "PhicommChat"
 
@@ -143,7 +143,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 238
+    .line 257
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -166,7 +166,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 240
+    .line 259
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->openAIClient:Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
@@ -180,7 +180,7 @@
 
     move-result-object v11
 
-    .line 242
+    .line 261
     .local v11, "response":Ljava/lang/String;
     const-string v12, "PhicommChat"
 
@@ -204,7 +204,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 245
+    .line 264
     if-eqz v11, :cond_af
 
     invoke-virtual {v11}, Ljava/lang/String;->isEmpty()Z
@@ -213,7 +213,7 @@
 
     if-nez v12, :cond_af
 
-    .line 246
+    .line 265
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # invokes: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->extractFirstIdiom(Ljava/lang/String;)Ljava/lang/String;
@@ -221,7 +221,7 @@
 
     move-result-object v11
 
-    .line 247
+    .line 266
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -244,7 +244,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 250
+    .line 269
     :cond_af
     if-eqz v11, :cond_b7
 
@@ -254,11 +254,11 @@
 
     if-eqz v12, :cond_b9
 
-    .line 251
+    .line 270
     :cond_b7
     const-string v11, "\u4e00\u9a6c\u5f53\u5148"
 
-    .line 254
+    .line 273
     :cond_b9
     new-instance v12, Ljava/lang/StringBuilder;
 
@@ -278,7 +278,7 @@
 
     move-result-object v11
 
-    .line 390
+    .line 409
     .end local v10    # "prompt":Ljava/lang/String;
     :cond_cc
     :goto_cc
@@ -290,17 +290,17 @@
 
     if-nez v12, :cond_4ad
 
-    .line 392
+    .line 411
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12}, Lcom/unisound/vui/engine/ANTHandlerContext;->stopWakeup()V
 
-    .line 393
+    .line 412
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12}, Lcom/unisound/vui/engine/ANTHandlerContext;->stopASR()V
 
-    .line 395
+    .line 414
     new-instance v12, Ljava/lang/StringBuilder;
 
     invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
@@ -322,13 +322,13 @@
     # invokes: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->writeLog(Ljava/lang/String;)V
     invoke-static {v12}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$900(Ljava/lang/String;)V
 
-    .line 396
+    .line 415
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->currentResponse:Ljava/lang/String;
     invoke-static {v12, v11}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$602(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 398
+    .line 417
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
@@ -338,7 +338,7 @@
 
     if-nez v12, :cond_107
 
-    .line 399
+    .line 418
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x1
@@ -346,7 +346,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->pendingTease:Z
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$1002(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 401
+    .line 420
     :cond_107
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
@@ -355,7 +355,7 @@
     .catch Ljava/lang/Exception; {:try_start_6 .. :try_end_10c} :catch_292
     .catchall {:try_start_6 .. :try_end_10c} :catchall_47e
 
-    .line 418
+    .line 437
     :cond_10c
     :goto_10c
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
@@ -365,12 +365,12 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isProcessingRequest:Z
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$002(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 420
+    .line 439
     .end local v11    # "response":Ljava/lang/String;
     :goto_112
     return-void
 
-    .line 256
+    .line 275
     :cond_113
     :try_start_113
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
@@ -382,7 +382,7 @@
 
     if-eqz v12, :cond_2cb
 
-    .line 258
+    .line 277
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$userInput:Ljava/lang/String;
 
     const-string v13, "\u9000\u51fa"
@@ -407,7 +407,7 @@
 
     const-string v13, "\u505c\u6b62"
 
-    .line 259
+    .line 278
     invoke-virtual {v12, v13}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
     move-result v12
@@ -424,7 +424,7 @@
 
     if-eqz v12, :cond_190
 
-    .line 260
+    .line 279
     :cond_143
     const-string v12, "PhicommChat"
 
@@ -432,7 +432,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 261
+    .line 280
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -440,7 +440,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$102(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 262
+    .line 281
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -448,7 +448,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->idiomGameTurn:I
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$202(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;I)I
 
-    .line 263
+    .line 282
     new-instance v12, Ljava/lang/StringBuilder;
 
     invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
@@ -480,24 +480,24 @@
 
     move-result-object v11
 
-    .line 266
+    .line 285
     .restart local v11    # "response":Ljava/lang/String;
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12}, Lcom/unisound/vui/engine/ANTHandlerContext;->stopWakeup()V
 
-    .line 267
+    .line 286
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12}, Lcom/unisound/vui/engine/ANTHandlerContext;->stopASR()V
 
-    .line 268
+    .line 287
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->currentResponse:Ljava/lang/String;
     invoke-static {v12, v11}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$602(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 269
+    .line 288
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12, v11}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
@@ -505,7 +505,7 @@
     .catch Ljava/lang/Exception; {:try_start_113 .. :try_end_189} :catch_292
     .catchall {:try_start_113 .. :try_end_189} :catchall_47e
 
-    .line 418
+    .line 437
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -515,7 +515,7 @@
 
     goto :goto_112
 
-    .line 274
+    .line 293
     .end local v11    # "response":Ljava/lang/String;
     :cond_190
     :try_start_190
@@ -524,7 +524,7 @@
     # operator++ for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->idiomGameTurn:I
     invoke-static {v12}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$208(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)I
 
-    .line 275
+    .line 294
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     iget-object v13, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$userInput:Ljava/lang/String;
@@ -532,7 +532,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->lastUserIdiom:Ljava/lang/String;
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$302(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 277
+    .line 296
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -574,7 +574,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 280
+    .line 299
     new-instance v12, Ljava/lang/StringBuilder;
 
     invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
@@ -601,7 +601,7 @@
 
     move-result-object v10
 
-    .line 289
+    .line 308
     .restart local v10    # "prompt":Ljava/lang/String;
     const-string v12, "PhicommChat"
 
@@ -638,7 +638,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 290
+    .line 309
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -663,7 +663,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 291
+    .line 310
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -686,7 +686,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 293
+    .line 312
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->openAIClient:Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
@@ -700,7 +700,7 @@
 
     move-result-object v11
 
-    .line 295
+    .line 314
     .restart local v11    # "response":Ljava/lang/String;
     const-string v12, "PhicommChat"
 
@@ -724,7 +724,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 298
+    .line 317
     if-eqz v11, :cond_280
 
     invoke-virtual {v11}, Ljava/lang/String;->isEmpty()Z
@@ -733,7 +733,7 @@
 
     if-nez v12, :cond_280
 
-    .line 299
+    .line 318
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # invokes: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->extractFirstIdiom(Ljava/lang/String;)Ljava/lang/String;
@@ -741,7 +741,7 @@
 
     move-result-object v11
 
-    .line 300
+    .line 319
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -764,7 +764,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 303
+    .line 322
     :cond_280
     if-eqz v11, :cond_288
 
@@ -774,11 +774,11 @@
 
     if-eqz v12, :cond_cc
 
-    .line 304
+    .line 323
     :cond_288
     const-string v11, "\u6211\u60f3\u60f3...\u8fd9\u4e2a\u6709\u70b9\u96be,\u4f60\u8d62\u4e86!"
 
-    .line 305
+    .line 324
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -791,13 +791,13 @@
 
     goto/16 :goto_cc
 
-    .line 410
+    .line 429
     .end local v10    # "prompt":Ljava/lang/String;
     .end local v11    # "response":Ljava/lang/String;
     :catch_292
     move-exception v5
 
-    .line 411
+    .line 430
     .local v5, "e":Ljava/lang/Exception;
     :try_start_293
     const-string v12, "PhicommChat"
@@ -822,17 +822,17 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 412
+    .line 431
     invoke-virtual {v5}, Ljava/lang/Exception;->printStackTrace()V
 
-    .line 413
+    .line 432
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     const-string v13, "\u6a21\u578b\u8c03\u7528\u5931\u8d25"
 
     invoke-interface {v12, v13}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
 
-    .line 414
+    .line 433
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
@@ -842,7 +842,7 @@
 
     if-eqz v12, :cond_2c3
 
-    .line 415
+    .line 434
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -852,7 +852,7 @@
     :try_end_2c3
     .catchall {:try_start_293 .. :try_end_2c3} :catchall_47e
 
-    .line 418
+    .line 437
     :cond_2c3
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
@@ -863,7 +863,7 @@
 
     goto/16 :goto_112
 
-    .line 310
+    .line 329
     .end local v5    # "e":Ljava/lang/Exception;
     :cond_2cb
     :try_start_2cb
@@ -873,7 +873,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 311
+    .line 330
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -898,7 +898,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 314
+    .line 333
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isMultiTurnMode:Z
@@ -908,7 +908,7 @@
 
     if-nez v12, :cond_30b
 
-    .line 316
+    .line 335
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x1
@@ -916,7 +916,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isMultiTurnMode:Z
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$702(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 317
+    .line 336
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     new-instance v13, Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
@@ -926,14 +926,14 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->conversationHistory:Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$802(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;)Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
 
-    .line 318
+    .line 337
     const-string v12, "PhicommChat"
 
     const-string v13, "\u591a\u8f6e\u5bf9\u8bdd\u6a21\u5f0f\u542f\u52a8(\u4ec5\u5927\u6a21\u578b\u573a\u666f)"
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 322
+    .line 341
     :cond_30b
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$userInput:Ljava/lang/String;
 
@@ -955,13 +955,13 @@
 
     if-eqz v12, :cond_37c
 
-    .line 323
+    .line 342
     :cond_31f
     invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->getCurrentPersonaId()Ljava/lang/String;
 
     move-result-object v9
 
-    .line 324
+    .line 343
     .local v9, "pid":Ljava/lang/String;
     const-string v12, "PhicommChat"
 
@@ -991,10 +991,10 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 325
+    .line 344
     invoke-static {v9}, Lcom/phicomm/speaker/device/custom/ai/PersonaConversationManager;->clear(Ljava/lang/String;)V
 
-    .line 328
+    .line 347
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -1002,7 +1002,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isMultiTurnMode:Z
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$702(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 329
+    .line 348
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -1010,39 +1010,39 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->conversationHistory:Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$802(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;)Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
 
-    .line 330
+    .line 349
     const-string v12, "PhicommChat"
 
     const-string v13, "\u5df2\u9000\u51fa\u591a\u8f6e\u5bf9\u8bdd\u6a21\u5f0f"
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 333
+    .line 352
     const-string v11, "\u6210\u529f\u6e05\u7406"
 
-    .line 336
+    .line 355
     .restart local v11    # "response":Ljava/lang/String;
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12}, Lcom/unisound/vui/engine/ANTHandlerContext;->stopWakeup()V
 
-    .line 337
+    .line 356
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12}, Lcom/unisound/vui/engine/ANTHandlerContext;->stopASR()V
 
-    .line 340
+    .line 359
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->currentResponse:Ljava/lang/String;
     invoke-static {v12, v11}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$602(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 341
+    .line 360
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     invoke-interface {v12, v11}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
 
-    .line 343
+    .line 362
     const-string v12, "PhicommChat"
 
     const-string v13, "=== \u8bb0\u5fc6\u6e05\u7a7a\u5b8c\u6210,\u9000\u51fa\u591a\u8f6e\u6a21\u5f0f ==="
@@ -1052,7 +1052,7 @@
     .catch Ljava/lang/Exception; {:try_start_2cb .. :try_end_374} :catch_292
     .catchall {:try_start_2cb .. :try_end_374} :catchall_47e
 
-    .line 418
+    .line 437
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
@@ -1062,7 +1062,7 @@
 
     goto/16 :goto_112
 
-    .line 348
+    .line 367
     .end local v9    # "pid":Ljava/lang/String;
     .end local v11    # "response":Ljava/lang/String;
     :cond_37c
@@ -1076,7 +1076,7 @@
 
     if-nez v12, :cond_3c9
 
-    .line 349
+    .line 368
     const-string v12, "PhicommChat"
 
     const-string v13, "openAIClient is null! \u5c1d\u8bd5\u91cd\u65b0\u521d\u59cb\u5316..."
@@ -1086,7 +1086,7 @@
     .catch Ljava/lang/Exception; {:try_start_37c .. :try_end_38b} :catch_292
     .catchall {:try_start_37c .. :try_end_38b} :catchall_47e
 
-    .line 351
+    .line 370
     :try_start_38b
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
@@ -1094,13 +1094,13 @@
 
     move-result-object v4
 
-    .line 352
+    .line 371
     .local v4, "context":Landroid/content/Context;
     invoke-static {v4}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->load(Landroid/content/Context;)Lcom/phicomm/speaker/device/custom/config/AIConfig;
 
     move-result-object v3
 
-    .line 353
+    .line 372
     .local v3, "config":Lcom/phicomm/speaker/device/custom/config/AIConfig;
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
@@ -1111,7 +1111,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->openAIClient:Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
     invoke-static {v12, v13}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$402(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;)Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
 
-    .line 354
+    .line 373
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -1155,7 +1155,7 @@
     .catch Ljava/lang/Exception; {:try_start_38b .. :try_end_3c9} :catch_486
     .catchall {:try_start_38b .. :try_end_3c9} :catchall_47e
 
-    .line 360
+    .line 379
     .end local v3    # "config":Lcom/phicomm/speaker/device/custom/config/AIConfig;
     .end local v4    # "context":Landroid/content/Context;
     :cond_3c9
@@ -1170,18 +1170,18 @@
 
     if-eqz v12, :cond_4a4
 
-    .line 362
+    .line 381
     invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->getCurrentPersonaId()Ljava/lang/String;
 
     move-result-object v1
 
-    .line 363
+    .line 382
     .local v1, "activePersonaId":Ljava/lang/String;
     invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->getCurrentPersonaConfig()Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
 
     move-result-object v0
 
-    .line 364
+    .line 383
     .local v0, "activeCfg":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
     if-eqz v0, :cond_4a1
 
@@ -1189,20 +1189,20 @@
 
     move-result-object v2
 
-    .line 365
+    .line 384
     .local v2, "activeSysPrompt":Ljava/lang/String;
     :goto_3df
     invoke-static {v1}, Lcom/phicomm/speaker/device/custom/ai/PersonaConversationManager;->getHistory(Ljava/lang/String;)Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
 
     move-result-object v8
 
-    .line 366
+    .line 385
     .local v8, "personaHistory":Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
     invoke-virtual {v8}, Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;->getFormattedHistory()Ljava/lang/String;
 
     move-result-object v7
 
-    .line 368
+    .line 387
     .local v7, "historyText":Ljava/lang/String;
     const-string v12, "PhicommChat"
 
@@ -1226,7 +1226,7 @@
 
     move-result-object v13
 
-    .line 369
+    .line 388
     invoke-virtual {v8}, Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;->size()I
 
     move-result v14
@@ -1239,10 +1239,10 @@
 
     move-result-object v13
 
-    .line 368
+    .line 387
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 372
+    .line 391
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->openAIClient:Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
@@ -1256,7 +1256,7 @@
 
     move-result-object v11
 
-    .line 374
+    .line 393
     .restart local v11    # "response":Ljava/lang/String;
     const-string v12, "PhicommChat"
 
@@ -1280,7 +1280,7 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 377
+    .line 396
     if-eqz v11, :cond_464
 
     invoke-virtual {v11}, Ljava/lang/String;->isEmpty()Z
@@ -1289,12 +1289,12 @@
 
     if-nez v12, :cond_464
 
-    .line 378
+    .line 397
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$userInput:Ljava/lang/String;
 
     invoke-virtual {v8, v12, v11}, Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;->addTurn(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 379
+    .line 398
     const-string v12, "PhicommChat"
 
     new-instance v13, Ljava/lang/StringBuilder;
@@ -1317,7 +1317,7 @@
 
     move-result-object v13
 
-    .line 380
+    .line 399
     invoke-virtual {v8}, Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;->size()I
 
     move-result v14
@@ -1330,10 +1330,10 @@
 
     move-result-object v13
 
-    .line 379
+    .line 398
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 387
+    .line 406
     .end local v0    # "activeCfg":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
     .end local v1    # "activePersonaId":Ljava/lang/String;
     .end local v2    # "activeSysPrompt":Ljava/lang/String;
@@ -1368,7 +1368,7 @@
 
     goto/16 :goto_cc
 
-    .line 418
+    .line 437
     .end local v11    # "response":Ljava/lang/String;
     :catchall_47e
     move-exception v12
@@ -1380,14 +1380,14 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isProcessingRequest:Z
     invoke-static {v13, v14}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$002(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 419
+    .line 438
     throw v12
 
-    .line 355
+    .line 374
     :catch_486
     move-exception v6
 
-    .line 356
+    .line 375
     .local v6, "ex":Ljava/lang/Exception;
     :try_start_487
     const-string v12, "PhicommChat"
@@ -1414,7 +1414,7 @@
 
     goto/16 :goto_3c9
 
-    .line 364
+    .line 383
     .end local v6    # "ex":Ljava/lang/Exception;
     .restart local v0    # "activeCfg":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
     .restart local v1    # "activePersonaId":Ljava/lang/String;
@@ -1423,7 +1423,7 @@
 
     goto/16 :goto_3df
 
-    .line 383
+    .line 402
     .end local v0    # "activeCfg":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
     .end local v1    # "activePersonaId":Ljava/lang/String;
     :cond_4a4
@@ -1433,13 +1433,13 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 384
+    .line 403
     const/4 v11, 0x0
 
     .restart local v11    # "response":Ljava/lang/String;
     goto :goto_464
 
-    .line 404
+    .line 423
     :cond_4ad
     const-string v12, "PhicommChat"
 
@@ -1476,14 +1476,14 @@
 
     invoke-static {v12, v13}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 405
+    .line 424
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     const-string v13, "\u6a21\u578b\u8c03\u7528\u5931\u8d25"
 
     invoke-interface {v12, v13}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
 
-    .line 406
+    .line 425
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
@@ -1493,7 +1493,7 @@
 
     if-eqz v12, :cond_10c
 
-    .line 407
+    .line 426
     iget-object v12, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v13, 0x0
