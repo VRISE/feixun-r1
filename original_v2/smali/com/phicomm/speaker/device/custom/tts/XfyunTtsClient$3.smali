@@ -3,7 +3,7 @@
 .source "XfyunTtsClient.java"
 
 # interfaces
-.implements Landroid/media/MediaPlayer$OnCompletionListener;
+.implements Ljava/lang/Runnable;
 
 
 # annotations
@@ -22,22 +22,29 @@
 
 .field final synthetic val$callback:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;
 
+.field final synthetic val$done:[Z
+
+.field final synthetic val$durationMs:I
+
+.field final synthetic val$finalPlayer:Landroid/media/MediaPlayer;
+
 
 # direct methods
-.method constructor <init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
-    .registers 3
+.method constructor <init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;[ZILandroid/media/MediaPlayer;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
+    .registers 6
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
-    .line 513
+    .line 521
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->this$0:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
 
-    iput-object p2, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$callback:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;
+    iput-object p2, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$done:[Z
+
+    iput p3, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$durationMs:I
+
+    iput-object p4, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$finalPlayer:Landroid/media/MediaPlayer;
+
+    iput-object p5, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$callback:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -46,26 +53,81 @@
 
 
 # virtual methods
-.method public onCompletion(Landroid/media/MediaPlayer;)V
+.method public run()V
     .registers 4
-    .param p1, "mp"    # Landroid/media/MediaPlayer;
 
     .prologue
-    .line 516
+    const/4 v2, 0x0
+
+    .line 524
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$done:[Z
+
+    aget-boolean v0, v0, v2
+
+    if-eqz v0, :cond_8
+
+    .line 529
+    :goto_7
+    return-void
+
+    .line 525
+    :cond_8
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$done:[Z
+
+    const/4 v1, 0x1
+
+    aput-boolean v1, v0, v2
+
+    .line 526
     const-string v0, "XfyunTtsClient"
 
-    const-string v1, "\u97f3\u9891\u64ad\u653e\u5b8c\u6210"
+    new-instance v1, Ljava/lang/StringBuilder;
 
-    invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 
-    .line 517
-    invoke-virtual {p1}, Landroid/media/MediaPlayer;->release()V
+    const-string v2, "[WATCHDOG] onCompletion lost (duration="
 
-    .line 518
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    iget v2, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$durationMs:I
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    const-string v2, "ms), force complete"
+
+    invoke-virtual {v1, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
+
+    .line 527
+    :try_start_2d
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$finalPlayer:Landroid/media/MediaPlayer;
+
+    invoke-virtual {v0}, Landroid/media/MediaPlayer;->release()V
+    :try_end_32
+    .catch Ljava/lang/Throwable; {:try_start_2d .. :try_end_32} :catch_38
+
+    .line 528
+    :goto_32
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;->val$callback:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;
 
     invoke-interface {v0}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;->onComplete()V
 
-    .line 519
-    return-void
+    goto :goto_7
+
+    .line 527
+    :catch_38
+    move-exception v0
+
+    goto :goto_32
 .end method

@@ -31,11 +31,6 @@
 .method constructor <init>(Lcom/phicomm/speaker/device/custom/handler/PhicommWeatherHandler;Ljava/lang/String;Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
     .registers 5
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommWeatherHandler;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
     .line 85

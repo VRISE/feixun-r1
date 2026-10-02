@@ -29,11 +29,6 @@
 .method constructor <init>(Lcom/phicomm/speaker/device/custom/music/PhicommPlayer;II)V
     .registers 4
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/music/PhicommPlayer;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
     .line 396

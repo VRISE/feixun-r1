@@ -7,7 +7,6 @@ import com.phicomm.speaker.device.custom.handler.PhicommBindStatusHandler;
 import com.phicomm.speaker.device.custom.handler.PhicommChatHandler;
 import com.phicomm.speaker.device.custom.handler.PhicommDataStatisticHandler;
 import com.phicomm.speaker.device.custom.handler.PersonaRouterHandler;
-import com.phicomm.speaker.device.custom.handler.EavesdropperHandler;
 import com.phicomm.speaker.device.custom.handler.PhicommExternalMusicHandler;
 import com.phicomm.speaker.device.custom.handler.PhicommInitializeHandler;
 import com.phicomm.speaker.device.custom.handler.PhicommInterceptHandler;
@@ -86,11 +85,9 @@ public final class ExampleANTEngineInitializer extends ANTEngineInitializer {
         // 自定义大模型 Chat 拦截:优先级 315 > DefaultChatHandler 300
         // 拦截闲聊意图,调用 OpenAI 兼容 API(智谱 GLM)生成回复
         // 人格路由: 消费 PersonaActivationEvent (捣蛋鬼/英语陪练师/成语接龙等),
-        // 播放激活提示音并切换人格. priority=400, 必须在 EavesdropperHandler(350)之前
+        // 播放激活提示音并切换人格. priority=400
         pipeline.addLast(new PersonaRouterHandler());
         pipeline.addLast(new PhicommChatHandler());
-        // 插嘴 Handler: 消费 EavesdropperTriggerEvent, 调用大模型回复
-        pipeline.addLast(new EavesdropperHandler());
         pipeline.addLast(new DefaultChatHandler());
         pipeline.addLast(new DefaultGuideHandler());
         pipeline.addLast(new DefaultIlleageChatHandler());

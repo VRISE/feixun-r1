@@ -9,6 +9,7 @@ import com.phicomm.speaker.device.custom.ipc.PhicommLightController;
 import com.phicomm.speaker.device.custom.keyevent.PhicommKeyEventController;
 import com.phicomm.speaker.device.custom.keyevent.PhicommKeyEventProcessor;
 import com.phicomm.speaker.device.custom.match.MatchProcessor;
+import com.phicomm.speaker.device.custom.outputevents.DormantOutputEvent;
 import com.phicomm.speaker.device.custom.speech.SpeechManager;
 import com.phicomm.speaker.device.custom.status.PhicommDeviceStatusProcessor;
 import com.phicomm.speaker.device.custom.udid.UDIDProcessor;
@@ -25,7 +26,6 @@ import com.unisound.vui.engine.ANTHandlerContext;
 import com.unisound.vui.handler.ANTEventDispatcher;
 import com.phicomm.speaker.device.custom.persona.PersonaConfig;
 import com.phicomm.speaker.device.custom.persona.PersonaManager;
-import com.phicomm.speaker.device.custom.engine.EavesdropperEngine;
 import com.phicomm.speaker.device.custom.engine.PlaybackStateMonitor;
 import com.unisound.vui.engine.ANTPipeline;
 import com.unisound.vui.transport.out.ChangeWakeupWordEvent;
@@ -52,7 +52,7 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
     private SysPrivateManager mSysPrivateManager = null;
     private MatchProcessor matchProcessor;
     private UDIDProcessor udidProcessor;
-    private EavesdropperEngine mEavesdropperEngine;
+
 
     /* access modifiers changed from: protected */
     @Override // com.unisound.vui.handler.ANTEventDispatcher
@@ -125,13 +125,6 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
             initPhicommBusiness();
         }
 
-        // ⭐ 插嘴 session 期间播 TTS 完成后,主引擎会自动转 Speech 状态.
-        // 强制 stopWakeup 保持 MIC 给我们的 EavesdropperSession,避免死锁.
-        if (mEavesdropperEngine != null && mEavesdropperEngine.isRunning()) {
-            Log.d(TAG, "Eavesdropper running, force stopWakeup after TTS to keep dormant");
-            this.mSpeechManager.stopWakeup();
-        }
-
         return super.onTTSEventPlayingEnd(ctx);
     }
 
@@ -192,9 +185,42 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
         // ⭐ 恢复人格状态
         PersonaManager.restorePersonaState(this.mContext);
         
-        // ⭐ 仅初始化 EavesdropperEngine,不立即启动
-        // 启动时机改为"双击进入休眠"事件 (onDormantStatusChanged(true))
-        initEavesdropperEngine();
+        // ⭐ v81: 开机 3 秒后强制回到正常模式。
+        // 设备状态持久化在 SharedPreferences: 上次留在休眠(5)则开机恢复休眠,
+        // 按工厂设计休眠=stopWakeup → "你好小迪"/"小讯小讯"全部无响应,
+        // 用户体感即"一开机就在监听"。默认必须可正常唤醒, 故开机一律退出休眠。
+        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                forceNormalModeAtBoot();
+            }
+        }, 3000);
+    }
+
+    /**
+     * ⭐ v81: 开机时若设备处于持久化恢复的休眠状态(5), 强制退出休眠、恢复唤醒词。
+     * 等价于一次"单击退出休眠", 但不播提示音(静默纠正)。
+     */
+    private void forceNormalModeAtBoot() {
+        try {
+            int status = PhicommDeviceStatusProcessor.getInstance().getDeviceStatus();
+            Log.d(TAG, "[BOOT] persisted device status=" + status);
+            if (status != 5) {
+                Log.d(TAG, "[BOOT] normal mode, nothing to do");
+                return;
+            }
+            LogUtils.w(TAG, "[BOOT] device restored in DORMANT, force exit to normal mode");
+            // 退出休眠: DormantOutputEvent(false) → PhicommStatusHandler.onStopDormant → 状态机 5→0
+            this.mANTEngine.pipeline().write(new DormantOutputEvent(false));
+            this.mLightController.turnOffDormantLight();
+            UserPerferenceUtil.setDormantLightState(this.mContext, false);
+            UserPerferenceUtil.setStartWakeupAfterSetWakeupWord(this.mContext, true);
+            // 恢复唤醒引擎
+            this.mSpeechManager.startWakeup();
+            LogUtils.w(TAG, "[BOOT] force normal mode done, wake word restored");
+        } catch (Throwable t) {
+            LogUtils.e(TAG, "forceNormalModeAtBoot error: ", t);
+        }
     }
 
     /**
@@ -284,16 +310,6 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
         }
     }
     
-    /**
-     * 初始化 EavesdropperEngine 实例(不立即启动)
-     * 启动时机由 onDormantStatusChanged(true) 触发
-     */
-    private void initEavesdropperEngine() {
-        ANTPipeline pipeline = this.mANTEngine.pipeline();
-        mEavesdropperEngine = new EavesdropperEngine(this.mContext, pipeline, this.mANTEngine);
-        Log.d(TAG, "Eavesdropper engine initialized (will start on dormant)");
-    }
-
     private void initDeviceStatusListener() {
         this.mDeviceStatusProcessor = PhicommDeviceStatusProcessor.getInstance();
         this.mDeviceStatusProcessor.addDeviceStatusChangedListener(this);
@@ -318,16 +334,5 @@ public class PhicommInitializeHandler extends ANTEventDispatcher implements Phic
         Map<String, String> content = new HashMap<>();
         content.put(SelfDefinationRequestInfo.CURRENT_DORMANT_STATUS, isDormant ? "1" : "0");
         SessionRegister.getUpDownMessageManager().onReportStatus(DstServiceName.DST_SERVICE_SELF_DEFINATION, null, DstServiceName.DST_SERVICE_SELF_DEFINATION, DstServiceName.DST_SERVICE_SELF_DEFINATION, new SelfDefinationResponseInfo(SelfDefinationRequestInfo.MODIFY_DORMANT_STATUS, 0, content));
-
-        // ⭐ 休眠模式 = 插嘴模式: 主引擎已被双击 stopWakeup, MIC 给我们用
-        if (mEavesdropperEngine != null) {
-            if (isDormant) {
-                Log.d(TAG, "Dormant entered → start Eavesdropper");
-                mEavesdropperEngine.start();
-            } else {
-                Log.d(TAG, "Dormant exited → stop Eavesdropper");
-                mEavesdropperEngine.stop();
-            }
-        }
     }
 }

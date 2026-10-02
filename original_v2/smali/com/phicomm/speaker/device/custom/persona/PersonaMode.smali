@@ -23,40 +23,18 @@
 
 
 # direct methods
-.method private static synthetic $values()[Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
-    .registers 3
-
-    .prologue
-    .line 273
-    const/4 v0, 0x2
-
-    new-array v0, v0, [Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
-
-    const/4 v1, 0x0
-
-    sget-object v2, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;->PASSIVE:Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
-
-    aput-object v2, v0, v1
-
-    const/4 v1, 0x1
-
-    sget-object v2, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;->ACTIVE:Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
-
-    aput-object v2, v0, v1
-
-    return-object v0
-.end method
-
 .method static constructor <clinit>()V
-    .registers 3
+    .registers 4
 
     .prologue
+    const/4 v3, 0x1
+
+    const/4 v2, 0x0
+
     .line 274
     new-instance v0, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
 
     const-string v1, "PASSIVE"
-
-    const/4 v2, 0x0
 
     invoke-direct {v0, v1, v2}, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;-><init>(Ljava/lang/String;I)V
 
@@ -67,16 +45,22 @@
 
     const-string v1, "ACTIVE"
 
-    const/4 v2, 0x1
-
-    invoke-direct {v0, v1, v2}, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;-><init>(Ljava/lang/String;I)V
+    invoke-direct {v0, v1, v3}, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;-><init>(Ljava/lang/String;I)V
 
     sput-object v0, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;->ACTIVE:Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
 
     .line 273
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;->$values()[Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
+    const/4 v0, 0x2
 
-    move-result-object v0
+    new-array v0, v0, [Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
+
+    sget-object v1, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;->PASSIVE:Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
+
+    aput-object v1, v0, v2
+
+    sget-object v1, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;->ACTIVE:Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
+
+    aput-object v1, v0, v3
 
     sput-object v0, Lcom/phicomm/speaker/device/custom/persona/PersonaMode;->$VALUES:[Lcom/phicomm/speaker/device/custom/persona/PersonaMode;
 

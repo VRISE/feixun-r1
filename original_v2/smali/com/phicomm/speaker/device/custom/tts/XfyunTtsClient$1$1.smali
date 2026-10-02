@@ -27,11 +27,6 @@
 .method constructor <init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$1;Ljava/lang/String;)V
     .registers 3
     .param p1, "this$1"    # Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$1;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
     .line 232

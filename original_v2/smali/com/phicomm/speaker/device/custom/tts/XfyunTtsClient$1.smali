@@ -29,11 +29,6 @@
 .method constructor <init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;Landroid/content/Context;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$TtsCallback;)V
     .registers 4
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
     .line 225

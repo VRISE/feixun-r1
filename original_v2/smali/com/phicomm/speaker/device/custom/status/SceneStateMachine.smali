@@ -6,25 +6,25 @@
 # annotations
 .annotation system Ldalvik/annotation/MemberClasses;
     value = {
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$StatusChangedListener;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$BluetoothState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$DefaultState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$DossState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringBluetoothState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringDossState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringMusicState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringNetConfigState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingBluetoothState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingDossState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingMusicState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingNetConfigState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$MusicState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ReadyState;,
         Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$SteadyState;,
         Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$IntermediateState;,
         Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingIntermediateState;,
-        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringIntermediateState;
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringIntermediateState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingDossState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$DossState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringDossState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingBluetoothState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$BluetoothState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringBluetoothState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingNetConfigState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$NetConfigState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringNetConfigState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ExitingMusicState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$MusicState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$EnteringMusicState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$ReadyState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$DefaultState;,
+        Lcom/phicomm/speaker/device/custom/status/SceneStateMachine$StatusChangedListener;
     }
 .end annotation
 

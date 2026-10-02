@@ -104,7 +104,7 @@
     .registers 1
 
     .prologue
-    .line 97
+    .line 93
     sget-object v0, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->ttsPlaying:Ljava/util/concurrent/atomic/AtomicBoolean;
 
     invoke-virtual {v0}, Ljava/util/concurrent/atomic/AtomicBoolean;->get()Z
@@ -137,7 +137,7 @@
     .registers 1
 
     .prologue
-    .line 92
+    .line 88
     sget-object v0, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->musicPlaying:Ljava/util/concurrent/atomic/AtomicBoolean;
 
     invoke-virtual {v0}, Ljava/util/concurrent/atomic/AtomicBoolean;->get()Z
@@ -151,7 +151,7 @@
     .registers 1
 
     .prologue
-    .line 88
+    .line 84
     sget-object v0, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->ttsPlaying:Ljava/util/concurrent/atomic/AtomicBoolean;
 
     invoke-virtual {v0}, Ljava/util/concurrent/atomic/AtomicBoolean;->get()Z
@@ -166,23 +166,23 @@
     .param p0, "playing"    # Z
 
     .prologue
-    .line 74
+    .line 71
     sget-object v1, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->musicPlaying:Ljava/util/concurrent/atomic/AtomicBoolean;
 
     invoke-virtual {v1, p0}, Ljava/util/concurrent/atomic/AtomicBoolean;->getAndSet(Z)Z
 
     move-result v1
 
-    if-eq v1, p0, :cond_3a
+    if-eq v1, p0, :cond_37
 
     const/4 v0, 0x1
 
-    .line 75
+    .line 72
     .local v0, "changed":Z
     :goto_9
-    if-eqz v0, :cond_39
+    if-eqz v0, :cond_36
 
-    .line 76
+    .line 73
     const-string v1, "PlaybackStateMonitor"
 
     new-instance v2, Ljava/lang/StringBuilder;
@@ -205,20 +205,17 @@
 
     invoke-static {v1, v2}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 77
-    if-eqz p0, :cond_3c
+    .line 74
+    if-eqz p0, :cond_39
 
-    .line 78
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->notifyInteraction()V
-
-    .line 79
+    .line 75
     sget-object v1, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->mainHandler:Landroid/os/Handler;
 
     sget-object v2, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->musicAutoResetRunnable:Ljava/lang/Runnable;
 
     invoke-virtual {v1, v2}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    .line 80
+    .line 76
     sget-object v1, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->mainHandler:Landroid/os/Handler;
 
     sget-object v2, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->musicAutoResetRunnable:Ljava/lang/Runnable;
@@ -227,28 +224,28 @@
 
     invoke-virtual {v1, v2, v4, v5}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
-    .line 85
-    :cond_39
-    :goto_39
+    .line 81
+    :cond_36
+    :goto_36
     return-void
 
-    .line 74
+    .line 71
     .end local v0    # "changed":Z
-    :cond_3a
+    :cond_37
     const/4 v0, 0x0
 
     goto :goto_9
 
-    .line 82
+    .line 78
     .restart local v0    # "changed":Z
-    :cond_3c
+    :cond_39
     sget-object v1, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->mainHandler:Landroid/os/Handler;
 
     sget-object v2, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->musicAutoResetRunnable:Ljava/lang/Runnable;
 
     invoke-virtual {v1, v2}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    goto :goto_39
+    goto :goto_36
 .end method
 
 .method public static setTTSPlaying(Z)V
@@ -263,16 +260,16 @@
 
     move-result v1
 
-    if-eq v1, p0, :cond_40
+    if-eq v1, p0, :cond_3d
 
     const/4 v0, 0x1
 
     .line 57
     .local v0, "changed":Z
     :goto_9
-    if-eqz v0, :cond_3f
+    if-eqz v0, :cond_3c
 
-    .line 58
+    .line 59
     const-string v1, "PlaybackStateMonitor"
 
     new-instance v2, Ljava/lang/StringBuilder;
@@ -293,13 +290,10 @@
 
     move-result-object v2
 
-    invoke-static {v1, v2}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
-
-    .line 59
-    if-eqz p0, :cond_42
+    invoke-static {v1, v2}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
     .line 60
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->notifyInteraction()V
+    if-eqz p0, :cond_3f
 
     .line 61
     sget-object v1, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->mainHandler:Landroid/os/Handler;
@@ -324,29 +318,26 @@
 
     invoke-static {v1, v2}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 71
-    :cond_3f
-    :goto_3f
+    .line 68
+    :cond_3c
+    :goto_3c
     return-void
 
     .line 56
     .end local v0    # "changed":Z
-    :cond_40
+    :cond_3d
     const/4 v0, 0x0
 
     goto :goto_9
 
     .line 65
     .restart local v0    # "changed":Z
-    :cond_42
+    :cond_3f
     sget-object v1, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->mainHandler:Landroid/os/Handler;
 
     sget-object v2, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->ttsAutoResetRunnable:Ljava/lang/Runnable;
 
     invoke-virtual {v1, v2}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    .line 68
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->notifyTTSEnded()V
-
-    goto :goto_3f
+    goto :goto_3c
 .end method

@@ -27,11 +27,6 @@
 .method constructor <init>(Lcom/phicomm/speaker/device/custom/ipc/PhicommIpcRegister;Lcom/phicomm/speaker/device/ipc/IpcReceiver;)V
     .registers 3
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/ipc/PhicommIpcRegister;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
     .line 32

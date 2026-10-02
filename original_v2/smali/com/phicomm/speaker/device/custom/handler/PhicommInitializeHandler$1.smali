@@ -27,7 +27,7 @@
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
 
     .prologue
-    .line 79
+    .line 81
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -43,12 +43,12 @@
     .param p2, "tag"    # Ljava/lang/String;
 
     .prologue
-    .line 84
+    .line 86
     const/4 v0, 0x4
 
     if-ne p1, v0, :cond_48
 
-    .line 85
+    .line 87
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
 
     const/4 v1, 0x1
@@ -56,7 +56,7 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->isFristBoot:Z
     invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->access$002(Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;Z)Z
 
-    .line 86
+    .line 88
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
@@ -70,7 +70,7 @@
 
     if-eqz v0, :cond_32
 
-    .line 87
+    .line 89
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
@@ -93,7 +93,7 @@
 
     invoke-interface {v0, v1}, Lcom/unisound/vui/engine/ANTEngine;->playTTS(Ljava/lang/String;)V
 
-    .line 91
+    .line 93
     :goto_2a
     invoke-static {}, Lcom/unisound/vui/common/media/UniMediaPlayer;->getInstance()Lcom/unisound/vui/common/media/UniMediaPlayer;
 
@@ -101,12 +101,12 @@
 
     invoke-virtual {v0, p0}, Lcom/unisound/vui/common/media/UniMediaPlayer;->removeIMediaPlayerStateListener(Lcom/unisound/vui/common/media/IMediaPlayerStateListener;)V
 
-    .line 95
+    .line 97
     :cond_31
     :goto_31
     return-void
 
-    .line 89
+    .line 91
     :cond_32
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
 
@@ -132,13 +132,13 @@
 
     goto :goto_2a
 
-    .line 92
+    .line 94
     :cond_48
     const/4 v0, 0x3
 
     if-ne p1, v0, :cond_31
 
-    .line 93
+    .line 95
     invoke-static {}, Lcom/unisound/vui/common/media/UniMediaPlayer;->getInstance()Lcom/unisound/vui/common/media/UniMediaPlayer;
 
     move-result-object v0

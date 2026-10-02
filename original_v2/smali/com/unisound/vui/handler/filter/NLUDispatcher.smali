@@ -3,6 +3,10 @@
 .source "NLUDispatcher.java"
 
 
+# static fields
+.field private static final RECOG_STALL_TIMEOUT_MS:J = 0x1f40L
+
+
 # instance fields
 .field private b:Z
 
@@ -16,6 +20,10 @@
 
 .field private f423a:Z
 
+.field private recogStallWatchdog:Ljava/lang/Runnable;
+
+.field private final watchdogHandler:Landroid/os/Handler;
+
 
 # direct methods
 .method public constructor <init>(Lnluparser/MixtureProcessor;)V
@@ -23,48 +31,59 @@
     .param p1, "mixtureProcessor"    # Lnluparser/MixtureProcessor;
 
     .prologue
-    .line 43
+    .line 78
     invoke-direct {p0}, Lcom/unisound/vui/handler/ANTEventDispatcher;-><init>()V
 
-    .line 40
+    .line 47
+    new-instance v0, Landroid/os/Handler;
+
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+
+    move-result-object v1
+
+    invoke-direct {v0, v1}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+
+    iput-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->watchdogHandler:Landroid/os/Handler;
+
+    .line 75
     new-instance v0, Landroid/os/Handler;
 
     invoke-direct {v0}, Landroid/os/Handler;-><init>()V
 
     iput-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->e:Landroid/os/Handler;
 
-    .line 44
+    .line 79
     iput-object p1, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c:Lnluparser/MixtureProcessor;
 
-    .line 45
+    .line 80
     new-instance v0, Lnluparser/NluProcessor$Builder;
 
     invoke-direct {v0}, Lnluparser/NluProcessor$Builder;-><init>()V
 
     const-string v1, "cn.yunzhisheng.error"
 
-    new-instance v2, Lcom/unisound/vui/handler/filter/NLUDispatcher$1;
+    new-instance v2, Lcom/unisound/vui/handler/filter/NLUDispatcher$2;
 
-    invoke-direct {v2, p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher$1;-><init>(Lcom/unisound/vui/handler/filter/NLUDispatcher;)V
+    invoke-direct {v2, p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher$2;-><init>(Lcom/unisound/vui/handler/filter/NLUDispatcher;)V
 
-    .line 47
-    invoke-virtual {v2}, Lcom/unisound/vui/handler/filter/NLUDispatcher$1;->getType()Ljava/lang/reflect/Type;
+    .line 82
+    invoke-virtual {v2}, Lcom/unisound/vui/handler/filter/NLUDispatcher$2;->getType()Ljava/lang/reflect/Type;
 
     move-result-object v2
 
-    .line 45
+    .line 80
     invoke-virtual {v0, v1, v2}, Lnluparser/NluProcessor$Builder;->registerTypeMapper(Ljava/lang/String;Ljava/lang/reflect/Type;)Lnluparser/NluProcessor$Builder;
 
     move-result-object v0
 
-    .line 47
+    .line 82
     invoke-virtual {v0}, Lnluparser/NluProcessor$Builder;->build()Lnluparser/NluProcessor;
 
     move-result-object v0
 
     iput-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->d:Lnluparser/NluProcessor;
 
-    .line 48
+    .line 83
     return-void
 .end method
 
@@ -72,31 +91,31 @@
     .registers 3
 
     .prologue
-    .line 51
+    .line 86
     iget-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f:Ljava/lang/Runnable;
 
     if-eqz v0, :cond_15
 
-    .line 52
+    .line 87
     const-string v0, "NLUDispatcher"
 
     const-string v1, "stop asr or nlu result timeout task"
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 53
+    .line 88
     iget-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->e:Landroid/os/Handler;
 
     iget-object v1, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f:Ljava/lang/Runnable;
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    .line 54
+    .line 89
     const/4 v0, 0x0
 
     iput-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f:Ljava/lang/Runnable;
 
-    .line 56
+    .line 91
     :cond_15
     return-void
 .end method
@@ -107,7 +126,7 @@
     .param p2, "z"    # Z
 
     .prologue
-    .line 59
+    .line 94
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->engine()Lcom/unisound/vui/engine/ANTEngine;
 
     move-result-object v0
@@ -130,7 +149,7 @@
 
     invoke-interface {v0, v1}, Lcom/unisound/vui/util/Attribute;->set(Ljava/lang/Object;)V
 
-    .line 60
+    .line 95
     return-void
 .end method
 
@@ -139,7 +158,7 @@
     .param p1, "f2"    # F
 
     .prologue
-    .line 63
+    .line 98
     sget v0, Lcom/unisound/vui/common/config/ANTConfigPreference;->FUNCTION_WAKEUP_BENCHMARK:F
 
     cmpl-float v0, p1, v0
@@ -163,7 +182,7 @@
     .param p2, "str"    # Ljava/lang/String;
 
     .prologue
-    .line 67
+    .line 102
     invoke-static {p1}, Lcom/unisound/vui/util/UserPerferenceUtil;->getCmopetitionWord(Landroid/content/Context;)Ljava/util/List;
 
     move-result-object v0
@@ -182,24 +201,24 @@
     .prologue
     const/4 v2, 0x1
 
-    .line 71
+    .line 106
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->b(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
 
     move-result v3
 
     if-eqz v3, :cond_20
 
-    .line 72
+    .line 107
     iput-boolean v2, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
-    .line 73
+    .line 108
     const-string v3, "bluetooth_error"
 
     invoke-direct {p0, v3}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Ljava/lang/String;)Lnluparser/scheme/NLU;
 
     move-result-object v0
 
-    .line 74
+    .line 109
     .local v0, "c2":Lnluparser/scheme/NLU;
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
 
@@ -213,15 +232,15 @@
 
     invoke-virtual {v0, v3}, Lnluparser/scheme/NLU;->setText(Ljava/lang/String;)V
 
-    .line 75
+    .line 110
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
-    .line 84
+    .line 119
     .end local v0    # "c2":Lnluparser/scheme/NLU;
     :goto_1f
     return v2
 
-    .line 77
+    .line 112
     :cond_20
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
 
@@ -233,29 +252,29 @@
 
     if-nez v3, :cond_2c
 
-    .line 78
+    .line 113
     const/4 v2, 0x0
 
     goto :goto_1f
 
-    .line 80
+    .line 115
     :cond_2c
     iput-boolean v2, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
-    .line 81
+    .line 116
     const-string v3, "-90002"
 
     invoke-direct {p0, v3}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Ljava/lang/String;)Lnluparser/scheme/NLU;
 
     move-result-object v1
 
-    .line 82
+    .line 117
     .local v1, "c3":Lnluparser/scheme/NLU;
     const-string v3, "no network"
 
     invoke-virtual {v1, v3}, Lnluparser/scheme/NLU;->setText(Ljava/lang/String;)V
 
-    .line 83
+    .line 118
     invoke-direct {p0, p1, v1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
     goto :goto_1f
@@ -284,7 +303,7 @@
 
     const/4 v1, 0x0
 
-    .line 89
+    .line 124
     invoke-virtual {p3}, Lnluparser/scheme/Mixture;->getNluList()Ljava/util/List;
 
     move-result-object v3
@@ -295,7 +314,7 @@
 
     check-cast v0, Lnluparser/scheme/NLU;
 
-    .line 90
+    .line 125
     .local v0, "nlu":Lnluparser/scheme/NLU;, "Lnluparser/scheme/NLU<Lnluparser/scheme/Intent;Lnluparser/scheme/Result;>;"
     invoke-direct {p0, p3, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lnluparser/scheme/Mixture;Lnluparser/scheme/NLU;)Z
 
@@ -303,33 +322,33 @@
 
     if-eqz v3, :cond_1a
 
-    .line 91
+    .line 126
     const-string v2, "NLUDispatcher"
 
     const-string v3, "handleNetFilterService return filter service ..."
 
     invoke-static {v2, v3}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 98
+    .line 133
     :goto_19
     return v1
 
-    .line 94
+    .line 129
     :cond_1a
     iput-boolean v2, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
-    .line 95
+    .line 130
     invoke-virtual {v0, v1}, Lnluparser/scheme/NLU;->setLocalNLU(Z)V
 
-    .line 96
+    .line 131
     invoke-virtual {v0, p2}, Lnluparser/scheme/NLU;->setAsrResult(Ljava/lang/String;)V
 
-    .line 97
+    .line 132
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->b(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
     move v1, v2
 
-    .line 98
+    .line 133
     goto :goto_19
 .end method
 
@@ -342,31 +361,31 @@
     .prologue
     const/4 v0, 0x1
 
-    .line 102
+    .line 137
     invoke-direct {p0, p1, p3}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)Z
 
     move-result v1
 
     if-eqz v1, :cond_9
 
-    .line 103
+    .line 138
     const/4 v0, 0x0
 
-    .line 109
+    .line 144
     :goto_8
     return v0
 
-    .line 105
+    .line 140
     :cond_9
     iput-boolean v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
-    .line 106
+    .line 141
     invoke-virtual {p3, v0}, Lnluparser/scheme/NLU;->setLocalNLU(Z)V
 
-    .line 107
+    .line 142
     invoke-virtual {p3, p2}, Lnluparser/scheme/NLU;->setAsrResult(Ljava/lang/String;)V
 
-    .line 108
+    .line 143
     invoke-direct {p0, p1, p3}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
     goto :goto_8
@@ -378,10 +397,10 @@
     .param p2, "localASR"    # Lnluparser/scheme/LocalASR;
 
     .prologue
-    .line 113
+    .line 148
     invoke-interface {p1, p2}, Lcom/unisound/vui/engine/ANTHandlerContext;->fireUserEventTriggered(Ljava/lang/Object;)Lcom/unisound/vui/engine/ANTHandlerContext;
 
-    .line 114
+    .line 149
     const/4 v0, 0x1
 
     return v0
@@ -393,7 +412,7 @@
     .param p2, "nlu"    # Lnluparser/scheme/NLU;
 
     .prologue
-    .line 118
+    .line 153
     invoke-virtual {p2}, Lnluparser/scheme/NLU;->getService()Ljava/lang/String;
 
     move-result-object v0
@@ -430,7 +449,7 @@
     .param p1, "str"    # Ljava/lang/String;
 
     .prologue
-    .line 122
+    .line 157
     invoke-static {p1}, Lcom/unisound/vui/handler/filter/a;->a(Ljava/lang/String;)Z
 
     move-result v0
@@ -444,7 +463,7 @@
     .param p2, "nlu"    # Lnluparser/scheme/NLU;
 
     .prologue
-    .line 126
+    .line 161
     invoke-virtual {p2}, Lnluparser/scheme/NLU;->getResponseCode()I
 
     move-result v0
@@ -489,7 +508,7 @@
     .local p1, "mixture":Lnluparser/scheme/Mixture;, "Lnluparser/scheme/Mixture<Lnluparser/scheme/Intent;Lnluparser/scheme/Result;>;"
     const/4 v1, 0x0
 
-    .line 130
+    .line 165
     invoke-virtual {p1}, Lnluparser/scheme/Mixture;->getNetASRList()Ljava/util/List;
 
     move-result-object v0
@@ -546,7 +565,7 @@
     .end annotation
 
     .prologue
-    .line 134
+    .line 169
     .local p1, "mixture":Lnluparser/scheme/Mixture;, "Lnluparser/scheme/Mixture<Lnluparser/scheme/Intent;Lnluparser/scheme/Result;>;"
     invoke-virtual {p2}, Lnluparser/scheme/NLU;->getService()Ljava/lang/String;
 
@@ -575,13 +594,25 @@
     goto :goto_11
 .end method
 
-.method static synthetic access$000(Lcom/unisound/vui/handler/filter/NLUDispatcher;Ljava/lang/String;)Lnluparser/scheme/NLU;
+.method static synthetic access$002(Lcom/unisound/vui/handler/filter/NLUDispatcher;Ljava/lang/Runnable;)Ljava/lang/Runnable;
+    .registers 2
+    .param p0, "x0"    # Lcom/unisound/vui/handler/filter/NLUDispatcher;
+    .param p1, "x1"    # Ljava/lang/Runnable;
+
+    .prologue
+    .line 35
+    iput-object p1, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->recogStallWatchdog:Ljava/lang/Runnable;
+
+    return-object p1
+.end method
+
+.method static synthetic access$100(Lcom/unisound/vui/handler/filter/NLUDispatcher;Ljava/lang/String;)Lnluparser/scheme/NLU;
     .registers 3
     .param p0, "x0"    # Lcom/unisound/vui/handler/filter/NLUDispatcher;
     .param p1, "x1"    # Ljava/lang/String;
 
     .prologue
-    .line 33
+    .line 35
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Ljava/lang/String;)Lnluparser/scheme/NLU;
 
     move-result-object v0
@@ -589,14 +620,14 @@
     return-object v0
 .end method
 
-.method static synthetic access$100(Lcom/unisound/vui/handler/filter/NLUDispatcher;Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
+.method static synthetic access$200(Lcom/unisound/vui/handler/filter/NLUDispatcher;Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
     .registers 3
     .param p0, "x0"    # Lcom/unisound/vui/handler/filter/NLUDispatcher;
     .param p1, "x1"    # Lcom/unisound/vui/engine/ANTHandlerContext;
     .param p2, "x2"    # Lnluparser/scheme/NLU;
 
     .prologue
-    .line 33
+    .line 35
     invoke-direct {p0, p1, p2}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
     return-void
@@ -608,7 +639,7 @@
     .param p2, "nlu"    # Lnluparser/scheme/NLU;
 
     .prologue
-    .line 138
+    .line 173
     const-string v0, "NLUDispatcher"
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -631,7 +662,7 @@
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 139
+    .line 174
     invoke-virtual {p2}, Lnluparser/scheme/NLU;->getText()Ljava/lang/String;
 
     move-result-object v0
@@ -642,7 +673,7 @@
 
     if-eqz v0, :cond_2c
 
-    .line 140
+    .line 175
     const-string v0, "-63551"
 
     invoke-direct {p0, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Ljava/lang/String;)Lnluparser/scheme/NLU;
@@ -651,11 +682,11 @@
 
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
-    .line 144
+    .line 179
     :goto_2b
     return-void
 
-    .line 142
+    .line 177
     :cond_2c
     invoke-direct {p0, p1, p2}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
@@ -667,7 +698,7 @@
     .param p1, "f2"    # F
 
     .prologue
-    .line 147
+    .line 182
     sget v0, Lcom/unisound/vui/common/config/ANTConfigPreference;->effectWakeupBenchmark:F
 
     cmpl-float v0, p1, v0
@@ -691,7 +722,7 @@
     .param p2, "str"    # Ljava/lang/String;
 
     .prologue
-    .line 151
+    .line 186
     invoke-static {p1}, Lcom/unisound/vui/util/UserPerferenceUtil;->getMainWakeupWord(Landroid/content/Context;)Ljava/util/List;
 
     move-result-object v0
@@ -718,7 +749,7 @@
     .param p1, "aNTHandlerContext"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 155
+    .line 190
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->engine()Lcom/unisound/vui/engine/ANTEngine;
 
     move-result-object v0
@@ -759,7 +790,7 @@
     .param p1, "str"    # Ljava/lang/String;
 
     .prologue
-    .line 159
+    .line 194
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Ljava/lang/String;)Z
 
     move-result v0
@@ -781,13 +812,13 @@
     .end annotation
 
     .prologue
-    .line 163
+    .line 198
     .local p1, "mixture":Lnluparser/scheme/Mixture;, "Lnluparser/scheme/Mixture<Lnluparser/scheme/Intent;Lnluparser/scheme/Result;>;"
     invoke-virtual {p1}, Lnluparser/scheme/Mixture;->getNluList()Ljava/util/List;
 
     move-result-object v0
 
-    .line 164
+    .line 199
     .local v0, "nluList":Ljava/util/List;, "Ljava/util/List<Lnluparser/scheme/NLU<Lnluparser/scheme/Intent;Lnluparser/scheme/Result;>;>;"
     if-eqz v0, :cond_c
 
@@ -814,21 +845,21 @@
     .param p1, "str"    # Ljava/lang/String;
 
     .prologue
-    .line 170
+    .line 205
     new-instance v0, Lnluparser/scheme/NLU;
 
     invoke-direct {v0}, Lnluparser/scheme/NLU;-><init>()V
 
-    .line 171
+    .line 206
     .local v0, "nlu":Lnluparser/scheme/NLU;
     const-string v1, "cn.yunzhisheng.error"
 
     invoke-virtual {v0, v1}, Lnluparser/scheme/NLU;->setService(Ljava/lang/String;)V
 
-    .line 172
+    .line 207
     invoke-virtual {v0, p1}, Lnluparser/scheme/NLU;->setCode(Ljava/lang/String;)V
 
-    .line 173
+    .line 208
     return-object v0
 .end method
 
@@ -840,10 +871,10 @@
     .prologue
     const/4 v2, 0x0
 
-    .line 179
+    .line 214
     invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a()V
 
-    .line 180
+    .line 215
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->pipeline()Lcom/unisound/vui/engine/ANTPipeline;
 
     move-result-object v0
@@ -852,27 +883,24 @@
 
     invoke-interface {v0, v1}, Lcom/unisound/vui/engine/ANTPipeline;->fireASREvent(I)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 181
+    .line 216
     const/4 v0, 0x1
 
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lcom/unisound/vui/engine/ANTHandlerContext;Z)V
 
-    .line 182
+    .line 217
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->cancelEngine()V
 
-    .line 184
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->notifyInteraction()V
-
-    .line 185
+    .line 218
     invoke-interface {p1, p2}, Lcom/unisound/vui/engine/ANTHandlerContext;->fireUserEventTriggered(Ljava/lang/Object;)Lcom/unisound/vui/engine/ANTHandlerContext;
 
-    .line 186
+    .line 219
     iput-boolean v2, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->b:Z
 
-    .line 187
+    .line 220
     iput-boolean v2, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
-    .line 188
+    .line 221
     return-void
 .end method
 
@@ -882,7 +910,7 @@
     .param p2, "str"    # Ljava/lang/String;
 
     .prologue
-    .line 191
+    .line 224
     invoke-static {p1}, Lcom/unisound/vui/util/UserPerferenceUtil;->getMainWakeupWord(Landroid/content/Context;)Ljava/util/List;
 
     move-result-object v0
@@ -899,7 +927,7 @@
     .param p1, "aNTHandlerContext"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 195
+    .line 228
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
 
     move-result-object v0
@@ -911,31 +939,57 @@
     return v0
 .end method
 
+.method private cancelRecogStallWatchdog()V
+    .registers 3
+
+    .prologue
+    .line 51
+    iget-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->recogStallWatchdog:Ljava/lang/Runnable;
+
+    if-eqz v0, :cond_e
+
+    .line 52
+    iget-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->watchdogHandler:Landroid/os/Handler;
+
+    iget-object v1, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->recogStallWatchdog:Ljava/lang/Runnable;
+
+    invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
+
+    .line 53
+    const/4 v0, 0x0
+
+    iput-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->recogStallWatchdog:Ljava/lang/Runnable;
+
+    .line 55
+    :cond_e
+    return-void
+.end method
+
 .method private d(Lcom/unisound/vui/engine/ANTHandlerContext;)V
     .registers 6
     .param p1, "aNTHandlerContext"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 199
+    .line 232
     iget-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f:Ljava/lang/Runnable;
 
     if-nez v0, :cond_1b
 
-    .line 200
+    .line 233
     const-string v0, "NLUDispatcher"
 
     const-string v1, "start asr or nlu result timeout task"
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 201
-    new-instance v0, Lcom/unisound/vui/handler/filter/NLUDispatcher$2;
+    .line 234
+    new-instance v0, Lcom/unisound/vui/handler/filter/NLUDispatcher$3;
 
-    invoke-direct {v0, p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher$2;-><init>(Lcom/unisound/vui/handler/filter/NLUDispatcher;Lcom/unisound/vui/engine/ANTHandlerContext;)V
+    invoke-direct {v0, p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher$3;-><init>(Lcom/unisound/vui/handler/filter/NLUDispatcher;Lcom/unisound/vui/engine/ANTHandlerContext;)V
 
     iput-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f:Ljava/lang/Runnable;
 
-    .line 212
+    .line 245
     iget-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->e:Landroid/os/Handler;
 
     iget-object v1, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f:Ljava/lang/Runnable;
@@ -944,73 +998,280 @@
 
     invoke-virtual {v0, v1, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
-    .line 214
+    .line 247
     :cond_1b
     return-void
 .end method
 
-.method private isEnableEavesdropCommand(Ljava/lang/String;)Z
-    .registers 3
-    .param p1, "text"    # Ljava/lang/String;
+.method private extractRecognitionText(Ljava/lang/String;)Ljava/lang/String;
+    .registers 13
+    .param p1, "result"    # Ljava/lang/String;
 
     .prologue
-    .line 430
-    const-string v0, "\u6253\u5f00\u63d2\u5634"
+    const/4 v7, 0x0
 
-    invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    .line 315
+    if-nez p1, :cond_4
 
-    move-result v0
+    .line 356
+    :cond_3
+    :goto_3
+    return-object v7
 
-    if-nez v0, :cond_28
+    .line 318
+    :cond_4
+    invoke-virtual {p1}, Ljava/lang/String;->trim()Ljava/lang/String;
 
-    const-string v0, "\u5f00\u59cb\u76d1\u542c"
+    move-result-object v6
 
-    .line 431
-    invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    .line 319
+    .local v6, "trimmed":Ljava/lang/String;
+    invoke-virtual {v6}, Ljava/lang/String;->isEmpty()Z
 
-    move-result v0
+    move-result v8
 
-    if-nez v0, :cond_28
+    if-nez v8, :cond_3
 
-    const-string v0, "\u7ee7\u7eed\u5077\u542c"
+    .line 324
+    :try_start_e
+    const-string v8, "}{"
 
-    .line 432
-    invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    invoke-virtual {v6, v8}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
-    move-result v0
+    move-result v8
 
-    if-nez v0, :cond_28
+    if-eqz v8, :cond_22
 
-    const-string v0, "\u6062\u590d\u63d2\u5634"
+    .line 325
+    const-string v8, "}{"
 
-    .line 433
-    invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    invoke-virtual {v6, v8}, Ljava/lang/String;->lastIndexOf(Ljava/lang/String;)I
 
-    move-result v0
+    move-result v8
 
-    if-nez v0, :cond_28
+    add-int/lit8 v8, v8, 0x1
 
-    const-string v0, "\u6253\u5f00\u76d1\u542c"
+    invoke-virtual {v6, v8}, Ljava/lang/String;->substring(I)Ljava/lang/String;
 
-    .line 434
-    invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    move-result-object v6
 
-    move-result v0
+    .line 327
+    :cond_22
+    new-instance v4, Lorg/json/JSONObject;
 
-    if-eqz v0, :cond_2a
+    invoke-direct {v4, v6}, Lorg/json/JSONObject;-><init>(Ljava/lang/String;)V
 
-    :cond_28
-    const/4 v0, 0x1
-
-    .line 430
-    :goto_29
-    return v0
-
-    .line 434
-    :cond_2a
+    .line 328
+    .local v4, "root":Lorg/json/JSONObject;
     const/4 v0, 0x0
 
-    goto :goto_29
+    .line 329
+    .local v0, "arr":Lorg/json/JSONArray;
+    const-string v8, "local_asr"
+
+    invoke-virtual {v4, v8}, Lorg/json/JSONObject;->has(Ljava/lang/String;)Z
+
+    move-result v8
+
+    if-eqz v8, :cond_64
+
+    .line 330
+    const-string v8, "local_asr"
+
+    invoke-virtual {v4, v8}, Lorg/json/JSONObject;->getJSONArray(Ljava/lang/String;)Lorg/json/JSONArray;
+
+    move-result-object v0
+
+    .line 336
+    :cond_36
+    :goto_36
+    if-eqz v0, :cond_82
+
+    invoke-virtual {v0}, Lorg/json/JSONArray;->length()I
+
+    move-result v8
+
+    if-lez v8, :cond_82
+
+    .line 337
+    const/4 v8, 0x0
+
+    invoke-virtual {v0, v8}, Lorg/json/JSONArray;->getJSONObject(I)Lorg/json/JSONObject;
+
+    move-result-object v2
+
+    .line 338
+    .local v2, "first":Lorg/json/JSONObject;
+    const-string v8, "recognition_result"
+
+    const-string v9, ""
+
+    invoke-virtual {v2, v8, v9}, Lorg/json/JSONObject;->optString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v5
+
+    .line 339
+    .local v5, "t":Ljava/lang/String;
+    invoke-virtual {v5}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v8
+
+    if-eqz v8, :cond_59
+
+    .line 340
+    const-string v8, "text"
+
+    const-string v9, ""
+
+    invoke-virtual {v2, v8, v9}, Lorg/json/JSONObject;->optString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v5
+
+    .line 342
+    :cond_59
+    invoke-virtual {v5}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v8
+
+    if-nez v8, :cond_82
+
+    .line 343
+    invoke-virtual {v5}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v7
+
+    goto :goto_3
+
+    .line 331
+    .end local v2    # "first":Lorg/json/JSONObject;
+    .end local v5    # "t":Ljava/lang/String;
+    :cond_64
+    const-string v8, "net_asr"
+
+    invoke-virtual {v4, v8}, Lorg/json/JSONObject;->has(Ljava/lang/String;)Z
+
+    move-result v8
+
+    if-eqz v8, :cond_73
+
+    .line 332
+    const-string v8, "net_asr"
+
+    invoke-virtual {v4, v8}, Lorg/json/JSONObject;->getJSONArray(Ljava/lang/String;)Lorg/json/JSONArray;
+
+    move-result-object v0
+
+    goto :goto_36
+
+    .line 333
+    :cond_73
+    const-string v8, "net_nlu"
+
+    invoke-virtual {v4, v8}, Lorg/json/JSONObject;->has(Ljava/lang/String;)Z
+
+    move-result v8
+
+    if-eqz v8, :cond_36
+
+    .line 334
+    const-string v8, "net_nlu"
+
+    invoke-virtual {v4, v8}, Lorg/json/JSONObject;->getJSONArray(Ljava/lang/String;)Lorg/json/JSONArray;
+
+    move-result-object v0
+
+    goto :goto_36
+
+    .line 346
+    :cond_82
+    const-string v8, "asr_recongize"
+
+    const-string v9, ""
+
+    invoke-virtual {v4, v8, v9}, Lorg/json/JSONObject;->optString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v3
+
+    .line 347
+    .local v3, "plain":Ljava/lang/String;
+    invoke-virtual {v3}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v8
+
+    if-eqz v8, :cond_98
+
+    .line 348
+    const-string v8, "asr_recognize"
+
+    const-string v9, ""
+
+    invoke-virtual {v4, v8, v9}, Lorg/json/JSONObject;->optString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v3
+
+    .line 350
+    :cond_98
+    invoke-virtual {v3}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v8
+
+    if-eqz v8, :cond_a6
+
+    .line 351
+    const-string v8, "text"
+
+    const-string v9, ""
+
+    invoke-virtual {v4, v8, v9}, Lorg/json/JSONObject;->optString(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+
+    move-result-object v3
+
+    .line 353
+    :cond_a6
+    invoke-virtual {v3}, Ljava/lang/String;->trim()Ljava/lang/String;
+    :try_end_a9
+    .catch Ljava/lang/Exception; {:try_start_e .. :try_end_a9} :catch_ac
+
+    move-result-object v7
+
+    goto/16 :goto_3
+
+    .line 354
+    .end local v0    # "arr":Lorg/json/JSONArray;
+    .end local v3    # "plain":Ljava/lang/String;
+    .end local v4    # "root":Lorg/json/JSONObject;
+    :catch_ac
+    move-exception v1
+
+    .line 355
+    .local v1, "e":Ljava/lang/Exception;
+    const-string v8, "NLUDispatcher"
+
+    new-instance v9, Ljava/lang/StringBuilder;
+
+    invoke-direct {v9}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v10, "[EAVES] extractRecognitionText failed: "
+
+    invoke-virtual {v9, v10}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v9
+
+    invoke-virtual {v1}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
+
+    move-result-object v10
+
+    invoke-virtual {v9, v10}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v9
+
+    invoke-virtual {v9}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v9
+
+    invoke-static {v8, v9}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
+
+    goto/16 :goto_3
 .end method
 
 .method private isShutUpCommand(Ljava/lang/String;)Z
@@ -1018,7 +1279,7 @@
     .param p1, "text"    # Ljava/lang/String;
 
     .prologue
-    .line 419
+    .line 515
     const-string v0, "\u7ed9\u6211\u95ed\u5634"
 
     invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
@@ -1029,7 +1290,7 @@
 
     const-string v0, "\u95ed\u5634"
 
-    .line 420
+    .line 516
     invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
     move-result v0
@@ -1038,7 +1299,7 @@
 
     const-string v0, "\u522b\u542c\u4e86"
 
-    .line 421
+    .line 517
     invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
     move-result v0
@@ -1047,7 +1308,7 @@
 
     const-string v0, "\u522b\u76d1\u542c\u4e86"
 
-    .line 422
+    .line 518
     invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
     move-result v0
@@ -1056,7 +1317,7 @@
 
     const-string v0, "\u5b89\u9759\u4e00\u5c0f\u65f6"
 
-    .line 423
+    .line 519
     invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
     move-result v0
@@ -1066,11 +1327,11 @@
     :cond_28
     const/4 v0, 0x1
 
-    .line 419
+    .line 515
     :goto_29
     return v0
 
-    .line 423
+    .line 519
     :cond_2a
     const/4 v0, 0x0
 
@@ -1082,7 +1343,7 @@
     .param p0, "args"    # [Ljava/lang/String;
 
     .prologue
-    .line 443
+    .line 528
     new-instance v3, Lnluparser/MixtureProcessor$Builder;
 
     invoke-direct {v3}, Lnluparser/MixtureProcessor$Builder;-><init>()V
@@ -1091,11 +1352,11 @@
 
     move-result-object v2
 
-    .line 444
+    .line 529
     .local v2, "mixtureProcessor":Lnluparser/MixtureProcessor;
     const-string v1, "{\'net_nlu\':[{\'semantic\':{\'intent\':{\'tag\':\'\u76f8\u58f0\',\'category\':\'\u76f8\u58f0\u8bc4\u4e66\',\'keyword\':\'\u76f8\u58f0\'}},\'code\':\'SEARCH_CATEGORY\',\'data\':{\'result\':{\'total\':\'1\',\'playlist\':[{\'url_m4a_high\':\'http://aod.cos.tx.xmcdn.com/group31/M02/2B/C3/wKgJSVmT_JSz0FGhAI6Is9Fjw-g605.m4a\',\'episode\':691,\'urlm4a\':\'http://aod.cos.tx.xmcdn.com/group31/M02/2B/C6/wKgJSVmT_Jeim-uMADZpM86L_MY216.m4a\',\'play_count\':122077,\'title\':\'2014\u65b0\u5e74\u76f8\u58f0\u559c\u4e50\u4f1a  \u90ed\u5fb7\u7eb2 \u4e8e\u8c26\u300a\u5b66\u8bc4\u4e66\u300b\',\'url\':\'http://aod.cos.tx.xmcdn.com/group31/M02/2B/BE/wKgJSVmT_IWTn7j3AEZ_fjTItf0356.mp3\',\'tags\':\',\'cover\':\'http://imgopen.xmcdn.com/group31/M09/20/BD/wKgJX1mBiHCR9cbqAAApsFjA_e4605.jpg!op_type=3&columns=100&rows=100\',\'duration\':1154,\'update_time\':\'2017-08-16 16:04:57\',\'url_high\':\'http://aod.cos.tx.xmcdn.com/group31/M02/2B/BF/wKgJSVmT_IvTQy78AIz-buUQbS8364.mp3\',\'id\':47545988,\'cover_large\':\'http://imgopen.xmcdn.com/group31/M09/20/BD/wKgJX1mBiHCR9cbqAAApsFjA_e4605.jpg!op_type=3&columns=640&rows=640\'}]\'originIntent\':{\'nluSlotInfos\':[]},\'history\':\'cn.yunzhisheng.audio\',\'source\':\'nlu\',\'uniCarRet\':{\'result\':{},\'returnCode\':609,\'message\':\'aios-home.hivoice.cn\'},\'rc\':0,\'general\':{\'actionAble\':\'true\',\'quitDialog\':\'true\',\'text\':\'\u4e3a\u60a8\u64ad\u653e\u76f8\u58f0:\',\'type\':\'T\'},\'returnCode\':0,\'audioUrl\':\'http://asrv3.hivoice.cn/trafficRouter/r/OVAVOb\',\'service\':\'cn.yunzhisheng.audio\',\'nluProcessTime\':\'98\',\'text\':\'\u64ad\u653e\u76f8\u58f0\',\'responseId\':\'2a9be6f6b605411b83149795a3591b59\'}]}"
 
-    .line 445
+    .line 530
     .local v1, "hook_res":Ljava/lang/String;
     const/16 v3, 0x27
 
@@ -1105,18 +1366,46 @@
 
     move-result-object v1
 
-    .line 447
+    .line 532
     invoke-virtual {v2, v1}, Lnluparser/MixtureProcessor;->from(Ljava/lang/String;)Lnluparser/scheme/Mixture;
 
     move-result-object v0
 
-    .line 448
+    .line 533
     .local v0, "from2":Lnluparser/scheme/Mixture;, "Lnluparser/scheme/Mixture<Lnluparser/scheme/Intent;Lnluparser/scheme/Result;>;"
     sget-object v3, Ljava/lang/System;->out:Ljava/io/PrintStream;
 
     invoke-virtual {v3, v0}, Ljava/io/PrintStream;->println(Ljava/lang/Object;)V
 
-    .line 449
+    .line 534
+    return-void
+.end method
+
+.method private scheduleRecogStallWatchdog(Lcom/unisound/vui/engine/ANTHandlerContext;)V
+    .registers 6
+    .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
+
+    .prologue
+    .line 58
+    invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->cancelRecogStallWatchdog()V
+
+    .line 59
+    new-instance v0, Lcom/unisound/vui/handler/filter/NLUDispatcher$1;
+
+    invoke-direct {v0, p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher$1;-><init>(Lcom/unisound/vui/handler/filter/NLUDispatcher;Lcom/unisound/vui/engine/ANTHandlerContext;)V
+
+    iput-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->recogStallWatchdog:Ljava/lang/Runnable;
+
+    .line 72
+    iget-object v0, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->watchdogHandler:Landroid/os/Handler;
+
+    iget-object v1, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->recogStallWatchdog:Ljava/lang/Runnable;
+
+    const-wide/16 v2, 0x1f40
+
+    invoke-virtual {v0, v1, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+
+    .line 73
     return-void
 .end method
 
@@ -1132,10 +1421,10 @@
 
     const/4 v7, 0x0
 
-    .line 219
+    .line 252
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->d(Lcom/unisound/vui/engine/ANTHandlerContext;)V
 
-    .line 220
+    .line 253
     const-string v4, "NLUDispatcher"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -1158,12 +1447,12 @@
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 221
+    .line 254
     invoke-static {p2}, Lcom/unisound/vui/util/JsonTool;->parseToJSONObject(Ljava/lang/String;)Lorg/json/JSONObject;
 
     move-result-object v3
 
-    .line 222
+    .line 255
     .local v3, "parseToJSONObject":Lorg/json/JSONObject;
     const-string v4, "errorCode"
 
@@ -1171,7 +1460,7 @@
 
     move-result-object v1
 
-    .line 223
+    .line 256
     .local v1, "jsonValue":Ljava/lang/String;
     const-string v4, "errorMsg"
 
@@ -1179,7 +1468,7 @@
 
     move-result-object v2
 
-    .line 224
+    .line 257
     .local v2, "jsonValue2":Ljava/lang/String;
     invoke-direct {p0, v1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->b(Ljava/lang/String;)Z
 
@@ -1187,27 +1476,27 @@
 
     if-eqz v4, :cond_36
 
-    .line 225
+    .line 258
     iput-boolean v8, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->b:Z
 
-    .line 232
+    .line 265
     :goto_35
     return v7
 
-    .line 228
+    .line 261
     :cond_36
     iput-boolean v8, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
-    .line 229
+    .line 262
     invoke-direct {p0, v1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Ljava/lang/String;)Lnluparser/scheme/NLU;
 
     move-result-object v0
 
-    .line 230
+    .line 263
     .local v0, "c2":Lnluparser/scheme/NLU;
     invoke-virtual {v0, v2}, Lnluparser/scheme/NLU;->setText(Ljava/lang/String;)V
 
-    .line 231
+    .line 264
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
     goto :goto_35
@@ -1218,11 +1507,53 @@
     .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 238
+    .line 271
     invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a()V
 
-    .line 239
+    .line 272
+    invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->cancelRecogStallWatchdog()V
+
+    .line 273
     const/4 v0, 0x0
+
+    return v0
+.end method
+
+.method public onASREventEnd(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+    .registers 3
+    .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
+
+    .prologue
+    .line 306
+    invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->cancelRecogStallWatchdog()V
+
+    .line 307
+    invoke-super {p0, p1}, Lcom/unisound/vui/handler/ANTEventDispatcher;->onASREventEnd(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+
+    move-result v0
+
+    return v0
+.end method
+
+.method public onASREventRecognitionEnd(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+    .registers 4
+    .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
+
+    .prologue
+    .line 298
+    const-string v0, "NLUDispatcher"
+
+    const-string v1, "onASREventRecognitionEnd -> cancel recog-stall watchdog"
+
+    invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
+
+    .line 299
+    invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->cancelRecogStallWatchdog()V
+
+    .line 300
+    invoke-super {p0, p1}, Lcom/unisound/vui/handler/ANTEventDispatcher;->onASREventRecognitionEnd(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+
+    move-result v0
 
     return v0
 .end method
@@ -1232,23 +1563,49 @@
     .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 245
+    .line 279
     const-string v0, "NLUDispatcher"
 
     const-string v1, "onASREventRecordingStart"
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 246
+    .line 280
     invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a()V
 
-    .line 247
+    .line 281
+    invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->cancelRecogStallWatchdog()V
+
+    .line 282
     const/4 v0, 0x0
 
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lcom/unisound/vui/engine/ANTHandlerContext;Z)V
 
-    .line 248
+    .line 283
     invoke-super {p0, p1}, Lcom/unisound/vui/handler/ANTEventDispatcher;->onASREventRecordingStart(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+
+    move-result v0
+
+    return v0
+.end method
+
+.method public onASREventRecordingStop(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
+    .registers 4
+    .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
+
+    .prologue
+    .line 289
+    const-string v0, "NLUDispatcher"
+
+    const-string v1, "onASREventRecordingStop -> schedule recog-stall watchdog"
+
+    invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
+
+    .line 291
+    invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->scheduleRecogStallWatchdog(Lcom/unisound/vui/engine/ANTHandlerContext;)V
+
+    .line 292
+    invoke-super {p0, p1}, Lcom/unisound/vui/handler/ANTEventDispatcher;->onASREventRecordingStop(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
 
     move-result v0
 
@@ -1263,7 +1620,7 @@
     .prologue
     const/4 v2, 0x0
 
-    .line 254
+    .line 363
     const-string v3, "NLUDispatcher"
 
     new-instance v4, Ljava/lang/StringBuilder;
@@ -1286,31 +1643,31 @@
 
     invoke-static {v3, v4}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 255
+    .line 365
     iget-boolean v3, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
     if-eqz v3, :cond_26
 
-    .line 256
+    .line 366
     const-string v2, "NLUDispatcher"
 
     const-string v3, "result has handled, local nlu handle return"
 
     invoke-static {v2, v3}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 257
+    .line 367
     const/4 v2, 0x1
 
-    .line 268
+    .line 379
     :cond_25
     :goto_25
     return v2
 
-    .line 259
+    .line 370
     :cond_26
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->d(Lcom/unisound/vui/engine/ANTHandlerContext;)V
 
-    .line 260
+    .line 371
     iget-object v3, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c:Lnluparser/MixtureProcessor;
 
     invoke-virtual {v3, p2}, Lnluparser/MixtureProcessor;->from(Ljava/lang/String;)Lnluparser/scheme/Mixture;
@@ -1327,7 +1684,7 @@
 
     check-cast v1, Lnluparser/scheme/LocalASR;
 
-    .line 261
+    .line 372
     .local v1, "localASR":Lnluparser/scheme/LocalASR;
     iget-object v3, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->d:Lnluparser/NluProcessor;
 
@@ -1339,7 +1696,7 @@
 
     move-result-object v0
 
-    .line 262
+    .line 373
     .local v0, "from":Lnluparser/scheme/NLU;
     invoke-direct {p0, v1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lnluparser/scheme/LocalASR;Lnluparser/scheme/NLU;)Z
 
@@ -1347,14 +1704,14 @@
 
     if-nez v3, :cond_4e
 
-    .line 263
+    .line 374
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
 
     move-result v2
 
     goto :goto_25
 
-    .line 265
+    .line 376
     :cond_4e
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
 
@@ -1370,7 +1727,7 @@
 
     if-nez v3, :cond_25
 
-    .line 268
+    .line 379
     invoke-direct {p0, p1, p2, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lcom/unisound/vui/engine/ANTHandlerContext;Ljava/lang/String;Lnluparser/scheme/NLU;)Z
 
     move-result v2
@@ -1388,7 +1745,7 @@
 
     const/4 v5, 0x1
 
-    .line 275
+    .line 386
     const-string v6, "NLUDispatcher"
 
     new-instance v7, Ljava/lang/StringBuilder;
@@ -1411,12 +1768,12 @@
 
     invoke-static {v6, v7}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 276
+    .line 388
     iget-boolean v6, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
     if-eqz v6, :cond_27
 
-    .line 277
+    .line 389
     const-string v4, "NLUDispatcher"
 
     const-string v6, "result has handled, net nlu handle return"
@@ -1425,27 +1782,27 @@
 
     move v4, v5
 
-    .line 335
+    .line 448
     :cond_26
     :goto_26
     return v4
 
-    .line 280
+    .line 393
     :cond_27
     invoke-direct {p0, p1}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->d(Lcom/unisound/vui/engine/ANTHandlerContext;)V
 
-    .line 281
+    .line 394
     iget-object v6, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c:Lnluparser/MixtureProcessor;
 
     invoke-virtual {v6, p2}, Lnluparser/MixtureProcessor;->from(Ljava/lang/String;)Lnluparser/scheme/Mixture;
 
     move-result-object v2
 
-    .line 282
+    .line 395
     .local v2, "from":Lnluparser/scheme/Mixture;, "Lnluparser/scheme/Mixture<Lnluparser/scheme/Intent;Lnluparser/scheme/Result;>;"
     if-nez v2, :cond_92
 
-    .line 284
+    .line 397
     :try_start_32
     invoke-static {p2}, Lcom/unisound/vui/util/JsonTool;->parseToJSONObject(Ljava/lang/String;)Lorg/json/JSONObject;
 
@@ -1475,7 +1832,7 @@
     :try_end_4b
     .catch Lorg/json/JSONException; {:try_start_32 .. :try_end_4b} :catch_73
 
-    .line 289
+    .line 402
     .local v3, "str":Ljava/lang/String;
     :goto_4b
     const-string v4, "NLUDispatcher"
@@ -1500,35 +1857,35 @@
 
     invoke-static {v4, v6}, Lcom/unisound/vui/util/LogMgr;->w(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 290
+    .line 403
     iput-boolean v5, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->f423a:Z
 
-    .line 291
+    .line 404
     const-string v4, "unsupportedDomain"
 
     invoke-direct {p0, v4}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c(Ljava/lang/String;)Lnluparser/scheme/NLU;
 
     move-result-object v0
 
-    .line 292
+    .line 405
     .local v0, "c2":Lnluparser/scheme/NLU;
     invoke-virtual {v0, v3}, Lnluparser/scheme/NLU;->setText(Ljava/lang/String;)V
 
-    .line 293
+    .line 406
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->b(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/NLU;)V
 
     move v4, v5
 
-    .line 294
+    .line 407
     goto :goto_26
 
-    .line 285
+    .line 398
     .end local v0    # "c2":Lnluparser/scheme/NLU;
     .end local v3    # "str":Ljava/lang/String;
     :catch_73
     move-exception v1
 
-    .line 286
+    .line 399
     .local v1, "e2":Lorg/json/JSONException;
     const-string v4, "NLUDispatcher"
 
@@ -1556,13 +1913,13 @@
 
     invoke-static {v4, v6}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 287
+    .line 400
     move-object v3, p2
 
     .restart local v3    # "str":Ljava/lang/String;
     goto :goto_4b
 
-    .line 295
+    .line 408
     .end local v1    # "e2":Lorg/json/JSONException;
     .end local v3    # "str":Ljava/lang/String;
     :cond_92
@@ -1572,7 +1929,7 @@
 
     if-eqz v5, :cond_26
 
-    .line 296
+    .line 409
     invoke-direct {p0, p1, p2, v2}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lcom/unisound/vui/engine/ANTHandlerContext;Ljava/lang/String;Lnluparser/scheme/Mixture;)Z
 
     move-result v4
@@ -1590,7 +1947,7 @@
 
     const/4 v3, 0x1
 
-    .line 342
+    .line 455
     const-string v5, "NLUDispatcher"
 
     new-instance v6, Ljava/lang/StringBuilder;
@@ -1613,7 +1970,10 @@
 
     invoke-static {v5, v6}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 343
+    .line 457
+    invoke-direct {p0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->cancelRecogStallWatchdog()V
+
+    .line 458
     iget-object v5, p0, Lcom/unisound/vui/handler/filter/NLUDispatcher;->c:Lnluparser/MixtureProcessor;
 
     invoke-virtual {v5, p2}, Lnluparser/MixtureProcessor;->from(Ljava/lang/String;)Lnluparser/scheme/Mixture;
@@ -1630,7 +1990,7 @@
 
     check-cast v0, Lnluparser/scheme/LocalASR;
 
-    .line 344
+    .line 459
     .local v0, "localASR":Lnluparser/scheme/LocalASR;
     invoke-virtual {v0}, Lnluparser/scheme/LocalASR;->getRecognitionResult()Ljava/lang/String;
 
@@ -1640,7 +2000,7 @@
 
     move-result-object v2
 
-    .line 346
+    .line 461
     .local v2, "trim":Ljava/lang/String;
     const-string v5, "NLUDispatcher"
 
@@ -1670,10 +2030,7 @@
 
     invoke-static {v5, v6}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 349
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->notifyWakeupDetected()V
-
-    .line 351
+    .line 463
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
 
     move-result-object v5
@@ -1684,7 +2041,7 @@
 
     if-eqz v5, :cond_76
 
-    .line 352
+    .line 464
     const-string v4, "NLUDispatcher"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -1707,11 +2064,11 @@
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 411
+    .line 507
     :goto_75
     return v3
 
-    .line 354
+    .line 466
     :cond_76
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
 
@@ -1733,7 +2090,7 @@
 
     if-eqz v5, :cond_b5
 
-    .line 355
+    .line 467
     const-string v3, "NLUDispatcher"
 
     new-instance v4, Ljava/lang/StringBuilder;
@@ -1770,14 +2127,14 @@
 
     invoke-static {v3, v4}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 356
+    .line 468
     invoke-direct {p0, p1, v0}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->a(Lcom/unisound/vui/engine/ANTHandlerContext;Lnluparser/scheme/LocalASR;)Z
 
     move-result v3
 
     goto :goto_75
 
-    .line 357
+    .line 469
     :cond_b5
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
 
@@ -1799,7 +2156,7 @@
 
     if-nez v5, :cond_e6
 
-    .line 358
+    .line 470
     :cond_c9
     const-string v4, "NLUDispatcher"
 
@@ -1829,7 +2186,7 @@
 
     goto :goto_75
 
-    .line 361
+    .line 473
     :cond_e6
     const-string v5, "NLUDispatcher"
 
@@ -1867,14 +2224,14 @@
 
     invoke-static {v5, v6}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 364
+    .line 476
     invoke-direct {p0, v2}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->isShutUpCommand(Ljava/lang/String;)Z
 
     move-result v5
 
     if-eqz v5, :cond_137
 
-    .line 365
+    .line 477
     const-string v4, "NLUDispatcher"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -1897,65 +2254,21 @@
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 368
+    .line 480
     invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->enableShutUpMode()V
 
-    .line 371
+    .line 483
     const-string v4, "\u597d\u7684,\u6211\u95ed\u5634\u4e00\u5c0f\u65f6"
 
     invoke-interface {p1, v4}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
 
-    .line 374
+    .line 486
     invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->recordInteraction()V
 
     goto/16 :goto_75
 
-    .line 380
+    .line 492
     :cond_137
-    invoke-direct {p0, v2}, Lcom/unisound/vui/handler/filter/NLUDispatcher;->isEnableEavesdropCommand(Ljava/lang/String;)Z
-
-    move-result v5
-
-    if-eqz v5, :cond_162
-
-    .line 381
-    const-string v4, "NLUDispatcher"
-
-    new-instance v5, Ljava/lang/StringBuilder;
-
-    invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v6, "Enable eavesdrop command detected: "
-
-    invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v5
-
-    invoke-virtual {v5, v2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v5
-
-    invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v5
-
-    invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
-
-    .line 384
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->disableShutUpMode()V
-
-    .line 387
-    const-string v4, "\u63d2\u5634\u529f\u80fd\u5df2\u6253\u5f00,\u6211\u4f1a\u7ee7\u7eed\u5077\u542c\u7684~"
-
-    invoke-interface {p1, v4}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
-
-    .line 390
-    invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->recordInteraction()V
-
-    goto/16 :goto_75
-
-    .line 396
-    :cond_162
     const-string v3, "NLUDispatcher"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -1984,16 +2297,16 @@
 
     invoke-static {v3, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 397
+    .line 493
     invoke-static {v2}, Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;->findByWakeupWord(Ljava/lang/String;)Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
 
     move-result-object v1
 
-    .line 399
+    .line 495
     .local v1, "personaConfig":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
-    if-eqz v1, :cond_1e1
+    if-eqz v1, :cond_1b6
 
-    .line 400
+    .line 496
     const-string v3, "NLUDispatcher"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -2040,24 +2353,24 @@
 
     invoke-static {v3, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 402
+    .line 498
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->pipeline()Lcom/unisound/vui/engine/ANTPipeline;
 
     move-result-object v3
 
     new-instance v5, Lcom/phicomm/speaker/device/custom/event/PersonaActivationEvent;
 
-    .line 403
+    .line 499
     invoke-virtual {v1}, Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;->getPersonaId()Ljava/lang/String;
 
     move-result-object v6
 
     invoke-direct {v5, v2, v6}, Lcom/phicomm/speaker/device/custom/event/PersonaActivationEvent;-><init>(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 402
+    .line 498
     invoke-interface {v3, v5}, Lcom/unisound/vui/engine/ANTPipeline;->fireUserEventTriggered(Ljava/lang/Object;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 405
+    .line 501
     const-string v3, "NLUDispatcher"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -2080,14 +2393,14 @@
 
     invoke-static {v3, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    :goto_1de
+    :goto_1b3
     move v3, v4
 
-    .line 411
+    .line 507
     goto/16 :goto_75
 
-    .line 407
-    :cond_1e1
+    .line 503
+    :cond_1b6
     const-string v3, "NLUDispatcher"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -2116,14 +2429,14 @@
 
     invoke-static {v3, v5}, Lcom/unisound/vui/util/LogMgr;->w(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 408
+    .line 504
     const-string v3, "NLUDispatcher"
 
-    const-string v5, "[DEBUG] Available wakeup words: \u5c0f\u8baf\u5c0f\u8baf, \u4ea4\u63a5\u624b\u7eed, \u6363\u86cb\u9b3c, \u82f1\u8bed\u966a\u7ec3\u5e08, \u6210\u8bed\u63a5\u9f99"
+    const-string v5, "[DEBUG] Available wakeup words: \u4f60\u597d\u5c0f\u8fea, \u5c0f\u8baf\u5c0f\u8baf, \u4ea4\u63a5\u624b\u7eed, \u6363\u86cb\u9b3c, \u82f1\u8bed\u966a\u7ec3\u5e08, \u6210\u8bed\u63a5\u9f99"
 
     invoke-static {v3, v5}, Lcom/unisound/vui/util/LogMgr;->w(Ljava/lang/String;Ljava/lang/String;)V
 
-    goto :goto_1de
+    goto :goto_1b3
 .end method
 
 .method public userEventTriggered(Ljava/lang/Object;Lcom/unisound/vui/engine/ANTHandlerContext;)V
@@ -2137,9 +2450,9 @@
     .end annotation
 
     .prologue
-    .line 439
+    .line 524
     invoke-interface {p2, p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->fireUserEventTriggered(Ljava/lang/Object;)Lcom/unisound/vui/engine/ANTHandlerContext;
 
-    .line 440
+    .line 525
     return-void
 .end method

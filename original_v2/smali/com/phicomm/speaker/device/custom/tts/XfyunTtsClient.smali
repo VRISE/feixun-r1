@@ -1515,7 +1515,7 @@
 .end method
 
 .method private playAudio(Landroid/content/Context;Ljava/lang/String;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
-    .registers 11
+    .registers 16
     .param p1, "context"    # Landroid/content/Context;
     .param p2, "audioPath"    # Ljava/lang/String;
     .param p3, "callback"    # Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;
@@ -1523,163 +1523,233 @@
     .prologue
     .line 502
     :try_start_0
-    new-instance v0, Ljava/io/File;
+    new-instance v6, Ljava/io/File;
 
-    invoke-direct {v0, p2}, Ljava/io/File;-><init>(Ljava/lang/String;)V
+    invoke-direct {v6, p2}, Ljava/io/File;-><init>(Ljava/lang/String;)V
 
     .line 503
-    .local v0, "audioFile":Ljava/io/File;
-    invoke-virtual {v0}, Ljava/io/File;->exists()Z
+    .local v6, "audioFile":Ljava/io/File;
+    invoke-virtual {v6}, Ljava/io/File;->exists()Z
 
-    move-result v4
+    move-result v0
 
-    if-nez v4, :cond_22
+    if-nez v0, :cond_22
 
     .line 504
-    new-instance v4, Ljava/lang/StringBuilder;
+    new-instance v0, Ljava/lang/StringBuilder;
 
-    invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
+    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
 
-    const-string v5, "\u97f3\u9891\u6587\u4ef6\u4e0d\u5b58\u5728: "
+    const-string v1, "\u97f3\u9891\u6587\u4ef6\u4e0d\u5b58\u5728: "
 
-    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    move-result-object v4
+    move-result-object v0
 
-    invoke-virtual {v4, p2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v0, p2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    move-result-object v4
+    move-result-object v0
 
-    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
-    move-result-object v4
+    move-result-object v0
 
-    invoke-interface {p3, v4}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;->onError(Ljava/lang/String;)V
+    invoke-interface {p3, v0}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;->onError(Ljava/lang/String;)V
 
-    .line 538
-    .end local v0    # "audioFile":Ljava/io/File;
+    .line 563
+    .end local v6    # "audioFile":Ljava/io/File;
     :goto_21
     return-void
 
     .line 508
-    .restart local v0    # "audioFile":Ljava/io/File;
+    .restart local v6    # "audioFile":Ljava/io/File;
     :cond_22
-    new-instance v3, Landroid/media/MediaPlayer;
+    new-instance v8, Landroid/media/MediaPlayer;
 
-    invoke-direct {v3}, Landroid/media/MediaPlayer;-><init>()V
+    invoke-direct {v8}, Landroid/media/MediaPlayer;-><init>()V
 
     .line 509
-    .local v3, "player":Landroid/media/MediaPlayer;
-    invoke-virtual {v3, p2}, Landroid/media/MediaPlayer;->setDataSource(Ljava/lang/String;)V
+    .local v8, "player":Landroid/media/MediaPlayer;
+    invoke-virtual {v8, p2}, Landroid/media/MediaPlayer;->setDataSource(Ljava/lang/String;)V
 
     .line 510
-    invoke-virtual {v3}, Landroid/media/MediaPlayer;->prepare()V
+    invoke-virtual {v8}, Landroid/media/MediaPlayer;->prepare()V
 
     .line 512
-    move-object v2, v3
+    move-object v4, v8
 
-    .line 513
-    .local v2, "finalPlayer":Landroid/media/MediaPlayer;
-    new-instance v4, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;
+    .line 514
+    .local v4, "finalPlayer":Landroid/media/MediaPlayer;
+    const/4 v0, 0x1
 
-    invoke-direct {v4, p0, p3}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;-><init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
+    new-array v2, v0, [Z
 
-    invoke-virtual {v3, v4}, Landroid/media/MediaPlayer;->setOnCompletionListener(Landroid/media/MediaPlayer$OnCompletionListener;)V
+    const/4 v0, 0x0
 
-    .line 522
-    new-instance v4, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$4;
+    const/4 v1, 0x0
 
-    invoke-direct {v4, p0, p3}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$4;-><init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
+    aput-boolean v1, v2, v0
 
-    invoke-virtual {v3, v4}, Landroid/media/MediaPlayer;->setOnErrorListener(Landroid/media/MediaPlayer$OnErrorListener;)V
+    .line 519
+    .local v2, "done":[Z
+    invoke-virtual {v8}, Landroid/media/MediaPlayer;->getDuration()I
+
+    move-result v3
+
+    .line 520
+    .local v3, "durationMs":I
+    new-instance v9, Landroid/os/Handler;
+
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+
+    move-result-object v0
+
+    invoke-direct {v9, v0}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+
+    .line 521
+    .local v9, "watchdog":Landroid/os/Handler;
+    new-instance v0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;
+
+    move-object v1, p0
+
+    move-object v5, p3
+
+    invoke-direct/range {v0 .. v5}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$3;-><init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;[ZILandroid/media/MediaPlayer;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
+
+    const/16 v1, 0x1f40
+
+    add-int/lit16 v5, v3, 0xbb8
+
+    .line 530
+    invoke-static {v1, v5}, Ljava/lang/Math;->max(II)I
+
+    move-result v1
+
+    int-to-long v10, v1
+
+    .line 521
+    invoke-virtual {v9, v0, v10, v11}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
     .line 532
-    invoke-virtual {v3}, Landroid/media/MediaPlayer;->start()V
+    new-instance v0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$4;
 
-    .line 533
-    const-string v4, "XfyunTtsClient"
+    invoke-direct {v0, p0, v9, v2, p3}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$4;-><init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;Landroid/os/Handler;[ZLcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
 
-    new-instance v5, Ljava/lang/StringBuilder;
+    invoke-virtual {v8, v0}, Landroid/media/MediaPlayer;->setOnCompletionListener(Landroid/media/MediaPlayer$OnCompletionListener;)V
 
-    invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
+    .line 544
+    new-instance v0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$5;
 
-    const-string v6, "\u5f00\u59cb\u64ad\u653e\u97f3\u9891: "
+    invoke-direct {v0, p0, v9, v2, p3}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$5;-><init>(Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;Landroid/os/Handler;[ZLcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;)V
 
-    invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v8, v0}, Landroid/media/MediaPlayer;->setOnErrorListener(Landroid/media/MediaPlayer$OnErrorListener;)V
 
-    move-result-object v5
+    .line 557
+    invoke-virtual {v8}, Landroid/media/MediaPlayer;->start()V
 
-    invoke-virtual {v5, p2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    .line 558
+    const-string v0, "XfyunTtsClient"
 
-    move-result-object v5
+    new-instance v1, Ljava/lang/StringBuilder;
 
-    invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 
-    move-result-object v5
+    const-string v5, "\u5f00\u59cb\u64ad\u653e\u97f3\u9891: "
 
-    invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_59
-    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_59} :catch_5a
+    invoke-virtual {v1, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    goto :goto_21
+    move-result-object v1
 
-    .line 534
-    .end local v0    # "audioFile":Ljava/io/File;
-    .end local v2    # "finalPlayer":Landroid/media/MediaPlayer;
-    .end local v3    # "player":Landroid/media/MediaPlayer;
-    :catch_5a
-    move-exception v1
+    invoke-virtual {v1, p2}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 535
-    .local v1, "e":Ljava/lang/Exception;
-    const-string v4, "XfyunTtsClient"
+    move-result-object v1
 
-    new-instance v5, Ljava/lang/StringBuilder;
+    const-string v5, " (duration="
 
-    invoke-direct {v5}, Ljava/lang/StringBuilder;-><init>()V
+    invoke-virtual {v1, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    const-string v6, "\u64ad\u653e\u97f3\u9891\u5931\u8d25: "
+    move-result-object v1
 
-    invoke-virtual {v5, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v1, v3}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
 
-    move-result-object v5
+    move-result-object v1
 
-    invoke-virtual {v5, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+    const-string v5, "ms)"
 
-    move-result-object v5
+    invoke-virtual {v1, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    invoke-virtual {v5}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    move-result-object v1
 
-    move-result-object v5
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
-    invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
+    move-result-object v1
 
-    .line 536
-    new-instance v4, Ljava/lang/StringBuilder;
-
-    invoke-direct {v4}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v5, "\u64ad\u653e\u5931\u8d25: "
-
-    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v4
-
-    invoke-virtual {v1}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
-
-    move-result-object v5
-
-    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v4
-
-    invoke-virtual {v4}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v4
-
-    invoke-interface {p3, v4}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;->onError(Ljava/lang/String;)V
+    invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_90
+    .catch Ljava/lang/Exception; {:try_start_0 .. :try_end_90} :catch_91
 
     goto :goto_21
+
+    .line 559
+    .end local v2    # "done":[Z
+    .end local v3    # "durationMs":I
+    .end local v4    # "finalPlayer":Landroid/media/MediaPlayer;
+    .end local v6    # "audioFile":Ljava/io/File;
+    .end local v8    # "player":Landroid/media/MediaPlayer;
+    .end local v9    # "watchdog":Landroid/os/Handler;
+    :catch_91
+    move-exception v7
+
+    .line 560
+    .local v7, "e":Ljava/lang/Exception;
+    const-string v0, "XfyunTtsClient"
+
+    new-instance v1, Ljava/lang/StringBuilder;
+
+    invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v5, "\u64ad\u653e\u97f3\u9891\u5931\u8d25: "
+
+    invoke-virtual {v1, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v1
+
+    invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
+
+    .line 561
+    new-instance v0, Ljava/lang/StringBuilder;
+
+    invoke-direct {v0}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v1, "\u64ad\u653e\u5931\u8d25: "
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v0
+
+    invoke-virtual {v7}, Ljava/lang/Exception;->getMessage()Ljava/lang/String;
+
+    move-result-object v1
+
+    invoke-virtual {v0, v1}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-interface {p3, v0}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;->onError(Ljava/lang/String;)V
+
+    goto/16 :goto_21
 .end method
 
 .method private sendRequest(Lokhttp3/WebSocket;Ljava/lang/String;)V

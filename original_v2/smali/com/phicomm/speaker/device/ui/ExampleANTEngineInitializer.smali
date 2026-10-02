@@ -8,7 +8,7 @@
     .registers 1
 
     .prologue
-    .line 49
+    .line 48
     invoke-direct {p0}, Lcom/unisound/vui/engine/ANTEngineInitializer;-><init>()V
 
     return-void
@@ -25,18 +25,18 @@
 
     const/4 v10, 0x0
 
-    .line 53
+    .line 52
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTEngine;->androidContext()Landroid/content/Context;
 
     move-result-object v0
 
-    .line 54
+    .line 53
     .local v0, "context":Landroid/content/Context;
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTEngine;->pipeline()Lcom/unisound/vui/engine/ANTPipeline;
 
     move-result-object v5
 
-    .line 55
+    .line 54
     .local v5, "pipeline":Lcom/unisound/vui/engine/ANTPipeline;
     new-instance v7, Lnluparser/MixtureProcessor$Builder;
 
@@ -46,13 +46,13 @@
 
     move-result-object v3
 
-    .line 56
+    .line 55
     .local v3, "mixtureProcessor":Lnluparser/MixtureProcessor;
     invoke-static {}, Lcom/unisound/ant/device/DeviceCenterHandler;->getDeviceCenterMgr()Lcom/unisound/ant/device/DeviceCenterHandler;
 
     move-result-object v1
 
-    .line 57
+    .line 56
     .local v1, "deviceCenterMgr":Lcom/unisound/ant/device/DeviceCenterHandler;
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
@@ -64,7 +64,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 58
+    .line 57
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommDataStatisticHandler;
@@ -75,7 +75,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 59
+    .line 58
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommReminderHandler;
@@ -86,7 +86,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 60
+    .line 59
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommAlarmHandler;
@@ -97,12 +97,12 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 61
+    .line 60
     new-instance v6, Lcom/unisound/vui/handler/session/memo/DefaultMemoRingingHandler;
 
     invoke-direct {v6}, Lcom/unisound/vui/handler/session/memo/DefaultMemoRingingHandler;-><init>()V
 
-    .line 62
+    .line 61
     .local v6, "ringingHandler":Lcom/unisound/vui/handler/session/memo/DefaultMemoRingingHandler;
     new-instance v7, Lcom/phicomm/speaker/device/custom/ringing/RingingEventProcessor;
 
@@ -110,19 +110,19 @@
 
     invoke-virtual {v6, v7}, Lcom/unisound/vui/handler/session/memo/DefaultMemoRingingHandler;->setOnRingingListener(Lcom/unisound/vui/handler/session/memo/DefaultMemoRingingHandler$OnRingingListener;)V
 
-    .line 63
+    .line 62
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     aput-object v6, v7, v10
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 64
+    .line 63
     new-instance v2, Lcom/phicomm/speaker/device/custom/lights/PhicommLightListener;
 
     invoke-direct {v2, v0}, Lcom/phicomm/speaker/device/custom/lights/PhicommLightListener;-><init>(Landroid/content/Context;)V
 
-    .line 65
+    .line 64
     .local v2, "lightListener":Lcom/phicomm/speaker/device/custom/lights/PhicommLightListener;
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
@@ -134,7 +134,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 66
+    .line 65
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/light/DefaultLightsHandler;
@@ -145,7 +145,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 67
+    .line 66
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommTTSHandler;
@@ -156,7 +156,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 68
+    .line 67
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/SimpleSessionManager;
@@ -167,7 +167,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 69
+    .line 68
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     invoke-virtual {v1, p1, v3}, Lcom/unisound/ant/device/DeviceCenterHandler;->associateEngine(Lcom/unisound/vui/engine/ANTEngine;Lnluparser/MixtureProcessor;)Lcom/unisound/ant/device/DeviceCenterHandler;
@@ -178,7 +178,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 70
+    .line 69
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommWakeupWordChangedHandler;
@@ -189,7 +189,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 71
+    .line 70
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommBindStatusHandler;
@@ -200,7 +200,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 72
+    .line 71
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/launch/DefaultANTLaunchHandler;
@@ -211,7 +211,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 74
+    .line 73
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommWeatherHandler;
@@ -222,7 +222,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 75
+    .line 74
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/weather/DefaultWeatherHandler;
@@ -233,7 +233,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 76
+    .line 75
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/stock/DefaultStockHandler;
@@ -244,7 +244,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 79
+    .line 78
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommMusicSearchHandler;
@@ -255,7 +255,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 80
+    .line 79
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommExternalMusicHandler;
@@ -270,7 +270,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 81
+    .line 80
     new-instance v4, Lcom/phicomm/speaker/device/custom/music/PhicommPlayer;
 
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTEngine;->config()Lcom/unisound/vui/engine/ANTEngineConfig;
@@ -287,7 +287,7 @@
 
     invoke-direct {v4, v0, v7, p1}, Lcom/phicomm/speaker/device/custom/music/PhicommPlayer;-><init>(Landroid/content/Context;Ljava/lang/String;Lcom/unisound/vui/engine/ANTEngine;)V
 
-    .line 82
+    .line 81
     .local v4, "phicommPlayer":Lcom/phicomm/speaker/device/custom/music/PhicommPlayer;
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
@@ -299,7 +299,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 83
+    .line 82
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommMusicScheduleHandler;
@@ -310,7 +310,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 84
+    .line 83
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/memo/DefaultNoteHandler;
@@ -321,7 +321,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 85
+    .line 84
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/setting/DefaultSettingHandler;
@@ -336,7 +336,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 90
+    .line 89
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PersonaRouterHandler;
@@ -347,7 +347,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 91
+    .line 90
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
@@ -358,18 +358,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 93
-    new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
-
-    new-instance v8, Lcom/phicomm/speaker/device/custom/handler/EavesdropperHandler;
-
-    invoke-direct {v8}, Lcom/phicomm/speaker/device/custom/handler/EavesdropperHandler;-><init>()V
-
-    aput-object v8, v7, v10
-
-    invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
-
-    .line 94
+    .line 91
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/chat/DefaultChatHandler;
@@ -380,7 +369,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 95
+    .line 92
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/DefaultGuideHandler;
@@ -391,7 +380,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 96
+    .line 93
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/ant/platform/illeagechat/DefaultIlleageChatHandler;
@@ -402,7 +391,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 97
+    .line 94
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/ant/platform/smarthome/DefaultSmartHomeHandler;
@@ -413,7 +402,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 98
+    .line 95
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/unisound/vui/handler/session/DefaultUnSupportHandler;
@@ -424,7 +413,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 99
+    .line 96
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
@@ -435,7 +424,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 100
+    .line 97
     new-array v7, v11, [Lcom/unisound/vui/engine/ANTHandler;
 
     new-instance v8, Lcom/phicomm/speaker/device/custom/handler/PhicommStatusHandler;
@@ -446,7 +435,7 @@
 
     invoke-interface {v5, v7}, Lcom/unisound/vui/engine/ANTPipeline;->addLast([Lcom/unisound/vui/engine/ANTHandler;)Lcom/unisound/vui/engine/ANTPipeline;
 
-    .line 101
+    .line 98
     new-instance v7, Lcom/phicomm/speaker/device/custom/api/CustomApiManager;
 
     invoke-direct {v7, v0, p1, v4}, Lcom/phicomm/speaker/device/custom/api/CustomApiManager;-><init>(Landroid/content/Context;Lcom/unisound/vui/engine/ANTEngine;Lcom/phicomm/speaker/device/custom/music/PhicommPlayer;)V
@@ -457,6 +446,6 @@
 
     invoke-virtual {v7, v10, v8}, Lcom/phicomm/speaker/device/custom/api/CustomApiManager;->addListener(ILcom/phicomm/speaker/device/custom/api/CustomApiListener;)V
 
-    .line 102
+    .line 99
     return-void
 .end method

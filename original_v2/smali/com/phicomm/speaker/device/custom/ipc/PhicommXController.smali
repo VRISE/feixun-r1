@@ -421,14 +421,18 @@
 
     .line 56
     .local v7, "data":Landroid/os/Parcelable;
+    sget-object v0, Lcom/phicomm/speaker/device/custom/ipc/PhicommXController$1;->$SwitchMap$com$phicomm$speaker$device$custom$ipc$PhicommXController$DeviceStatus:[I
+
     invoke-virtual {p1}, Lcom/phicomm/speaker/device/custom/ipc/PhicommXController$DeviceStatus;->ordinal()I
 
-    move-result v0
+    move-result v2
 
-    packed-switch v0, :pswitch_data_54
+    aget v0, v0, v2
+
+    packed-switch v0, :pswitch_data_58
 
     .line 73
-    :goto_b
+    :goto_f
     const-string v0, "PhicommXController"
 
     new-instance v2, Ljava/lang/StringBuilder;
@@ -474,7 +478,7 @@
     return-void
 
     .line 58
-    :pswitch_36
+    :pswitch_3a
     const/4 v0, 0x0
 
     invoke-static {v0}, Landroid/os/ParcelableUtil;->obtain(I)Landroid/os/ParcelableUtil;
@@ -482,19 +486,19 @@
     move-result-object v7
 
     .line 59
-    goto :goto_b
+    goto :goto_f
 
     .line 61
-    :pswitch_3c
+    :pswitch_40
     invoke-static {v1}, Landroid/os/ParcelableUtil;->obtain(I)Landroid/os/ParcelableUtil;
 
     move-result-object v7
 
     .line 62
-    goto :goto_b
+    goto :goto_f
 
     .line 64
-    :pswitch_41
+    :pswitch_45
     const/4 v0, 0x2
 
     invoke-static {v0}, Landroid/os/ParcelableUtil;->obtain(I)Landroid/os/ParcelableUtil;
@@ -502,10 +506,10 @@
     move-result-object v7
 
     .line 65
-    goto :goto_b
+    goto :goto_f
 
     .line 67
-    :pswitch_47
+    :pswitch_4b
     const/4 v0, 0x3
 
     invoke-static {v0}, Landroid/os/ParcelableUtil;->obtain(I)Landroid/os/ParcelableUtil;
@@ -513,28 +517,28 @@
     move-result-object v7
 
     .line 68
-    goto :goto_b
+    goto :goto_f
 
     .line 70
-    :pswitch_4d
+    :pswitch_51
     const/4 v0, 0x5
 
     invoke-static {v0}, Landroid/os/ParcelableUtil;->obtain(I)Landroid/os/ParcelableUtil;
 
     move-result-object v7
 
-    goto :goto_b
+    goto :goto_f
 
     .line 56
     nop
 
-    :pswitch_data_54
-    .packed-switch 0x0
-        :pswitch_36
-        :pswitch_3c
-        :pswitch_41
-        :pswitch_47
-        :pswitch_4d
+    :pswitch_data_58
+    .packed-switch 0x1
+        :pswitch_3a
+        :pswitch_40
+        :pswitch_45
+        :pswitch_4b
+        :pswitch_51
     .end packed-switch
 .end method
 

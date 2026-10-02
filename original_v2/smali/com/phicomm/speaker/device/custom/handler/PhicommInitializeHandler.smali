@@ -13,6 +13,8 @@
 
 .field private static final FX_SYSTEM_PRIVATE:Ljava/lang/String; = "FXSystemPrivate"
 
+.field private static final MAIN_WAKEUP_WORD:Ljava/lang/String; = "\u4f60\u597d\u5c0f\u8fea"
+
 .field private static final TAG:Ljava/lang/String;
 
 
@@ -24,8 +26,6 @@
 .field private mContext:Landroid/content/Context;
 
 .field private mDeviceStatusProcessor:Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;
-
-.field private mEavesdropperEngine:Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
 
 .field private mKeyEventProcessor:Lcom/phicomm/speaker/device/custom/keyevent/PhicommKeyEventProcessor;
 
@@ -45,7 +45,7 @@
     .registers 1
 
     .prologue
-    .line 42
+    .line 44
     const-class v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
 
     invoke-virtual {v0}, Ljava/lang/Class;->getSimpleName()Ljava/lang/String;
@@ -64,12 +64,12 @@
     .line 38
     invoke-direct {p0}, Lcom/unisound/vui/handler/ANTEventDispatcher;-><init>()V
 
-    .line 43
+    .line 45
     const/4 v0, 0x0
 
     iput-boolean v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->isFristBoot:Z
 
-    .line 50
+    .line 52
     const/4 v0, 0x0
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSysPrivateManager:Landroid/os/SysPrivateManager;
@@ -111,11 +111,156 @@
     return-object v0
 .end method
 
+.method static synthetic access$300(Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;)V
+    .registers 1
+    .param p0, "x0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;
+
+    .prologue
+    .line 38
+    invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->forceNormalModeAtBoot()V
+
+    return-void
+.end method
+
+.method private forceNormalModeAtBoot()V
+    .registers 6
+
+    .prologue
+    .line 206
+    :try_start_0
+    invoke-static {}, Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;->getInstance()Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;
+
+    move-result-object v2
+
+    invoke-virtual {v2}, Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;->getDeviceStatus()I
+
+    move-result v0
+
+    .line 207
+    .local v0, "status":I
+    sget-object v2, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
+
+    new-instance v3, Ljava/lang/StringBuilder;
+
+    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v4, "[BOOT] persisted device status="
+
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v3
+
+    invoke-virtual {v3, v0}, Ljava/lang/StringBuilder;->append(I)Ljava/lang/StringBuilder;
+
+    move-result-object v3
+
+    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v3
+
+    invoke-static {v2, v3}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 208
+    const/4 v2, 0x5
+
+    if-eq v0, v2, :cond_2b
+
+    .line 209
+    sget-object v2, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
+
+    const-string v3, "[BOOT] normal mode, nothing to do"
+
+    invoke-static {v2, v3}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
+
+    .line 224
+    .end local v0    # "status":I
+    :goto_2a
+    return-void
+
+    .line 212
+    .restart local v0    # "status":I
+    :cond_2b
+    sget-object v2, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
+
+    const-string v3, "[BOOT] device restored in DORMANT, force exit to normal mode"
+
+    invoke-static {v2, v3}, Lcom/phicomm/speaker/device/utils/LogUtils;->w(Ljava/lang/String;Ljava/lang/String;)V
+
+    .line 214
+    iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
+
+    invoke-interface {v2}, Lcom/unisound/vui/engine/ANTEngine;->pipeline()Lcom/unisound/vui/engine/ANTPipeline;
+
+    move-result-object v2
+
+    new-instance v3, Lcom/phicomm/speaker/device/custom/outputevents/DormantOutputEvent;
+
+    const/4 v4, 0x0
+
+    invoke-static {v4}, Ljava/lang/Boolean;->valueOf(Z)Ljava/lang/Boolean;
+
+    move-result-object v4
+
+    invoke-direct {v3, v4}, Lcom/phicomm/speaker/device/custom/outputevents/DormantOutputEvent;-><init>(Ljava/lang/Boolean;)V
+
+    invoke-interface {v2, v3}, Lcom/unisound/vui/engine/ANTPipeline;->write(Ljava/lang/Object;)V
+
+    .line 215
+    iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mLightController:Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
+
+    invoke-virtual {v2}, Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;->turnOffDormantLight()V
+
+    .line 216
+    iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
+
+    const/4 v3, 0x0
+
+    invoke-static {v2, v3}, Lcom/unisound/vui/util/UserPerferenceUtil;->setDormantLightState(Landroid/content/Context;Z)V
+
+    .line 217
+    iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
+
+    const/4 v3, 0x1
+
+    invoke-static {v2, v3}, Lcom/unisound/vui/util/UserPerferenceUtil;->setStartWakeupAfterSetWakeupWord(Landroid/content/Context;Z)V
+
+    .line 219
+    iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSpeechManager:Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
+
+    invoke-virtual {v2}, Lcom/phicomm/speaker/device/custom/speech/SpeechManager;->startWakeup()V
+
+    .line 220
+    sget-object v2, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
+
+    const-string v3, "[BOOT] force normal mode done, wake word restored"
+
+    invoke-static {v2, v3}, Lcom/phicomm/speaker/device/utils/LogUtils;->w(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_62
+    .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_62} :catch_63
+
+    goto :goto_2a
+
+    .line 221
+    .end local v0    # "status":I
+    :catch_63
+    move-exception v1
+
+    .line 222
+    .local v1, "t":Ljava/lang/Throwable;
+    sget-object v2, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
+
+    const-string v3, "forceNormalModeAtBoot error: "
+
+    invoke-static {v2, v3, v1}, Lcom/phicomm/speaker/device/utils/LogUtils;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+
+    goto :goto_2a
+.end method
+
 .method private initCustomMatchProcess()V
     .registers 4
 
     .prologue
-    .line 302
+    .line 324
     new-instance v0, Lcom/phicomm/speaker/device/custom/match/MatchProcessor;
 
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
@@ -126,12 +271,12 @@
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->matchProcessor:Lcom/phicomm/speaker/device/custom/match/MatchProcessor;
 
-    .line 303
+    .line 325
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->matchProcessor:Lcom/phicomm/speaker/device/custom/match/MatchProcessor;
 
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/match/MatchProcessor;->register()V
 
-    .line 304
+    .line 326
     return-void
 .end method
 
@@ -139,7 +284,7 @@
     .registers 4
 
     .prologue
-    .line 297
+    .line 319
     new-instance v0, Lcom/phicomm/speaker/device/custom/udid/UDIDProcessor;
 
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
@@ -150,12 +295,12 @@
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->udidProcessor:Lcom/phicomm/speaker/device/custom/udid/UDIDProcessor;
 
-    .line 298
+    .line 320
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->udidProcessor:Lcom/phicomm/speaker/device/custom/udid/UDIDProcessor;
 
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/udid/UDIDProcessor;->register()V
 
-    .line 299
+    .line 321
     return-void
 .end method
 
@@ -163,10 +308,10 @@
     .registers 9
 
     .prologue
-    .line 203
-    const-string v1, "\u4e8c\u5e08\u5144"
+    .line 231
+    const-string v1, "\u4f60\u597d\u5c0f\u8fea"
 
-    .line 206
+    .line 234
     .local v1, "customWakeupWord":Ljava/lang/String;
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
@@ -174,7 +319,7 @@
 
     move-result-object v0
 
-    .line 207
+    .line 235
     .local v0, "currentWords":Ljava/util/List;, "Ljava/util/List<Ljava/lang/String;>;"
     if-eqz v0, :cond_29
 
@@ -184,7 +329,7 @@
 
     if-eqz v5, :cond_29
 
-    .line 208
+    .line 236
     sget-object v5, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     new-instance v6, Ljava/lang/StringBuilder;
@@ -207,11 +352,11 @@
 
     invoke-static {v5, v6}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 240
+    .line 268
     :goto_28
     return-void
 
-    .line 212
+    .line 240
     :cond_29
     sget-object v5, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
@@ -235,16 +380,16 @@
 
     invoke-static {v5, v6}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 215
+    .line 243
     new-instance v3, Ljava/util/ArrayList;
 
     invoke-direct {v3}, Ljava/util/ArrayList;-><init>()V
 
-    .line 216
+    .line 244
     .local v3, "newWakeupWords":Ljava/util/List;, "Ljava/util/List<Ljava/lang/String;>;"
     invoke-interface {v3, v1}, Ljava/util/List;->add(Ljava/lang/Object;)Z
 
-    .line 218
+    .line 246
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v5}, Lcom/unisound/vui/util/UserPerferenceUtil;->getDefaultWakeupWord(Landroid/content/Context;)Ljava/util/List;
@@ -253,25 +398,25 @@
 
     invoke-interface {v3, v5}, Ljava/util/List;->addAll(Ljava/util/Collection;)Z
 
-    .line 222
+    .line 250
     :try_start_52
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v5, v3}, Lcom/unisound/vui/util/UserPerferenceUtil;->setWakeupWord(Landroid/content/Context;Ljava/util/List;)V
 
-    .line 225
+    .line 253
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
     invoke-interface {v5}, Lcom/unisound/vui/engine/ANTEngine;->stopWakeup()V
 
-    .line 226
+    .line 254
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
     invoke-interface {v5, v3}, Lcom/unisound/vui/engine/ANTEngine;->updateWakeupWord(Ljava/util/List;)V
     :try_end_61
     .catch Ljava/lang/Throwable; {:try_start_52 .. :try_end_61} :catch_88
 
-    .line 231
+    .line 259
     :try_start_61
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
@@ -287,7 +432,7 @@
     :try_end_6f
     .catch Ljava/lang/Throwable; {:try_start_61 .. :try_end_6f} :catch_a2
 
-    .line 236
+    .line 264
     :goto_6f
     :try_start_6f
     sget-object v5, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
@@ -316,11 +461,11 @@
 
     goto :goto_28
 
-    .line 237
+    .line 265
     :catch_88
     move-exception v2
 
-    .line 238
+    .line 266
     .local v2, "e":Ljava/lang/Throwable;
     sget-object v5, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
@@ -346,12 +491,12 @@
 
     goto :goto_28
 
-    .line 232
+    .line 260
     .end local v2    # "e":Ljava/lang/Throwable;
     :catch_a2
     move-exception v4
 
-    .line 233
+    .line 261
     .local v4, "t":Ljava/lang/Throwable;
     :try_start_a3
     sget-object v5, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
@@ -385,53 +530,19 @@
     .registers 2
 
     .prologue
-    .line 292
+    .line 314
     invoke-static {}, Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;->getInstance()Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;
 
     move-result-object v0
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mDeviceStatusProcessor:Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;
 
-    .line 293
+    .line 315
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mDeviceStatusProcessor:Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;
 
     invoke-virtual {v0, p0}, Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;->addDeviceStatusChangedListener(Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor$OnDeviceStatusChangedListener;)V
 
-    .line 294
-    return-void
-.end method
-
-.method private initEavesdropperEngine()V
-    .registers 5
-
-    .prologue
-    .line 286
-    iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
-
-    invoke-interface {v1}, Lcom/unisound/vui/engine/ANTEngine;->pipeline()Lcom/unisound/vui/engine/ANTPipeline;
-
-    move-result-object v0
-
-    .line 287
-    .local v0, "pipeline":Lcom/unisound/vui/engine/ANTPipeline;
-    new-instance v1, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
-
-    iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
-
-    iget-object v3, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
-
-    invoke-direct {v1, v2, v0, v3}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;-><init>(Landroid/content/Context;Lcom/unisound/vui/engine/ANTPipeline;Lcom/unisound/vui/engine/ANTEngine;)V
-
-    iput-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mEavesdropperEngine:Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
-
-    .line 288
-    sget-object v1, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
-
-    const-string v2, "Eavesdropper engine initialized (will start on dormant)"
-
-    invoke-static {v1, v2}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
-
-    .line 289
+    .line 316
     return-void
 .end method
 
@@ -439,7 +550,7 @@
     .registers 5
 
     .prologue
-    .line 307
+    .line 329
     new-instance v0, Lcom/phicomm/speaker/device/custom/keyevent/PhicommKeyEventProcessor;
 
     new-instance v1, Lcom/phicomm/speaker/device/custom/keyevent/PhicommKeyEventController;
@@ -456,12 +567,12 @@
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mKeyEventProcessor:Lcom/phicomm/speaker/device/custom/keyevent/PhicommKeyEventProcessor;
 
-    .line 308
+    .line 330
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mKeyEventProcessor:Lcom/phicomm/speaker/device/custom/keyevent/PhicommKeyEventProcessor;
 
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/keyevent/PhicommKeyEventProcessor;->register()V
 
-    .line 309
+    .line 331
     return-void
 .end method
 
@@ -469,30 +580,35 @@
     .registers 11
 
     .prologue
-    .line 246
+    .line 274
     new-instance v3, Ljava/util/ArrayList;
 
     invoke-direct {v3}, Ljava/util/ArrayList;-><init>()V
 
-    .line 249
+    .line 278
     .local v3, "newWakeupWords":Ljava/util/List;, "Ljava/util/List<Ljava/lang/String;>;"
+    const-string v7, "\u4f60\u597d\u5c0f\u8fea"
+
+    invoke-interface {v3, v7}, Ljava/util/List;->add(Ljava/lang/Object;)Z
+
+    .line 281
     invoke-static {}, Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;->getPassivePersonas()Ljava/util/List;
 
     move-result-object v5
 
-    .line 250
+    .line 282
     .local v5, "passivePersonas":Ljava/util/List;, "Ljava/util/List<Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;>;"
     invoke-interface {v5}, Ljava/util/List;->iterator()Ljava/util/Iterator;
 
     move-result-object v7
 
-    :cond_d
-    :goto_d
+    :cond_12
+    :goto_12
     invoke-interface {v7}, Ljava/util/Iterator;->hasNext()Z
 
     move-result v8
 
-    if-eqz v8, :cond_27
+    if-eqz v8, :cond_2c
 
     invoke-interface {v7}, Ljava/util/Iterator;->next()Ljava/lang/Object;
 
@@ -500,26 +616,26 @@
 
     check-cast v0, Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
 
-    .line 251
+    .line 283
     .local v0, "config":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;->getWakeupWord()Ljava/lang/String;
 
     move-result-object v8
 
-    if-eqz v8, :cond_d
+    if-eqz v8, :cond_12
 
-    .line 252
+    .line 284
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;->getWakeupWord()Ljava/lang/String;
 
     move-result-object v8
 
     invoke-interface {v3, v8}, Ljava/util/List;->add(Ljava/lang/Object;)Z
 
-    goto :goto_d
+    goto :goto_12
 
-    .line 257
+    .line 289
     .end local v0    # "config":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
-    :cond_27
+    :cond_2c
     new-instance v4, Ljava/util/ArrayList;
 
     new-instance v7, Ljava/util/HashSet;
@@ -528,39 +644,39 @@
 
     invoke-direct {v4, v7}, Ljava/util/ArrayList;-><init>(Ljava/util/Collection;)V
 
-    .line 261
+    .line 293
     .end local v3    # "newWakeupWords":Ljava/util/List;, "Ljava/util/List<Ljava/lang/String;>;"
     .local v4, "newWakeupWords":Ljava/util/List;, "Ljava/util/List<Ljava/lang/String;>;"
-    :try_start_31
+    :try_start_36
     iget-object v7, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v7, v4}, Lcom/unisound/vui/util/UserPerferenceUtil;->setWakeupWord(Landroid/content/Context;Ljava/util/List;)V
 
-    .line 264
+    .line 296
     iget-object v7, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
     invoke-interface {v7}, Lcom/unisound/vui/engine/ANTEngine;->stopWakeup()V
 
-    .line 265
+    .line 297
     iget-object v7, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
     invoke-interface {v7, v4}, Lcom/unisound/vui/engine/ANTEngine;->updateWakeupWord(Ljava/util/List;)V
 
-    .line 268
+    .line 300
     invoke-interface {v4}, Ljava/util/List;->isEmpty()Z
 
     move-result v7
 
-    if-eqz v7, :cond_6f
+    if-eqz v7, :cond_74
 
     const-string v2, ""
-    :try_end_48
-    .catch Ljava/lang/Throwable; {:try_start_31 .. :try_end_48} :catch_92
+    :try_end_4d
+    .catch Ljava/lang/Throwable; {:try_start_36 .. :try_end_4d} :catch_97
 
-    .line 270
+    .line 302
     .local v2, "firstWakeupWord":Ljava/lang/String;
-    :goto_48
-    :try_start_48
+    :goto_4d
+    :try_start_4d
     iget-object v7, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
     invoke-interface {v7}, Lcom/unisound/vui/engine/ANTEngine;->pipeline()Lcom/unisound/vui/engine/ANTPipeline;
@@ -572,12 +688,12 @@
     invoke-direct {v8, v2}, Lcom/unisound/vui/transport/out/ChangeWakeupWordEvent;-><init>(Ljava/lang/String;)V
 
     invoke-interface {v7, v8}, Lcom/unisound/vui/engine/ANTPipeline;->fireUserEventTriggered(Ljava/lang/Object;)Lcom/unisound/vui/engine/ANTPipeline;
-    :try_end_56
-    .catch Ljava/lang/Throwable; {:try_start_48 .. :try_end_56} :catch_78
+    :try_end_5b
+    .catch Ljava/lang/Throwable; {:try_start_4d .. :try_end_5b} :catch_7d
 
-    .line 275
-    :goto_56
-    :try_start_56
+    .line 307
+    :goto_5b
+    :try_start_5b
     sget-object v7, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     new-instance v8, Ljava/lang/StringBuilder;
@@ -600,13 +716,13 @@
 
     invoke-static {v7, v8}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 279
+    .line 311
     .end local v2    # "firstWakeupWord":Ljava/lang/String;
-    :goto_6e
+    :goto_73
     return-void
 
-    .line 268
-    :cond_6f
+    .line 300
+    :cond_74
     const/4 v7, 0x0
 
     invoke-interface {v4, v7}, Ljava/util/List;->get(I)Ljava/lang/Object;
@@ -617,14 +733,14 @@
 
     move-object v2, v7
 
-    goto :goto_48
+    goto :goto_4d
 
-    .line 271
+    .line 303
     .restart local v2    # "firstWakeupWord":Ljava/lang/String;
-    :catch_78
+    :catch_7d
     move-exception v6
 
-    .line 272
+    .line 304
     .local v6, "t":Ljava/lang/Throwable;
     sget-object v7, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
@@ -647,18 +763,18 @@
     move-result-object v8
 
     invoke-static {v7, v8}, Landroid/util/Log;->w(Ljava/lang/String;Ljava/lang/String;)I
-    :try_end_91
-    .catch Ljava/lang/Throwable; {:try_start_56 .. :try_end_91} :catch_92
+    :try_end_96
+    .catch Ljava/lang/Throwable; {:try_start_5b .. :try_end_96} :catch_97
 
-    goto :goto_56
+    goto :goto_5b
 
-    .line 276
+    .line 308
     .end local v2    # "firstWakeupWord":Ljava/lang/String;
     .end local v6    # "t":Ljava/lang/Throwable;
-    :catch_92
+    :catch_97
     move-exception v1
 
-    .line 277
+    .line 309
     .local v1, "e":Ljava/lang/Throwable;
     sget-object v7, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
@@ -666,52 +782,66 @@
 
     invoke-static {v7, v8, v1}, Landroid/util/Log;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)I
 
-    goto :goto_6e
+    goto :goto_73
 .end method
 
 .method private initPhicommBusiness()V
-    .registers 2
+    .registers 5
 
     .prologue
-    .line 176
+    .line 171
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initDeviceStatusListener()V
 
-    .line 177
+    .line 172
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initKeyEventProcess()V
 
-    .line 178
+    .line 173
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initCustomUDIDProcess()V
 
-    .line 179
+    .line 174
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initCustomMatchProcess()V
 
-    .line 180
+    .line 175
     invoke-static {}, Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;->getInstance()Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;
 
     move-result-object v0
 
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/status/PhicommDeviceStatusProcessor;->startMonitorStatus()V
 
-    .line 182
+    .line 177
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initCustomWakeupWord()V
 
-    .line 185
+    .line 180
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initMultiPersonaWakeupWords()V
 
-    .line 188
+    .line 183
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v0}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->setContext(Landroid/content/Context;)V
 
-    .line 191
+    .line 186
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v0}, Lcom/phicomm/speaker/device/custom/persona/PersonaManager;->restorePersonaState(Landroid/content/Context;)V
 
-    .line 195
-    invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initEavesdropperEngine()V
+    .line 192
+    new-instance v0, Landroid/os/Handler;
 
-    .line 196
+    invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
+
+    move-result-object v1
+
+    invoke-direct {v0, v1}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+
+    new-instance v1, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler$2;
+
+    invoke-direct {v1, p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler$2;-><init>(Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;)V
+
+    const-wide/16 v2, 0xbb8
+
+    invoke-virtual {v0, v1, v2, v3}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+
+    .line 198
     return-void
 .end method
 
@@ -720,23 +850,23 @@
     .param p1, "isDormant"    # Z
 
     .prologue
-    .line 312
+    .line 334
     new-instance v6, Ljava/util/HashMap;
 
     invoke-direct {v6}, Ljava/util/HashMap;-><init>()V
 
-    .line 313
+    .line 335
     .local v6, "content":Ljava/util/Map;, "Ljava/util/Map<Ljava/lang/String;Ljava/lang/String;>;"
     const-string v1, "currentDormantStatus"
 
-    if-eqz p1, :cond_37
+    if-eqz p1, :cond_25
 
     const-string v0, "1"
 
     :goto_b
     invoke-interface {v6, v1, v0}, Ljava/util/Map;->put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
 
-    .line 314
+    .line 336
     invoke-static {}, Lcom/unisound/ant/device/sessionlayer/SessionRegister;->getUpDownMessageManager()Lcom/unisound/ant/device/message/UpDownMessageManager;
 
     move-result-object v0
@@ -759,58 +889,21 @@
 
     invoke-virtual/range {v0 .. v5}, Lcom/unisound/ant/device/message/UpDownMessageManager;->onReportStatus(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V
 
-    .line 317
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mEavesdropperEngine:Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
-
-    if-eqz v0, :cond_36
-
-    .line 318
-    if-eqz p1, :cond_3a
-
-    .line 319
-    sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
-
-    const-string v1, "Dormant entered \u2192 start Eavesdropper"
-
-    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
-
-    .line 320
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mEavesdropperEngine:Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
-
-    invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->start()V
-
-    .line 326
-    :cond_36
-    :goto_36
+    .line 337
     return-void
 
-    .line 313
-    :cond_37
+    .line 335
+    :cond_25
     const-string v0, "0"
 
     goto :goto_b
-
-    .line 322
-    :cond_3a
-    sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
-
-    const-string v1, "Dormant exited \u2192 stop Eavesdropper"
-
-    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
-
-    .line 323
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mEavesdropperEngine:Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
-
-    invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->stop()V
-
-    goto :goto_36
 .end method
 
 .method private playInitDoneTips()V
     .registers 7
 
     .prologue
-    .line 68
+    .line 70
     :try_start_0
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
@@ -824,7 +917,7 @@
 
     iput-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSysPrivateManager:Landroid/os/SysPrivateManager;
 
-    .line 69
+    .line 71
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSysPrivateManager:Landroid/os/SysPrivateManager;
 
     if-eqz v1, :cond_3c
@@ -845,14 +938,14 @@
 
     if-eqz v1, :cond_3c
 
-    .line 70
+    .line 72
     sget-object v1, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     const-string v2, "playInitDoneTips, silent update"
 
     invoke-static {v1, v2}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 71
+    .line 73
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSysPrivateManager:Landroid/os/SysPrivateManager;
 
     const-string v2, "fxotamode"
@@ -861,20 +954,20 @@
 
     invoke-virtual {v1, v2, v3}, Landroid/os/SysPrivateManager;->setBootProp(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 72
+    .line 74
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initPhicommBusiness()V
     :try_end_33
     .catch Ljava/lang/Throwable; {:try_start_0 .. :try_end_33} :catch_34
 
-    .line 101
+    .line 103
     :goto_33
     return-void
 
-    .line 75
+    .line 77
     :catch_34
     move-exception v0
 
-    .line 76
+    .line 78
     .local v0, "e":Ljava/lang/Throwable;
     sget-object v1, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
@@ -882,7 +975,7 @@
 
     invoke-static {v1, v2, v0}, Lcom/phicomm/speaker/device/utils/LogUtils;->e(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
 
-    .line 78
+    .line 80
     .end local v0    # "e":Ljava/lang/Throwable;
     :cond_3c
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
@@ -893,7 +986,7 @@
 
     if-nez v1, :cond_56
 
-    .line 79
+    .line 81
     invoke-static {}, Lcom/unisound/vui/common/media/UniMediaPlayer;->getInstance()Lcom/unisound/vui/common/media/UniMediaPlayer;
 
     move-result-object v1
@@ -912,7 +1005,7 @@
 
     goto :goto_33
 
-    .line 99
+    .line 101
     :cond_56
     invoke-static {}, Lcom/unisound/vui/common/media/UniMediaPlayer;->getInstance()Lcom/unisound/vui/common/media/UniMediaPlayer;
 
@@ -922,7 +1015,7 @@
 
     invoke-virtual {v1, v2}, Lcom/unisound/vui/common/media/UniMediaPlayer;->playBeepSound(I)V
 
-    .line 100
+    .line 102
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initPhicommBusiness()V
 
     goto :goto_33
@@ -933,7 +1026,7 @@
     .param p1, "type"    # I
 
     .prologue
-    .line 172
+    .line 167
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
     invoke-interface {v0}, Lcom/unisound/vui/engine/ANTEngine;->unsafe()Lcom/unisound/vui/engine/ANTEngine$Unsafe;
@@ -948,7 +1041,7 @@
 
     invoke-interface {v0, v1, v2}, Lcom/unisound/vui/engine/ANTEngine$Unsafe;->setASROption(ILjava/lang/Object;)V
 
-    .line 173
+    .line 168
     return-void
 .end method
 
@@ -959,21 +1052,21 @@
     .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 58
+    .line 60
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->androidContext()Landroid/content/Context;
 
     move-result-object v0
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
-    .line 59
+    .line 61
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->engine()Lcom/unisound/vui/engine/ANTEngine;
 
     move-result-object v0
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
 
-    .line 60
+    .line 62
     new-instance v0, Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
 
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mANTEngine:Lcom/unisound/vui/engine/ANTEngine;
@@ -982,7 +1075,7 @@
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSpeechManager:Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
 
-    .line 61
+    .line 63
     new-instance v0, Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
 
     iget-object v1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
@@ -991,10 +1084,10 @@
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mLightController:Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
 
-    .line 62
+    .line 64
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->playInitDoneTips()V
 
-    .line 63
+    .line 65
     invoke-super {p0, p1}, Lcom/unisound/vui/handler/ANTEventDispatcher;->onASREventEngineInitDone(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
 
     move-result v0
@@ -1018,39 +1111,39 @@
 
     const/4 v2, 0x5
 
-    .line 138
+    .line 133
     if-ne p1, v2, :cond_16
 
     if-eq p2, v2, :cond_16
 
-    .line 139
+    .line 134
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mLightController:Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;
 
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/ipc/PhicommLightController;->turnOffDormantLight()V
 
-    .line 140
+    .line 135
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v0, v5}, Lcom/unisound/vui/util/UserPerferenceUtil;->setDormantLightState(Landroid/content/Context;Z)V
 
-    .line 141
+    .line 136
     invoke-direct {p0, v5}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->onDormantStatusChanged(Z)V
 
-    .line 143
+    .line 138
     :cond_16
     if-eq p1, v2, :cond_22
 
     if-ne p2, v2, :cond_22
 
-    .line 144
+    .line 139
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v0, v6}, Lcom/unisound/vui/util/UserPerferenceUtil;->setDormantLightState(Landroid/content/Context;Z)V
 
-    .line 145
+    .line 140
     invoke-direct {p0, v6}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->onDormantStatusChanged(Z)V
 
-    .line 147
+    .line 142
     :cond_22
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
@@ -1060,54 +1153,54 @@
 
     if-eqz v0, :cond_37
 
-    .line 148
+    .line 143
     sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     const-string v1, "system boot finish, ignore"
 
     invoke-static {v0, v1}, Lcom/phicomm/speaker/device/utils/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 149
+    .line 144
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v0, v5}, Lcom/phicomm/speaker/device/Receiver/MessageReceiver;->setSystemBootloader(Landroid/content/Context;Z)V
 
-    .line 169
+    .line 164
     :cond_36
     :goto_36
     return-void
 
-    .line 152
+    .line 147
     :cond_37
     if-nez p2, :cond_5c
 
     if-ne p1, v3, :cond_5c
 
-    .line 153
+    .line 148
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSpeechManager:Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
 
     sget v1, Lcom/phicomm/speaker/device/R$string;->tts_stop_match_net:I
 
     invoke-virtual {v0, v1}, Lcom/phicomm/speaker/device/custom/speech/SpeechManager;->playTTS(I)V
 
-    .line 157
+    .line 152
     :cond_42
     :goto_42
     if-eq p1, v4, :cond_68
 
     if-ne p2, v4, :cond_68
 
-    .line 158
+    .line 153
     sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     const-string v1, "-----\u5df2\u5207\u6362\u6210\u84dd\u7259\u6a21\u5f0f, ASR \u6362\u6210 local \u6a21\u5f0f-----"
 
     invoke-static {v0, v1}, Lcom/phicomm/speaker/device/utils/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 159
+    .line 154
     invoke-direct {p0, v3}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->switchASRModeType(I)V
 
-    .line 164
+    .line 159
     :cond_50
     :goto_50
     if-ne p1, v2, :cond_77
@@ -1116,20 +1209,20 @@
 
     if-eq p2, v2, :cond_77
 
-    .line 165
+    .line 160
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v0, v6}, Lcom/unisound/vui/util/UserPerferenceUtil;->setStartWakeupAfterSetWakeupWord(Landroid/content/Context;Z)V
 
     goto :goto_36
 
-    .line 154
+    .line 149
     :cond_5c
     if-nez p2, :cond_42
 
     if-ne p1, v4, :cond_42
 
-    .line 155
+    .line 150
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSpeechManager:Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
 
     sget v1, Lcom/phicomm/speaker/device/R$string;->tts_close_bluetooth_for_phicomm:I
@@ -1138,25 +1231,25 @@
 
     goto :goto_42
 
-    .line 160
+    .line 155
     :cond_68
     if-ne p1, v4, :cond_50
 
     if-eq p2, v4, :cond_50
 
-    .line 161
+    .line 156
     sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     const-string v1, "-----\u5df2\u5207\u6362\u6210\u975e\u84dd\u7259\u6a21\u5f0f, ASR \u6362\u6210 mix \u6a21\u5f0f-----"
 
     invoke-static {v0, v1}, Lcom/phicomm/speaker/device/utils/LogUtils;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 162
+    .line 157
     invoke-direct {p0, v5}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->switchASRModeType(I)V
 
     goto :goto_50
 
-    .line 166
+    .line 161
     :cond_77
     if-ne p1, v3, :cond_36
 
@@ -1164,7 +1257,7 @@
 
     if-eq p2, v3, :cond_36
 
-    .line 167
+    .line 162
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mContext:Landroid/content/Context;
 
     invoke-static {v0, v6}, Lcom/unisound/vui/util/UserPerferenceUtil;->setStartWakeupAfterSetWakeupWord(Landroid/content/Context;Z)V
@@ -1179,7 +1272,7 @@
     .prologue
     const/4 v3, 0x0
 
-    .line 118
+    .line 120
     sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -1204,53 +1297,27 @@
 
     invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 119
+    .line 121
     invoke-static {v3}, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->setTTSPlaying(Z)V
 
-    .line 120
+    .line 122
     iget-boolean v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->isFristBoot:Z
 
     if-eqz v0, :cond_2c
 
-    .line 121
+    .line 123
     iput-boolean v3, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->isFristBoot:Z
 
-    .line 122
+    .line 124
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSpeechManager:Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
 
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/speech/SpeechManager;->startWakeup()V
 
-    .line 123
+    .line 125
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->initPhicommBusiness()V
 
     .line 128
     :cond_2c
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mEavesdropperEngine:Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
-
-    if-eqz v0, :cond_44
-
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mEavesdropperEngine:Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;
-
-    invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/engine/EavesdropperEngine;->isRunning()Z
-
-    move-result v0
-
-    if-eqz v0, :cond_44
-
-    .line 129
-    sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
-
-    const-string v1, "Eavesdropper running, force stopWakeup after TTS to keep dormant"
-
-    invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
-
-    .line 130
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSpeechManager:Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
-
-    invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/speech/SpeechManager;->stopWakeup()V
-
-    .line 133
-    :cond_44
     invoke-super {p0, p1}, Lcom/unisound/vui/handler/ANTEventDispatcher;->onTTSEventPlayingEnd(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
 
     move-result v0
@@ -1263,7 +1330,7 @@
     .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 106
+    .line 108
     sget-object v0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->TAG:Ljava/lang/String;
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -1288,22 +1355,22 @@
 
     invoke-static {v0, v1}, Landroid/util/Log;->d(Ljava/lang/String;Ljava/lang/String;)I
 
-    .line 108
+    .line 110
     const/4 v0, 0x1
 
     invoke-static {v0}, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->setTTSPlaying(Z)V
 
-    .line 109
+    .line 111
     iget-boolean v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->isFristBoot:Z
 
     if-eqz v0, :cond_27
 
-    .line 110
+    .line 112
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommInitializeHandler;->mSpeechManager:Lcom/phicomm/speaker/device/custom/speech/SpeechManager;
 
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/speech/SpeechManager;->stopWakeup()V
 
-    .line 112
+    .line 114
     :cond_27
     invoke-super {p0, p1}, Lcom/unisound/vui/handler/ANTEventDispatcher;->onTTSEventPlayingStart(Lcom/unisound/vui/engine/ANTHandlerContext;)Z
 

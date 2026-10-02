@@ -27,11 +27,6 @@
 .method constructor <init>(Lcom/phicomm/speaker/device/custom/handler/PhicommDataStatisticHandler;Ljava/lang/String;)V
     .registers 3
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommDataStatisticHandler;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
     .line 53

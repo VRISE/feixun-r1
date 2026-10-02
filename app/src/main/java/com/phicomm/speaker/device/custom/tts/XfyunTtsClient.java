@@ -504,33 +504,58 @@ public class XfyunTtsClient {
                 callback.onError("音频文件不存在: " + audioPath);
                 return;
             }
-            
+
             MediaPlayer player = new MediaPlayer();
             player.setDataSource(audioPath);
             player.prepare();
-            
+
             final MediaPlayer finalPlayer = player;
+            // ⭐ v78: 防止 onComplete/onError 重复回调
+            final boolean[] done = {false};
+            // ⭐ v78: 播放完成看门狗。Android 5.1 上 MediaPlayer.onCompletion 偶发丢失
+            //    (实测约一半概率), 回调丢失会让上层把"TTS 播放中"状态挂住 30 秒
+            //    (PlaybackStateMonitor 兜底), 表现为"说了几句就断掉/卡住不动"。
+            //    prepare 后取实际时长, 超时未回调则强制按完成处理并释放播放器。
+            final int durationMs = player.getDuration();
+            final android.os.Handler watchdog = new android.os.Handler(android.os.Looper.getMainLooper());
+            watchdog.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (done[0]) return;
+                    done[0] = true;
+                    LogMgr.e(TAG, "[WATCHDOG] onCompletion lost (duration=" + durationMs + "ms), force complete");
+                    try { finalPlayer.release(); } catch (Throwable t) { }
+                    callback.onComplete();
+                }
+            }, Math.max(8000, durationMs + 3000));
+
             player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
                     LogMgr.d(TAG, "音频播放完成");
+                    watchdog.removeCallbacksAndMessages(null);
+                    if (done[0]) return;
+                    done[0] = true;
                     mp.release();
                     callback.onComplete();
                 }
             });
-            
+
             player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
                 @Override
                 public boolean onError(MediaPlayer mp, int what, int extra) {
                     LogMgr.e(TAG, "音频播放错误: what=" + what + ", extra=" + extra);
+                    watchdog.removeCallbacksAndMessages(null);
+                    if (done[0]) return true;
+                    done[0] = true;
                     mp.release();
                     callback.onError("播放错误");
                     return true;
                 }
             });
-            
+
             player.start();
-            LogMgr.d(TAG, "开始播放音频: " + audioPath);
+            LogMgr.d(TAG, "开始播放音频: " + audioPath + " (duration=" + durationMs + "ms)");
         } catch (Exception e) {
             LogMgr.e(TAG, "播放音频失败: " + e);
             callback.onError("播放失败: " + e.getMessage());

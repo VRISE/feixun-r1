@@ -2,6 +2,7 @@ package com.unisound.vui.handler.filter;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.StrictMode;
 import android.text.TextUtils;
 import com.google.gson.reflect.TypeToken;
@@ -23,10 +24,11 @@ import nluparser.scheme.NLU;
 import com.phicomm.speaker.device.custom.event.PersonaActivationEvent;
 import com.phicomm.speaker.device.custom.persona.PersonaConfig;
 import com.phicomm.speaker.device.custom.persona.PersonaManager;
-import com.phicomm.speaker.device.custom.engine.EavesdropperEngine;
+
 import com.unisound.vui.engine.ANTPipeline;
 import nluparser.scheme.Result;
 import nluparser.scheme.SName;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,6 +38,39 @@ public final class NLUDispatcher extends ANTEventDispatcher {
     private boolean f423a;
     private boolean b;
     private final MixtureProcessor c;
+
+    // ⭐ v82: 识别卡死看门狗。
+    // 实测(15:55): 唤醒成功→本地识别"打开蓝牙"成功→VAD 超时停录音→管线等待云端最终结果,
+    // 而云 ASR/NLU 服务器已死 → 永远等不到 → 设备卡在"识别中"(蓝灯闪) = 用户说的"死机"。
+    // 录音停止后 8 秒内没有最终结果就强制 cancelEngine 回到待唤醒状态。
+    private static final long RECOG_STALL_TIMEOUT_MS = 8000;
+    private final Handler watchdogHandler = new Handler(Looper.getMainLooper());
+    private Runnable recogStallWatchdog;
+
+    private void cancelRecogStallWatchdog() {
+        if (recogStallWatchdog != null) {
+            watchdogHandler.removeCallbacks(recogStallWatchdog);
+            recogStallWatchdog = null;
+        }
+    }
+
+    private void scheduleRecogStallWatchdog(final ANTHandlerContext ctx) {
+        cancelRecogStallWatchdog();
+        recogStallWatchdog = new Runnable() {
+            @Override
+            public void run() {
+                LogMgr.e("NLUDispatcher", "[WATCHDOG] recognition stalled > "
+                        + RECOG_STALL_TIMEOUT_MS + "ms (dead cloud ASR?), force cancelEngine to recover");
+                try {
+                    ctx.cancelEngine();
+                } catch (Throwable t) {
+                    LogMgr.e("NLUDispatcher", "[WATCHDOG] cancelEngine failed: " + t);
+                }
+                recogStallWatchdog = null;
+            }
+        };
+        watchdogHandler.postDelayed(recogStallWatchdog, RECOG_STALL_TIMEOUT_MS);
+    }
     private NluProcessor d;
     private Handler e = new Handler();
     private Runnable f;
@@ -180,8 +215,6 @@ public final class NLUDispatcher extends ANTEventDispatcher {
         aNTHandlerContext.pipeline().fireASREvent(1102);
         a(aNTHandlerContext, true);
         aNTHandlerContext.cancelEngine();
-        // 通知插嘴引擎: 任意命令被处理,退出插嘴模式
-        EavesdropperEngine.notifyInteraction();
         aNTHandlerContext.fireUserEventTriggered(nlu);
         this.b = false;
         this.f423a = false;
@@ -236,6 +269,7 @@ public final class NLUDispatcher extends ANTEventDispatcher {
     @Override // com.unisound.vui.handler.ANTEventDispatcher
     public boolean onASREventCancel(ANTHandlerContext ctx) {
         a();
+        cancelRecogStallWatchdog();
         return false;
     }
 
@@ -244,18 +278,95 @@ public final class NLUDispatcher extends ANTEventDispatcher {
     public boolean onASREventRecordingStart(ANTHandlerContext ctx) {
         LogMgr.i("NLUDispatcher", "onASREventRecordingStart");
         a();
+        cancelRecogStallWatchdog();
         a(ctx, false);
         return super.onASREventRecordingStart(ctx);
     }
 
     /* access modifiers changed from: protected */
     @Override // com.unisound.vui.handler.ANTEventDispatcher
+    public boolean onASREventRecordingStop(ANTHandlerContext ctx) {
+        LogMgr.i("NLUDispatcher", "onASREventRecordingStop -> schedule recog-stall watchdog");
+        // ⭐ v82: 录音停止 = 等最终识别结果, 云端死了就会卡死, 挂看门狗兜底
+        scheduleRecogStallWatchdog(ctx);
+        return super.onASREventRecordingStop(ctx);
+    }
+
+    /* access modifiers changed from: protected */
+    @Override // com.unisound.vui.handler.ANTEventDispatcher
+    public boolean onASREventRecognitionEnd(ANTHandlerContext ctx) {
+        LogMgr.i("NLUDispatcher", "onASREventRecognitionEnd -> cancel recog-stall watchdog");
+        cancelRecogStallWatchdog();
+        return super.onASREventRecognitionEnd(ctx);
+    }
+
+    /* access modifiers changed from: protected */
+    @Override // com.unisound.vui.handler.ANTEventDispatcher
+    public boolean onASREventEnd(ANTHandlerContext ctx) {
+        cancelRecogStallWatchdog();
+        return super.onASREventEnd(ctx);
+    }
+
+    /**
+     * 从原厂 ASR 结果 JSON 里提取识别文本。
+     * 兼容已知结构: local_asr / net_asr / net_nlu / asr_recongize(asr_recognize) / text
+     */
+    private String extractRecognitionText(String result) {
+        if (result == null) {
+            return null;
+        }
+        String trimmed = result.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+        try {
+            // USC 流式返回可能是多段拼接 "{seg1}{seg2}", 整体解析不了时取最后一段
+            if (trimmed.contains("}{")) {
+                trimmed = trimmed.substring(trimmed.lastIndexOf("}{") + 1);
+            }
+            JSONObject root = new JSONObject(trimmed);
+            JSONArray arr = null;
+            if (root.has("local_asr")) {
+                arr = root.getJSONArray("local_asr");
+            } else if (root.has("net_asr")) {
+                arr = root.getJSONArray("net_asr");
+            } else if (root.has("net_nlu")) {
+                arr = root.getJSONArray("net_nlu");
+            }
+            if (arr != null && arr.length() > 0) {
+                JSONObject first = arr.getJSONObject(0);
+                String t = first.optString("recognition_result", "");
+                if (t.isEmpty()) {
+                    t = first.optString("text", "");
+                }
+                if (!t.isEmpty()) {
+                    return t.trim();
+                }
+            }
+            String plain = root.optString("asr_recongize", "");
+            if (plain.isEmpty()) {
+                plain = root.optString("asr_recognize", "");
+            }
+            if (plain.isEmpty()) {
+                plain = root.optString("text", "");
+            }
+            return plain.trim();
+        } catch (Exception e) {
+            LogMgr.e("NLUDispatcher", "[EAVES] extractRecognitionText failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /* access modifiers changed from: protected */
+    @Override // com.unisound.vui.handler.ANTEventDispatcher
     public boolean onASRResultLocal(ANTHandlerContext ctx, String result) {
         LogMgr.d("NLUDispatcher", "onASRResultLocal:" + result);
+
         if (this.f423a) {
             LogMgr.e("NLUDispatcher", "result has handled, local nlu handle return");
             return true;
         }
+
         d(ctx);
         LocalASR localASR = this.c.from(result).getLocalASRList().get(0);
         NLU from = this.d.from(localASR.getRecognitionResult());
@@ -273,10 +384,12 @@ public final class NLUDispatcher extends ANTEventDispatcher {
     public boolean onASRResultNet(ANTHandlerContext ctx, String result) {
         String str;
         LogMgr.d("NLUDispatcher", "onASRResultNet:" + result);
+
         if (this.f423a) {
             LogMgr.e("NLUDispatcher", "result has handled, net nlu handle return");
             return true;
         }
+
         d(ctx);
         Mixture<Intent, Result> from = this.c.from(result);
         if (from == null) {
@@ -340,13 +453,12 @@ public final class NLUDispatcher extends ANTEventDispatcher {
     @Override // com.unisound.vui.handler.ANTEventDispatcher
     public boolean onWakeupResult(ANTHandlerContext ctx, String result) {
         LogMgr.d("NLUDispatcher", "onWakeupResult:" + result);
+        // ⭐ v82: 新一轮唤醒, 上一轮的卡死看门狗作废
+        cancelRecogStallWatchdog();
         LocalASR localASR = this.c.from(result).getLocalASRList().get(0);
         String trim = localASR.getRecognitionResult().trim();
         
         LogMgr.d("NLUDispatcher", "[DEBUG] Recognized wakeup word: '" + trim + "'");
-        
-        // 通知 EavesdropperEngine: 唤醒词正在处理(优先级高于插嘴监听)
-        EavesdropperEngine.notifyWakeupDetected();
 
         if (a(ctx.androidContext(), trim)) {
             LogMgr.d("NLUDispatcher", trim + " is CompetitionWord, return");
@@ -369,22 +481,6 @@ public final class NLUDispatcher extends ANTEventDispatcher {
                 
                 // 播放确认提示
                 ctx.playTTS("好的,我闭嘴一小时");
-                
-                // 记录交互时间
-                PersonaManager.recordInteraction();
-                
-                return true;  // 拦截,不进入对话
-            }
-            
-            // ⭐ 检查是否是"打开插嘴"命令
-            if (isEnableEavesdropCommand(trim)) {
-                LogMgr.d("NLUDispatcher", "Enable eavesdrop command detected: " + trim);
-                
-                // 禁用闭嘴模式(立即恢复)
-                PersonaManager.disableShutUpMode();
-                
-                // 播放确认提示
-                ctx.playTTS("插嘴功能已打开,我会继续偷听的~");
                 
                 // 记录交互时间
                 PersonaManager.recordInteraction();
@@ -421,17 +517,6 @@ public final class NLUDispatcher extends ANTEventDispatcher {
                text.contains("别听了") || 
                text.contains("别监听了") ||
                text.contains("安静一小时");
-    }
-    
-    /**
-     * ⭐ 检查是否是"打开插嘴"命令
-     */
-    private boolean isEnableEavesdropCommand(String text) {
-        return text.contains("打开插嘴") || 
-               text.contains("开始监听") || 
-               text.contains("继续偷听") ||
-               text.contains("恢复插嘴") ||
-               text.contains("打开监听");
     }
 
     @Override // com.unisound.vui.engine.ANTInboundHandler, com.unisound.vui.engine.ANTInboundHandlerAdapter

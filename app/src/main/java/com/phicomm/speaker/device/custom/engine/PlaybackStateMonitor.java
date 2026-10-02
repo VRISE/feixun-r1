@@ -55,17 +55,14 @@ public final class PlaybackStateMonitor {
     public static void setTTSPlaying(boolean playing) {
         boolean changed = ttsPlaying.getAndSet(playing) != playing;
         if (changed) {
-            LogMgr.d(TAG, "TTS playing -> " + playing);
+            // ⭐ v78: 用 LogMgr.e 保证这条状态线在 logcat 里永远可见(d 级别实测会被吞)
+            LogMgr.e(TAG, "TTS playing -> " + playing);
             if (playing) {
-                EavesdropperEngine.notifyInteraction();
                 mainHandler.removeCallbacks(ttsAutoResetRunnable);
                 mainHandler.postDelayed(ttsAutoResetRunnable, TTS_AUTO_RESET_MS);
                 LogMgr.d(TAG, "TTS auto-reset scheduled in " + TTS_AUTO_RESET_MS + "ms");
             } else {
                 mainHandler.removeCallbacks(ttsAutoResetRunnable);
-                // ⭐ TTS 播完后,如果 EavesdropperEngine 在跑(休眠模式),
-                // 立即让主引擎 stopWakeup,防止状态自动切到 Speech 触发死锁
-                EavesdropperEngine.notifyTTSEnded();
             }
         }
     }
@@ -75,7 +72,6 @@ public final class PlaybackStateMonitor {
         if (changed) {
             LogMgr.d(TAG, "Music playing -> " + playing);
             if (playing) {
-                EavesdropperEngine.notifyInteraction();
                 mainHandler.removeCallbacks(musicAutoResetRunnable);
                 mainHandler.postDelayed(musicAutoResetRunnable, MUSIC_AUTO_RESET_MS);
             } else {

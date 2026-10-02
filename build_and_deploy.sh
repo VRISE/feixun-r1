@@ -233,19 +233,19 @@ echo -e "${YELLOW}[9/9] 安装到设备...${NC}"
 
 # ⭐ 清理设备上的旧文件
 echo "  清理旧文件..."
-adb shell "rm -f /sdcard/*.apk; rm -f /sdcard/eavesdrop_*.pcm; rm -f /sdcard/scan_v*.log; rm -f /sdcard/now*.log; rm -f /sdcard/v*.log; rm -f /sdcard/eav_event.log"
+adb -s 192.168.5.9:5555 shell "rm -f /sdcard/*.apk; rm -f /sdcard/eavesdrop_*.pcm; rm -f /sdcard/scan_v*.log; rm -f /sdcard/now*.log; rm -f /sdcard/v*.log; rm -f /sdcard/eav_event.log"
 
 echo "  推送 APK 到设备..."
-adb push "${OUTPUT_APK}" "/sdcard/janus_v${VERSION}.apk"
+adb -s 192.168.5.9:5555 push "${OUTPUT_APK}" "/sdcard/janus_v${VERSION}.apk"
 
 echo "  安装 APK..."
-adb shell "CLASSPATH=/system/framework/pm.jar app_process /system/bin com.android.commands.pm.Pm install -r /sdcard/janus_v${VERSION}.apk"
+adb -s 192.168.5.9:5555 shell "CLASSPATH=/system/framework/pm.jar app_process /system/bin com.android.commands.pm.Pm install -r /sdcard/janus_v${VERSION}.apk"
 
 echo "  清除 dalvik-cache..."
-adb shell "rm -rf /data/dalvik-cache/arm/* /data/dalvik-cache/arm64/* && sync"
+adb -s 192.168.5.9:5555 shell "rm -rf /data/dalvik-cache/arm/* /data/dalvik-cache/arm64/* && sync"
 
 echo "  重启设备..."
-adb reboot
+adb -s 192.168.5.9:5555 reboot
 
 echo ""
 echo -e "${BLUE}========================================${NC}"

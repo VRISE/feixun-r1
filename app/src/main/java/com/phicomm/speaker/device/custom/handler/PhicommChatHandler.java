@@ -10,6 +10,7 @@ import com.phicomm.speaker.device.custom.ai.PersonaConversationManager;
 import com.phicomm.speaker.device.custom.config.AIConfig;
 import com.phicomm.speaker.device.custom.persona.PersonaConfig;
 import com.phicomm.speaker.device.custom.persona.PersonaManager;
+import com.phicomm.speaker.device.custom.teaser.PostDialogueTeaser;
 import com.unisound.vui.engine.ANTHandlerContext;
 import com.unisound.vui.handler.SessionRegister;
 import com.unisound.vui.handler.SimpleUserEventInboundHandler;
@@ -75,6 +76,14 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
     
     // 当前大模型回复(用于打断处理)
     private String currentResponse;
+
+    // ⭐ v83: 最近一轮的用户原话(回复播完后交给 PostDialogueTeaser 做事后调侃)
+    private volatile String lastUserInput;
+
+    // ⭐ v84: 只有本轮回复确实由【大模型成功生成】才置 true(在 playTTS 前设置,
+    //    playingEnd 消费后清除)。传统指令(音乐/音量/关机等)由其他 Handler 处理,
+    //    根本不走这里; 即使有杂散 TTS 事件飘进本 Handler, 没有这个标记也绝不调侃。
+    private volatile boolean pendingTease = false;
     
     // 上下文
     private ANTHandlerContext ctx;
@@ -83,7 +92,7 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
     private boolean isIdiomGameMode = false;  // 是否在成语接龙模式
     private int idiomGameTurn = 0;  // 当前轮数
     private String lastUserIdiom = null;  // 用户说的最后一个成语
-    // 多轮对话(成语接龙/捣蛋鬼/英语陪练师等)静音超时: 15 秒后退出, 让出 MIC 给唤醒/插嘴
+    // 多轮对话(成语接龙/英语陪练师等)静音超时: 15 秒后退出, 让出 MIC 给唤醒
     private static final int MAX_IDLE_TIMEOUT = 15000;
     
     // 超时处理器
@@ -190,6 +199,7 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
         super.eventReceived(evt, ctx);
         
         final String userInput = evt.getText();
+        this.lastUserInput = userInput;
         LogMgr.d(TAG, "chat intent: " + userInput + ", isIdiomGameMode=" + isIdiomGameMode);
         
         // 取消超时定时器(用户说话了)
@@ -384,6 +394,10 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                         
                         writeLog("=== 调用原厂 TTS === " + response);
                         currentResponse = response;
+                        // ⭐ v84: 本轮回复来自大模型 → 标记允许事后调侃(playingEnd 时消费)
+                        if (!isIdiomGameMode) {
+                            pendingTease = true;
+                        }
                         ctx.playTTS(response);
                     } else {
                         // API 调用失败 - 统一回复
@@ -423,6 +437,15 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
     private boolean handleTtsPlayingEnd() {
         LogMgr.d(TAG, "handleTtsPlayingEnd, isIdiomGameMode=" + isIdiomGameMode + 
                  ", isMultiTurnMode=" + isMultiTurnMode);
+        
+        // ⭐ v83/v84: 只调侃【大模型成功回复】的对话轮(pendingTease 在 playTTS 前置位,
+        //    此处一次性消费)。传统指令(音乐/音量/关机等)不走大模型, 永远不会置位。
+        boolean shouldTease = pendingTease;
+        pendingTease = false;
+        if (shouldTease && !isIdiomGameMode && currentResponse != null && lastUserInput != null) {
+            PostDialogueTeaser.get().maybeTease(ctx != null ? ctx.androidContext() : null,
+                    lastUserInput, currentResponse);
+        }
         
         if (isIdiomGameMode) {
             // 成语接龙模式:直接进入 ASR,继续聆听
@@ -565,6 +588,7 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
     @Override
     public void reset() {
         currentResponse = null;
+        pendingTease = false;  // ⭐ v84: 会话重置时清掉调侃标记, 杜绝过期标记误触发
         // 注意:不要在这里重置 isIdiomGameMode,因为多轮对话需要保持状态
         super.reset();
     }

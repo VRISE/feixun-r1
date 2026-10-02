@@ -9,8 +9,8 @@
 # annotations
 .annotation system Ldalvik/annotation/MemberClasses;
     value = {
-        Lcom/phicomm/speaker/device/custom/setting/PhicommSettingHandler$PhicommIotReceiver;,
-        Lcom/phicomm/speaker/device/custom/setting/PhicommSettingHandler$IoTRunnable;
+        Lcom/phicomm/speaker/device/custom/setting/PhicommSettingHandler$IoTRunnable;,
+        Lcom/phicomm/speaker/device/custom/setting/PhicommSettingHandler$PhicommIotReceiver;
     }
 .end annotation
 

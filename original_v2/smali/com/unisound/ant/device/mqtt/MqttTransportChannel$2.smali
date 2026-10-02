@@ -27,11 +27,6 @@
 .method constructor <init>(Lcom/unisound/ant/device/mqtt/MqttTransportChannel;Ljava/lang/Object;)V
     .registers 3
     .param p1, "this$0"    # Lcom/unisound/ant/device/mqtt/MqttTransportChannel;
-    .annotation system Ldalvik/annotation/Signature;
-        value = {
-            "()V"
-        }
-    .end annotation
 
     .prologue
     .line 145

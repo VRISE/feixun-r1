@@ -27,7 +27,7 @@
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     .prologue
-    .line 433
+    .line 456
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -43,7 +43,7 @@
     .prologue
     const/4 v2, 0x0
 
-    .line 436
+    .line 459
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
@@ -53,26 +53,26 @@
 
     if-eqz v0, :cond_34
 
-    .line 437
+    .line 460
     const-string v0, "PhicommChat"
 
     const-string v1, "\u6210\u8bed\u63a5\u9f99\u8d85\u65f6,\u81ea\u52a8\u9000\u51fa"
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 438
+    .line 461
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
     invoke-static {v0, v2}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$102(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Z)Z
 
-    .line 439
+    .line 462
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->idiomGameTurn:I
     invoke-static {v0, v2}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$202(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;I)I
 
-    .line 440
+    .line 463
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     const/4 v1, 0x0
@@ -80,11 +80,11 @@
     # setter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->lastUserIdiom:Ljava/lang/String;
     invoke-static {v0, v1}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$302(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;Ljava/lang/String;)Ljava/lang/String;
 
-    .line 441
+    .line 464
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
-    invoke-static {v0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$1000(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)Lcom/unisound/vui/engine/ANTHandlerContext;
+    invoke-static {v0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$1100(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)Lcom/unisound/vui/engine/ANTHandlerContext;
 
     move-result-object v0
 
@@ -92,17 +92,17 @@
 
     invoke-interface {v0, v1}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
 
-    .line 442
+    .line 465
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
-    invoke-static {v0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$1000(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)Lcom/unisound/vui/engine/ANTHandlerContext;
+    invoke-static {v0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$1100(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)Lcom/unisound/vui/engine/ANTHandlerContext;
 
     move-result-object v0
 
     invoke-interface {v0, v2}, Lcom/unisound/vui/engine/ANTHandlerContext;->enterWakeup(Z)V
 
-    .line 444
+    .line 467
     :cond_34
     return-void
 .end method
