@@ -6,8 +6,6 @@
 # static fields
 .field private static final LLM_BUDGET_MS:J = 0x3a98L
 
-.field private static final MIN_REPLY_LEN:I = 0x2
-
 .field private static final MIN_USER_LEN:I = 0x4
 
 .field private static final TAG:Ljava/lang/String; = "PostTeaser"
@@ -15,6 +13,8 @@
 .field private static final TEASE_COOLDOWN_MS:J = 0x7530L
 
 .field private static final TEASE_DELAY_MS:J = 0x4b0L
+
+.field private static final TEASE_TOPIC:Ljava/lang/String; = "r1-teaser"
 
 .field private static volatile sEchoGuardUntil:J
 
@@ -32,15 +32,13 @@
 
 .field private llmClient:Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
 
-.field private ttsClient:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-
 
 # direct methods
 .method static constructor <clinit>()V
     .registers 2
 
     .prologue
-    .line 54
+    .line 62
     new-instance v0, Ljava/util/concurrent/atomic/AtomicInteger;
 
     const/4 v1, 0x0
@@ -49,7 +47,7 @@
 
     sput-object v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sGen:Ljava/util/concurrent/atomic/AtomicInteger;
 
-    .line 58
+    .line 66
     const-wide/16 v0, 0x0
 
     sput-wide v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sEchoGuardUntil:J
@@ -61,10 +59,10 @@
     .registers 3
 
     .prologue
-    .line 77
+    .line 84
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
-    .line 71
+    .line 79
     new-instance v0, Ljava/util/concurrent/atomic/AtomicBoolean;
 
     const/4 v1, 0x0
@@ -73,17 +71,17 @@
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
 
-    .line 72
+    .line 80
     const-wide/16 v0, 0x0
 
     iput-wide v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseAt:J
 
-    .line 73
+    .line 81
     const/4 v0, 0x0
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseText:Ljava/lang/String;
 
-    .line 77
+    .line 84
     return-void
 .end method
 
@@ -91,22 +89,21 @@
     .registers 1
 
     .prologue
-    .line 37
+    .line 40
     sget-object v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sGen:Ljava/util/concurrent/atomic/AtomicInteger;
 
     return-object v0
 .end method
 
-.method static synthetic access$100(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
-    .registers 4
+.method static synthetic access$100(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;Ljava/lang/String;)V
+    .registers 3
     .param p0, "x0"    # Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
     .param p1, "x1"    # Landroid/content/Context;
     .param p2, "x2"    # Ljava/lang/String;
-    .param p3, "x3"    # Ljava/lang/String;
 
     .prologue
-    .line 37
-    invoke-direct {p0, p1, p2, p3}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->runTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
+    .line 40
+    invoke-direct {p0, p1, p2}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->runTease(Landroid/content/Context;Ljava/lang/String;)V
 
     return-void
 .end method
@@ -117,7 +114,7 @@
     .param p1, "x1"    # Landroid/content/Context;
 
     .prologue
-    .line 37
+    .line 40
     invoke-direct {p0, p1}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->getLLM(Landroid/content/Context;)Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
 
     move-result-object v0
@@ -130,7 +127,7 @@
     .param p0, "x0"    # J
 
     .prologue
-    .line 37
+    .line 40
     sput-wide p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sEchoGuardUntil:J
 
     return-wide p0
@@ -140,7 +137,7 @@
     .registers 5
 
     .prologue
-    .line 236
+    .line 253
     :try_start_0
     const-string v2, "eavesdropper"
 
@@ -148,7 +145,7 @@
 
     move-result-object v0
 
-    .line 237
+    .line 254
     .local v0, "cfg":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
     if-eqz v0, :cond_27
 
@@ -158,12 +155,12 @@
 
     if-eqz v2, :cond_27
 
-    .line 238
+    .line 255
     invoke-virtual {v0}, Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;->getSystemPrompt()Ljava/lang/String;
 
     move-result-object v1
 
-    .line 240
+    .line 257
     .local v1, "p":Ljava/lang/String;
     new-instance v2, Ljava/lang/StringBuilder;
 
@@ -185,17 +182,17 @@
 
     move-result-object v2
 
-    .line 244
+    .line 261
     .end local v0    # "cfg":Lcom/phicomm/speaker/device/custom/persona/PersonaConfig;
     .end local v1    # "p":Ljava/lang/String;
     :goto_25
     return-object v2
 
-    .line 243
+    .line 260
     :catch_26
     move-exception v2
 
-    .line 244
+    .line 261
     :cond_27
     const-string v2, "\u4f60\u662f\u4e00\u4e2a\u5634\u8d31\u4f46\u65e0\u6076\u610f\u7684\u70b9\u8bc4\u8005,\u5bf9\u521a\u542c\u5230\u7684\u5bf9\u8bdd\u505a\u4e00\u53e5\u7b80\u77ed\u6bd2\u820c\u70b9\u8bc4\u3002"
 
@@ -207,20 +204,20 @@
     .param p0, "text"    # Ljava/lang/String;
 
     .prologue
-    .line 263
+    .line 273
     if-nez p0, :cond_4
 
     const/4 v2, 0x0
 
-    .line 269
+    .line 279
     :cond_3
     return v2
 
-    .line 264
+    .line 274
     :cond_4
     const/4 v2, 0x0
 
-    .line 265
+    .line 275
     .local v2, "n":I
     const/4 v1, 0x0
 
@@ -232,12 +229,12 @@
 
     if-ge v1, v3, :cond_3
 
-    .line 266
+    .line 276
     invoke-virtual {p0, v1}, Ljava/lang/String;->charAt(I)C
 
     move-result v0
 
-    .line 267
+    .line 277
     .local v0, "c":C
     invoke-static {v0}, Ljava/lang/Character;->isLetterOrDigit(C)Z
 
@@ -247,7 +244,7 @@
 
     add-int/lit8 v2, v2, 0x1
 
-    .line 265
+    .line 275
     :cond_18
     add-int/lit8 v1, v1, 0x1
 
@@ -258,42 +255,42 @@
     .registers 2
 
     .prologue
-    .line 61
+    .line 69
     sget-object v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sInstance:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     if-nez v0, :cond_13
 
-    .line 62
+    .line 70
     const-class v1, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     monitor-enter v1
 
-    .line 63
+    .line 71
     :try_start_7
     sget-object v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sInstance:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     if-nez v0, :cond_12
 
-    .line 64
+    .line 72
     new-instance v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     invoke-direct {v0}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;-><init>()V
 
     sput-object v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sInstance:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
-    .line 66
+    .line 74
     :cond_12
     monitor-exit v1
     :try_end_13
     .catchall {:try_start_7 .. :try_end_13} :catchall_16
 
-    .line 68
+    .line 76
     :cond_13
     sget-object v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sInstance:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     return-object v0
 
-    .line 66
+    .line 74
     :catchall_16
     move-exception v0
 
@@ -310,7 +307,7 @@
     .param p1, "context"    # Landroid/content/Context;
 
     .prologue
-    .line 248
+    .line 265
     monitor-enter p0
 
     :try_start_1
@@ -318,7 +315,7 @@
 
     if-nez v0, :cond_10
 
-    .line 249
+    .line 266
     new-instance v0, Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
 
     invoke-static {p1}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->load(Landroid/content/Context;)Lcom/phicomm/speaker/device/custom/config/AIConfig;
@@ -329,7 +326,7 @@
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->llmClient:Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
 
-    .line 251
+    .line 268
     :cond_10
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->llmClient:Lcom/phicomm/speaker/device/custom/ai/OpenAIClient;
     :try_end_12
@@ -339,46 +336,8 @@
 
     return-object v0
 
-    .line 248
+    .line 265
     :catchall_14
-    move-exception v0
-
-    monitor-exit p0
-
-    throw v0
-.end method
-
-.method private declared-synchronized getTTS()Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-    .registers 2
-
-    .prologue
-    .line 255
-    monitor-enter p0
-
-    :try_start_1
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->ttsClient:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-
-    if-nez v0, :cond_c
-
-    .line 256
-    new-instance v0, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-
-    invoke-direct {v0}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;-><init>()V
-
-    iput-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->ttsClient:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-
-    .line 258
-    :cond_c
-    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->ttsClient:Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
-    :try_end_e
-    .catchall {:try_start_1 .. :try_end_e} :catchall_10
-
-    monitor-exit p0
-
-    return-object v0
-
-    .line 255
-    :catchall_10
     move-exception v0
 
     monitor-exit p0
@@ -390,7 +349,7 @@
     .registers 4
 
     .prologue
-    .line 144
+    .line 146
     invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
     move-result-wide v0
@@ -412,591 +371,627 @@
     goto :goto_b
 .end method
 
-.method private runTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
-    .registers 20
+.method private runTease(Landroid/content/Context;Ljava/lang/String;)V
+    .registers 21
     .param p1, "appContext"    # Landroid/content/Context;
     .param p2, "userText"    # Ljava/lang/String;
-    .param p3, "replyText"    # Ljava/lang/String;
 
     .prologue
-    .line 149
+    .line 151
     move-object/from16 v0, p0
 
-    iget-object v11, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
+    iget-object v13, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
 
-    const/4 v12, 0x0
+    const/4 v14, 0x0
 
-    const/4 v13, 0x1
+    const/4 v15, 0x1
 
-    invoke-virtual {v11, v12, v13}, Ljava/util/concurrent/atomic/AtomicBoolean;->compareAndSet(ZZ)Z
+    invoke-virtual {v13, v14, v15}, Ljava/util/concurrent/atomic/AtomicBoolean;->compareAndSet(ZZ)Z
 
-    move-result v11
+    move-result v13
 
-    if-nez v11, :cond_14
+    if-nez v13, :cond_14
 
-    .line 150
-    const-string v11, "PostTeaser"
+    .line 152
+    const-string v13, "PostTeaser"
 
-    const-string v12, "[TEASE] busy, skip"
+    const-string v14, "[TEASE] busy, skip"
 
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 232
+    .line 249
     :goto_13
     return-void
 
-    .line 155
+    .line 157
     :cond_14
     :try_start_14
     invoke-static {}, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->isTTSPlaying()Z
 
-    move-result v11
+    move-result v13
 
-    if-nez v11, :cond_20
+    if-nez v13, :cond_20
 
     invoke-static {}, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->isMusicPlaying()Z
 
-    move-result v11
+    move-result v13
 
-    if-eqz v11, :cond_30
+    if-eqz v13, :cond_30
 
-    .line 156
+    .line 158
     :cond_20
-    const-string v11, "PostTeaser"
+    const-string v13, "PostTeaser"
 
-    const-string v12, "[TEASE] audio playing, skip"
+    const-string v14, "[TEASE] audio playing, skip"
 
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
     :try_end_27
-    .catch Ljava/lang/Throwable; {:try_start_14 .. :try_end_27} :catch_dc
-    .catchall {:try_start_14 .. :try_end_27} :catchall_119
+    .catch Ljava/lang/Throwable; {:try_start_14 .. :try_end_27} :catch_c7
+    .catchall {:try_start_14 .. :try_end_27} :catchall_104
 
-    .line 230
+    .line 247
     move-object/from16 v0, p0
 
-    iget-object v11, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
+    iget-object v13, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
 
-    const/4 v12, 0x0
+    const/4 v14, 0x0
 
-    invoke-virtual {v11, v12}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
+    invoke-virtual {v13, v14}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
 
     goto :goto_13
 
-    .line 159
+    .line 161
     :cond_30
     :try_start_30
-    const-string v11, "PostTeaser"
+    const-string v13, "PostTeaser"
 
-    new-instance v12, Ljava/lang/StringBuilder;
+    new-instance v14, Ljava/lang/StringBuilder;
 
-    invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
+    invoke-direct {v14}, Ljava/lang/StringBuilder;-><init>()V
 
-    const-string v13, "[TEASE] start for: user=\""
+    const-string v15, "[TEASE] start for: user=\""
 
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v14, v15}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    move-result-object v12
-
-    move-object/from16 v0, p2
-
-    invoke-virtual {v12, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    const-string v13, "\" reply=\""
-
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    move-object/from16 v0, p3
-
-    invoke-virtual {v12, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    const-string v13, "\""
-
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    invoke-virtual {v12}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v12
-
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
-
-    .line 162
-    new-instance v11, Ljava/lang/StringBuilder;
-
-    invoke-direct {v11}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v12, "\u7528\u6237:\u300c"
-
-    invoke-virtual {v11, v12}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v11
+    move-result-object v14
 
     move-object/from16 v0, p2
 
-    invoke-virtual {v11, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v14, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    move-result-object v11
+    move-result-object v14
 
-    const-string v12, "\u300d\n\u673a\u5668:\u300c"
+    const-string v15, "\""
 
-    invoke-virtual {v11, v12}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-virtual {v14, v15}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    move-result-object v11
+    move-result-object v14
 
-    move-object/from16 v0, p3
+    invoke-virtual {v14}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
-    invoke-virtual {v11, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    move-result-object v14
 
-    move-result-object v11
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
 
-    const-string v12, "\u300d"
+    .line 166
+    new-instance v13, Ljava/lang/StringBuilder;
 
-    invoke-virtual {v11, v12}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    invoke-direct {v13}, Ljava/lang/StringBuilder;-><init>()V
 
-    move-result-object v11
+    const-string v14, "\u7528\u6237\u521a\u624d\u5bf9\u667a\u80fd\u97f3\u7bb1\u8bf4:\u300c"
 
-    invoke-virtual {v11}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    invoke-virtual {v13, v14}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v13
+
+    move-object/from16 v0, p2
+
+    invoke-virtual {v13, v0}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v13
+
+    const-string v14, "\u300d"
+
+    invoke-virtual {v13, v14}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v13
+
+    invoke-virtual {v13}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v2
 
-    .line 164
+    .line 167
     .local v2, "dialogue":Ljava/lang/String;
     invoke-direct/range {p0 .. p0}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->buildSystemPrompt()Ljava/lang/String;
 
-    move-result-object v5
+    move-result-object v6
 
-    .line 165
-    .local v5, "sysPrompt":Ljava/lang/String;
-    const-string v9, "\u4e0a\u9762\u662f\u4f60\u521a\u65c1\u542c\u5230\u7684\u4e00\u6bb5\u7528\u6237\u548c\u667a\u80fd\u97f3\u7bb1\u7684\u5bf9\u8bdd\u8bb0\u5f55\u3002\u8bf7\u57fa\u4e8e\u8fd9\u6bb5\u5bf9\u8bdd,\u7528\u4f60\u7684\u5634\u8d31\u98ce\u683c\u5bf9\u8fd9\u4f4d\u7528\u6237\u6765\u4e00\u53e5\u7b80\u77ed\u8c03\u4f83\u3002\u8981\u6c42: \u53ea\u56de\u590d\u8c03\u4f83\u90a3\u4e00\u53e5\u8bdd,\u4e0d\u8d85\u8fc7 25 \u4e2a\u5b57,\u4e0d\u8981\u4efb\u4f55\u89e3\u91ca\u6216\u524d\u7f00\u3002"
+    .line 168
+    .local v6, "sysPrompt":Ljava/lang/String;
+    const-string v11, "\u4e0a\u9762\u662f\u7528\u6237\u521a\u5bf9\u667a\u80fd\u97f3\u7bb1\u8bf4\u7684\u4e00\u53e5\u8bdd\u3002\u8bf7\u7528\u4f60\u7684\u5634\u8d31\u98ce\u683c,\u9488\u5bf9\u4ed6\u8bf4\u7684\u8fd9\u53e5\u8bdd\u6765\u4e00\u53e5\u7b80\u77ed\u8c03\u4f83\u3002\u8981\u6c42: \u53ea\u56de\u590d\u8c03\u4f83\u90a3\u4e00\u53e5\u8bdd,\u4e0d\u8d85\u8fc7 25 \u4e2a\u5b57,\u4e0d\u8981\u4efb\u4f55\u89e3\u91ca\u6216\u524d\u7f00,\u4e5f\u4e0d\u8981\u91cd\u590d\u4ed6\u8bf4\u7684\u8bdd\u3001\u4e0d\u8981\u56de\u7b54\u4ed6\u7684\u95ee\u9898\u3002"
 
-    .line 170
-    .local v9, "trigger":Ljava/lang/String;
+    .line 174
+    .local v11, "trigger":Ljava/lang/String;
     new-instance v4, Ljava/util/concurrent/FutureTask;
 
-    new-instance v11, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;
+    new-instance v13, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;
 
     move-object/from16 v0, p0
 
     move-object/from16 v1, p1
 
-    invoke-direct {v11, v0, v1, v2, v5}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;-><init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
+    invoke-direct {v13, v0, v1, v2, v6}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$2;-><init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
 
-    invoke-direct {v4, v11}, Ljava/util/concurrent/FutureTask;-><init>(Ljava/util/concurrent/Callable;)V
-
-    .line 176
-    .local v4, "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Ljava/lang/String;>;"
-    new-instance v10, Ljava/lang/Thread;
-
-    const-string v11, "post-tease-llm"
-
-    invoke-direct {v10, v4, v11}, Ljava/lang/Thread;-><init>(Ljava/lang/Runnable;Ljava/lang/String;)V
-
-    .line 177
-    .local v10, "worker":Ljava/lang/Thread;
-    const/4 v11, 0x1
-
-    invoke-virtual {v10, v11}, Ljava/lang/Thread;->setDaemon(Z)V
-
-    .line 178
-    invoke-virtual {v10}, Ljava/lang/Thread;->start()V
-    :try_end_a5
-    .catch Ljava/lang/Throwable; {:try_start_30 .. :try_end_a5} :catch_dc
-    .catchall {:try_start_30 .. :try_end_a5} :catchall_119
-
-    .line 180
-    const/4 v8, 0x0
-
-    .line 182
-    .local v8, "teaseText":Ljava/lang/String;
-    const-wide/16 v12, 0x3a98
-
-    :try_start_a8
-    sget-object v11, Ljava/util/concurrent/TimeUnit;->MILLISECONDS:Ljava/util/concurrent/TimeUnit;
-
-    invoke-virtual {v4, v12, v13, v11}, Ljava/util/concurrent/FutureTask;->get(JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;
-
-    move-result-object v11
-
-    move-object v0, v11
-
-    check-cast v0, Ljava/lang/String;
-
-    move-object v8, v0
-    :try_end_b2
-    .catch Ljava/util/concurrent/TimeoutException; {:try_start_a8 .. :try_end_b2} :catch_cf
-    .catch Ljava/lang/Exception; {:try_start_a8 .. :try_end_b2} :catch_ff
-    .catch Ljava/lang/Throwable; {:try_start_a8 .. :try_end_b2} :catch_dc
-    .catchall {:try_start_a8 .. :try_end_b2} :catchall_119
-
-    .line 190
-    :goto_b2
-    if-eqz v8, :cond_be
-
-    :try_start_b4
-    invoke-virtual {v8}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v11
-
-    invoke-virtual {v11}, Ljava/lang/String;->isEmpty()Z
-
-    move-result v11
-
-    if-eqz v11, :cond_123
-
-    .line 191
-    :cond_be
-    const-string v11, "PostTeaser"
-
-    const-string v12, "[TEASE] empty response, done"
-
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_c5
-    .catch Ljava/lang/Throwable; {:try_start_b4 .. :try_end_c5} :catch_dc
-    .catchall {:try_start_b4 .. :try_end_c5} :catchall_119
-
-    .line 230
-    move-object/from16 v0, p0
-
-    iget-object v11, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
-
-    const/4 v12, 0x0
-
-    invoke-virtual {v11, v12}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
-
-    goto/16 :goto_13
+    invoke-direct {v4, v13}, Ljava/util/concurrent/FutureTask;-><init>(Ljava/util/concurrent/Callable;)V
 
     .line 183
-    :catch_cf
-    move-exception v7
+    .local v4, "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;>;"
+    new-instance v12, Ljava/lang/Thread;
+
+    const-string v13, "post-tease-llm"
+
+    invoke-direct {v12, v4, v13}, Ljava/lang/Thread;-><init>(Ljava/lang/Runnable;Ljava/lang/String;)V
 
     .line 184
-    .local v7, "te":Ljava/util/concurrent/TimeoutException;
-    const/4 v11, 0x1
+    .local v12, "worker":Ljava/lang/Thread;
+    const/4 v13, 0x1
 
-    :try_start_d1
-    invoke-virtual {v4, v11}, Ljava/util/concurrent/FutureTask;->cancel(Z)Z
+    invoke-virtual {v12, v13}, Ljava/lang/Thread;->setDaemon(Z)V
 
     .line 185
-    const-string v11, "PostTeaser"
-
-    const-string v12, "[TEASE] LLM timeout 15000ms, discard"
-
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->w(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_db
-    .catch Ljava/lang/Throwable; {:try_start_d1 .. :try_end_db} :catch_dc
-    .catchall {:try_start_d1 .. :try_end_db} :catchall_119
-
-    goto :goto_b2
-
-    .line 227
-    .end local v2    # "dialogue":Ljava/lang/String;
-    .end local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Ljava/lang/String;>;"
-    .end local v5    # "sysPrompt":Ljava/lang/String;
-    .end local v7    # "te":Ljava/util/concurrent/TimeoutException;
-    .end local v8    # "teaseText":Ljava/lang/String;
-    .end local v9    # "trigger":Ljava/lang/String;
-    .end local v10    # "worker":Ljava/lang/Thread;
-    :catch_dc
-    move-exception v6
-
-    .line 228
-    .local v6, "t":Ljava/lang/Throwable;
-    :try_start_dd
-    const-string v11, "PostTeaser"
-
-    new-instance v12, Ljava/lang/StringBuilder;
-
-    invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v13, "[TEASE] runTease error: "
-
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    invoke-virtual {v12, v6}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
-
-    move-result-object v12
-
-    invoke-virtual {v12}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v12
-
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_f5
-    .catchall {:try_start_dd .. :try_end_f5} :catchall_119
-
-    .line 230
-    move-object/from16 v0, p0
-
-    iget-object v11, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
-
-    const/4 v12, 0x0
-
-    invoke-virtual {v11, v12}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
-
-    goto/16 :goto_13
-
-    .line 186
-    .end local v6    # "t":Ljava/lang/Throwable;
-    .restart local v2    # "dialogue":Ljava/lang/String;
-    .restart local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Ljava/lang/String;>;"
-    .restart local v5    # "sysPrompt":Ljava/lang/String;
-    .restart local v8    # "teaseText":Ljava/lang/String;
-    .restart local v9    # "trigger":Ljava/lang/String;
-    .restart local v10    # "worker":Ljava/lang/Thread;
-    :catch_ff
-    move-exception v3
+    invoke-virtual {v12}, Ljava/lang/Thread;->start()V
+    :try_end_8d
+    .catch Ljava/lang/Throwable; {:try_start_30 .. :try_end_8d} :catch_c7
+    .catchall {:try_start_30 .. :try_end_8d} :catchall_104
 
     .line 187
-    .local v3, "ee":Ljava/lang/Exception;
-    :try_start_100
-    const-string v11, "PostTeaser"
+    const/4 v5, 0x0
 
-    new-instance v12, Ljava/lang/StringBuilder;
+    .line 189
+    .local v5, "reply":Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;
+    const-wide/16 v14, 0x3a98
 
-    invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
+    :try_start_90
+    sget-object v13, Ljava/util/concurrent/TimeUnit;->MILLISECONDS:Ljava/util/concurrent/TimeUnit;
 
-    const-string v13, "[TEASE] LLM error: "
+    invoke-virtual {v4, v14, v15, v13}, Ljava/util/concurrent/FutureTask;->get(JLjava/util/concurrent/TimeUnit;)Ljava/lang/Object;
 
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    move-result-object v13
 
-    move-result-object v12
+    move-object v0, v13
 
-    invoke-virtual {v12, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+    check-cast v0, Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;
 
-    move-result-object v12
-
-    invoke-virtual {v12}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v12
-
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_118
-    .catch Ljava/lang/Throwable; {:try_start_100 .. :try_end_118} :catch_dc
-    .catchall {:try_start_100 .. :try_end_118} :catchall_119
-
-    goto :goto_b2
-
-    .line 230
-    .end local v2    # "dialogue":Ljava/lang/String;
-    .end local v3    # "ee":Ljava/lang/Exception;
-    .end local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Ljava/lang/String;>;"
-    .end local v5    # "sysPrompt":Ljava/lang/String;
-    .end local v8    # "teaseText":Ljava/lang/String;
-    .end local v9    # "trigger":Ljava/lang/String;
-    .end local v10    # "worker":Ljava/lang/Thread;
-    :catchall_119
-    move-exception v11
-
-    move-object/from16 v0, p0
-
-    iget-object v12, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
-
-    const/4 v13, 0x0
-
-    invoke-virtual {v12, v13}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
-
-    .line 231
-    throw v11
-
-    .line 194
-    .restart local v2    # "dialogue":Ljava/lang/String;
-    .restart local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Ljava/lang/String;>;"
-    .restart local v5    # "sysPrompt":Ljava/lang/String;
-    .restart local v8    # "teaseText":Ljava/lang/String;
-    .restart local v9    # "trigger":Ljava/lang/String;
-    .restart local v10    # "worker":Ljava/lang/Thread;
-    :cond_123
-    :try_start_123
-    invoke-virtual {v8}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v8
-
-    .line 196
-    invoke-virtual {v8}, Ljava/lang/String;->length()I
-
-    move-result v11
-
-    const/4 v12, 0x1
-
-    if-le v11, v12, :cond_15d
-
-    const-string v11, "\""
+    move-object v5, v0
+    :try_end_9a
+    .catch Ljava/util/concurrent/TimeoutException; {:try_start_90 .. :try_end_9a} :catch_ba
+    .catch Ljava/lang/Exception; {:try_start_90 .. :try_end_9a} :catch_ea
+    .catch Ljava/lang/Throwable; {:try_start_90 .. :try_end_9a} :catch_c7
+    .catchall {:try_start_90 .. :try_end_9a} :catchall_104
 
     .line 197
-    invoke-virtual {v8, v11}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+    :goto_9a
+    if-nez v5, :cond_10e
 
-    move-result v11
-
-    if-eqz v11, :cond_13e
-
-    const-string v11, "\""
-
-    invoke-virtual {v8, v11}, Ljava/lang/String;->endsWith(Ljava/lang/String;)Z
-
-    move-result v11
-
-    if-nez v11, :cond_14e
-
-    :cond_13e
-    const-string v11, "\u201c"
+    const/4 v10, 0x0
 
     .line 198
-    invoke-virtual {v8, v11}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
+    .local v10, "teaseText":Ljava/lang/String;
+    :goto_9d
+    if-eqz v10, :cond_a9
 
-    move-result v11
+    :try_start_9f
+    invoke-virtual {v10}, Ljava/lang/String;->trim()Ljava/lang/String;
 
-    if-eqz v11, :cond_15d
+    move-result-object v13
 
-    const-string v11, "\u201d"
+    invoke-virtual {v13}, Ljava/lang/String;->isEmpty()Z
 
-    invoke-virtual {v8, v11}, Ljava/lang/String;->endsWith(Ljava/lang/String;)Z
+    move-result v13
 
-    move-result v11
-
-    if-eqz v11, :cond_15d
+    if-eqz v13, :cond_111
 
     .line 199
-    :cond_14e
-    const/4 v11, 0x1
+    :cond_a9
+    const-string v13, "PostTeaser"
 
-    invoke-virtual {v8}, Ljava/lang/String;->length()I
+    const-string v14, "[TEASE] empty response, done"
 
-    move-result v12
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_b0
+    .catch Ljava/lang/Throwable; {:try_start_9f .. :try_end_b0} :catch_c7
+    .catchall {:try_start_9f .. :try_end_b0} :catchall_104
 
-    add-int/lit8 v12, v12, -0x1
-
-    invoke-virtual {v8, v11, v12}, Ljava/lang/String;->substring(II)Ljava/lang/String;
-
-    move-result-object v11
-
-    invoke-virtual {v11}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v8
-
-    .line 201
-    :cond_15d
-    invoke-virtual {v8}, Ljava/lang/String;->isEmpty()Z
-
-    move-result v11
-
-    if-nez v11, :cond_16a
-
-    invoke-static {v8}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->effectiveLen(Ljava/lang/String;)I
-    :try_end_166
-    .catch Ljava/lang/Throwable; {:try_start_123 .. :try_end_166} :catch_dc
-    .catchall {:try_start_123 .. :try_end_166} :catchall_119
-
-    move-result v11
-
-    const/4 v12, 0x2
-
-    if-ge v11, v12, :cond_174
-
-    .line 230
-    :cond_16a
+    .line 247
     move-object/from16 v0, p0
 
-    iget-object v11, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
+    iget-object v13, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
 
-    const/4 v12, 0x0
+    const/4 v14, 0x0
 
-    invoke-virtual {v11, v12}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
+    invoke-virtual {v13, v14}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
 
     goto/16 :goto_13
 
-    .line 205
-    :cond_174
-    :try_start_174
+    .line 190
+    .end local v10    # "teaseText":Ljava/lang/String;
+    :catch_ba
+    move-exception v8
+
+    .line 191
+    .local v8, "te":Ljava/util/concurrent/TimeoutException;
+    const/4 v13, 0x1
+
+    :try_start_bc
+    invoke-virtual {v4, v13}, Ljava/util/concurrent/FutureTask;->cancel(Z)Z
+
+    .line 192
+    const-string v13, "PostTeaser"
+
+    const-string v14, "[TEASE] LLM timeout 15000ms, discard"
+
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->w(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_c6
+    .catch Ljava/lang/Throwable; {:try_start_bc .. :try_end_c6} :catch_c7
+    .catchall {:try_start_bc .. :try_end_c6} :catchall_104
+
+    goto :goto_9a
+
+    .line 244
+    .end local v2    # "dialogue":Ljava/lang/String;
+    .end local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;>;"
+    .end local v5    # "reply":Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;
+    .end local v6    # "sysPrompt":Ljava/lang/String;
+    .end local v8    # "te":Ljava/util/concurrent/TimeoutException;
+    .end local v11    # "trigger":Ljava/lang/String;
+    .end local v12    # "worker":Ljava/lang/Thread;
+    :catch_c7
+    move-exception v7
+
+    .line 245
+    .local v7, "t":Ljava/lang/Throwable;
+    :try_start_c8
+    const-string v13, "PostTeaser"
+
+    new-instance v14, Ljava/lang/StringBuilder;
+
+    invoke-direct {v14}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v15, "[TEASE] runTease error: "
+
+    invoke-virtual {v14, v15}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v14
+
+    invoke-virtual {v14, v7}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v14
+
+    invoke-virtual {v14}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v14
+
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_e0
+    .catchall {:try_start_c8 .. :try_end_e0} :catchall_104
+
+    .line 247
     move-object/from16 v0, p0
 
-    iput-object v8, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseText:Ljava/lang/String;
+    iget-object v13, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
 
-    .line 206
-    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+    const/4 v14, 0x0
 
-    move-result-wide v12
+    invoke-virtual {v13, v14}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
+
+    goto/16 :goto_13
+
+    .line 193
+    .end local v7    # "t":Ljava/lang/Throwable;
+    .restart local v2    # "dialogue":Ljava/lang/String;
+    .restart local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;>;"
+    .restart local v5    # "reply":Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;
+    .restart local v6    # "sysPrompt":Ljava/lang/String;
+    .restart local v11    # "trigger":Ljava/lang/String;
+    .restart local v12    # "worker":Ljava/lang/Thread;
+    :catch_ea
+    move-exception v3
+
+    .line 194
+    .local v3, "ee":Ljava/lang/Exception;
+    :try_start_eb
+    const-string v13, "PostTeaser"
+
+    new-instance v14, Ljava/lang/StringBuilder;
+
+    invoke-direct {v14}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v15, "[TEASE] LLM error: "
+
+    invoke-virtual {v14, v15}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v14
+
+    invoke-virtual {v14, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
+
+    move-result-object v14
+
+    invoke-virtual {v14}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v14
+
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_103
+    .catch Ljava/lang/Throwable; {:try_start_eb .. :try_end_103} :catch_c7
+    .catchall {:try_start_eb .. :try_end_103} :catchall_104
+
+    goto :goto_9a
+
+    .line 247
+    .end local v2    # "dialogue":Ljava/lang/String;
+    .end local v3    # "ee":Ljava/lang/Exception;
+    .end local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;>;"
+    .end local v5    # "reply":Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;
+    .end local v6    # "sysPrompt":Ljava/lang/String;
+    .end local v11    # "trigger":Ljava/lang/String;
+    .end local v12    # "worker":Ljava/lang/Thread;
+    :catchall_104
+    move-exception v13
 
     move-object/from16 v0, p0
 
-    iput-wide v12, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseAt:J
+    iget-object v14, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
 
-    .line 207
-    const-string v11, "PostTeaser"
+    const/4 v15, 0x0
 
-    new-instance v12, Ljava/lang/StringBuilder;
+    invoke-virtual {v14, v15}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
 
-    invoke-direct {v12}, Ljava/lang/StringBuilder;-><init>()V
+    .line 248
+    throw v13
 
-    const-string v13, "[TEASE] play: \""
+    .line 197
+    .restart local v2    # "dialogue":Ljava/lang/String;
+    .restart local v4    # "future":Ljava/util/concurrent/FutureTask;, "Ljava/util/concurrent/FutureTask<Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;>;"
+    .restart local v5    # "reply":Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;
+    .restart local v6    # "sysPrompt":Ljava/lang/String;
+    .restart local v11    # "trigger":Ljava/lang/String;
+    .restart local v12    # "worker":Ljava/lang/Thread;
+    :cond_10e
+    :try_start_10e
+    iget-object v10, v5, Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;->text:Ljava/lang/String;
 
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    goto :goto_9d
 
-    move-result-object v12
+    .line 202
+    .restart local v10    # "teaseText":Ljava/lang/String;
+    :cond_111
+    invoke-virtual {v10}, Ljava/lang/String;->trim()Ljava/lang/String;
 
-    invoke-virtual {v12, v8}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    move-result-object v10
 
-    move-result-object v12
+    .line 204
+    invoke-virtual {v10}, Ljava/lang/String;->length()I
+
+    move-result v13
+
+    const/4 v14, 0x1
+
+    if-le v13, v14, :cond_14b
 
     const-string v13, "\""
 
-    invoke-virtual {v12, v13}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+    .line 205
+    invoke-virtual {v10, v13}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
-    move-result-object v12
+    move-result v13
 
-    invoke-virtual {v12}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+    if-eqz v13, :cond_12c
 
-    move-result-object v12
+    const-string v13, "\""
 
-    invoke-static {v11, v12}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
+    invoke-virtual {v10, v13}, Ljava/lang/String;->endsWith(Ljava/lang/String;)Z
 
-    .line 210
-    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+    move-result v13
 
-    move-result-wide v12
+    if-nez v13, :cond_13c
 
-    const-wide/16 v14, 0x61a8
+    :cond_12c
+    const-string v13, "\u201c"
 
-    add-long/2addr v12, v14
+    .line 206
+    invoke-virtual {v10, v13}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
-    sput-wide v12, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sEchoGuardUntil:J
+    move-result v13
+
+    if-eqz v13, :cond_14b
+
+    const-string v13, "\u201d"
+
+    invoke-virtual {v10, v13}, Ljava/lang/String;->endsWith(Ljava/lang/String;)Z
+
+    move-result v13
+
+    if-eqz v13, :cond_14b
+
+    .line 207
+    :cond_13c
+    const/4 v13, 0x1
+
+    invoke-virtual {v10}, Ljava/lang/String;->length()I
+
+    move-result v14
+
+    add-int/lit8 v14, v14, -0x1
+
+    invoke-virtual {v10, v13, v14}, Ljava/lang/String;->substring(II)Ljava/lang/String;
+
+    move-result-object v13
+
+    invoke-virtual {v13}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v10
+
+    .line 209
+    :cond_14b
+    invoke-virtual {v10}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v13
+
+    if-nez v13, :cond_158
+
+    invoke-static {v10}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->effectiveLen(Ljava/lang/String;)I
+    :try_end_154
+    .catch Ljava/lang/Throwable; {:try_start_10e .. :try_end_154} :catch_c7
+    .catchall {:try_start_10e .. :try_end_154} :catchall_104
+
+    move-result v13
+
+    const/4 v14, 0x2
+
+    if-ge v13, v14, :cond_162
+
+    .line 247
+    :cond_158
+    move-object/from16 v0, p0
+
+    iget-object v13, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
+
+    const/4 v14, 0x0
+
+    invoke-virtual {v13, v14}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
+
+    goto/16 :goto_13
 
     .line 213
-    invoke-direct/range {p0 .. p0}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->getTTS()Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
+    :cond_162
+    :try_start_162
+    move-object/from16 v0, p0
 
-    move-result-object v11
+    iput-object v10, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseText:Ljava/lang/String;
 
-    new-instance v12, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$3;
+    .line 214
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+
+    move-result-wide v14
 
     move-object/from16 v0, p0
 
-    invoke-direct {v12, v0}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$3;-><init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;)V
+    iput-wide v14, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseAt:J
+
+    .line 215
+    const-string v13, "PostTeaser"
+
+    new-instance v14, Ljava/lang/StringBuilder;
+
+    invoke-direct {v14}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v15, "[TEASE] play: \""
+
+    invoke-virtual {v14, v15}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v14
+
+    invoke-virtual {v14, v10}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v14
+
+    const-string v15, "\""
+
+    invoke-virtual {v14, v15}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v14
+
+    invoke-virtual {v14}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v14
+
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->i(Ljava/lang/String;Ljava/lang/String;)V
+
+    .line 218
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+
+    move-result-wide v14
+
+    const-wide/16 v16, 0x61a8
+
+    add-long v14, v14, v16
+
+    sput-wide v14, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sEchoGuardUntil:J
+
+    .line 223
+    if-nez v5, :cond_1b6
+
+    const/4 v9, 0x0
+
+    .line 224
+    .local v9, "teaseAudio":[B
+    :goto_199
+    if-eqz v9, :cond_1b9
+
+    array-length v13, v9
+
+    if-lez v13, :cond_1b9
+
+    .line 225
+    iget-object v13, v5, Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;->audioFormat:Ljava/lang/String;
+
+    new-instance v14, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$3;
+
+    move-object/from16 v0, p0
+
+    invoke-direct {v14, v0}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$3;-><init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;)V
 
     move-object/from16 v0, p1
 
-    invoke-virtual {v11, v0, v8, v12}, Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;->synthesizeAndPlay(Landroid/content/Context;Ljava/lang/String;Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$TtsCallback;)V
-    :try_end_1b7
-    .catch Ljava/lang/Throwable; {:try_start_174 .. :try_end_1b7} :catch_dc
-    .catchall {:try_start_174 .. :try_end_1b7} :catchall_119
+    invoke-static {v0, v9, v13, v14}, Lcom/phicomm/speaker/device/custom/tts/DoubaoVoicePlayer;->play(Landroid/content/Context;[BLjava/lang/String;Lcom/phicomm/speaker/device/custom/tts/DoubaoVoicePlayer$PlayCallback;)V
+    :try_end_1ac
+    .catch Ljava/lang/Throwable; {:try_start_162 .. :try_end_1ac} :catch_c7
+    .catchall {:try_start_162 .. :try_end_1ac} :catchall_104
 
-    .line 230
+    .line 247
+    :goto_1ac
     move-object/from16 v0, p0
 
-    iget-object v11, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
+    iget-object v13, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->busy:Ljava/util/concurrent/atomic/AtomicBoolean;
 
-    const/4 v12, 0x0
+    const/4 v14, 0x0
 
-    invoke-virtual {v11, v12}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
+    invoke-virtual {v13, v14}, Ljava/util/concurrent/atomic/AtomicBoolean;->set(Z)V
 
     goto/16 :goto_13
+
+    .line 223
+    .end local v9    # "teaseAudio":[B
+    :cond_1b6
+    :try_start_1b6
+    iget-object v9, v5, Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$Reply;->audio:[B
+
+    goto :goto_199
+
+    .line 241
+    .restart local v9    # "teaseAudio":[B
+    :cond_1b9
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
+
+    move-result-wide v14
+
+    const-wide/16 v16, 0x7d0
+
+    add-long v14, v14, v16
+
+    sput-wide v14, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sEchoGuardUntil:J
+
+    .line 242
+    const-string v13, "PostTeaser"
+
+    const-string v14, "[TEASE] \u670d\u52a1\u7aef\u6ca1\u7ed9\u8bed\u97f3, \u672c\u8f6e\u4e0d\u64ad(\u53ea\u7528\u8c46\u5305\u97f3\u8272)"
+
+    invoke-static {v13, v14}, Lcom/unisound/vui/util/LogMgr;->w(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_1ca
+    .catch Ljava/lang/Throwable; {:try_start_1b6 .. :try_end_1ca} :catch_c7
+    .catchall {:try_start_1b6 .. :try_end_1ca} :catchall_104
+
+    goto :goto_1ac
 .end method
 
 
@@ -1005,256 +1000,201 @@
     .registers 3
 
     .prologue
-    .line 138
+    .line 140
     sget-object v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sGen:Ljava/util/concurrent/atomic/AtomicInteger;
 
     invoke-virtual {v0}, Ljava/util/concurrent/atomic/AtomicInteger;->incrementAndGet()I
 
-    .line 139
+    .line 141
     const-string v0, "PostTeaser"
 
     const-string v1, "[TEASE] pending tease cancelled"
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 140
+    .line 142
     return-void
 .end method
 
-.method public maybeTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
-    .registers 10
+.method public maybeTease(Landroid/content/Context;Ljava/lang/String;)V
+    .registers 5
     .param p1, "context"    # Landroid/content/Context;
     .param p2, "userText"    # Ljava/lang/String;
-    .param p3, "replyText"    # Ljava/lang/String;
 
     .prologue
-    .line 85
-    const-wide/16 v4, 0x4b0
+    .line 92
+    const-wide/16 v0, 0x4b0
 
-    move-object v0, p0
+    invoke-virtual {p0, p1, p2, v0, v1}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->maybeTease(Landroid/content/Context;Ljava/lang/String;J)V
 
-    move-object v1, p1
-
-    move-object v2, p2
-
-    move-object v3, p3
-
-    invoke-virtual/range {v0 .. v5}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->maybeTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;J)V
-
-    .line 86
+    .line 93
     return-void
 .end method
 
-.method public maybeTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;J)V
-    .registers 22
+.method public maybeTease(Landroid/content/Context;Ljava/lang/String;J)V
+    .registers 20
     .param p1, "context"    # Landroid/content/Context;
     .param p2, "userText"    # Ljava/lang/String;
-    .param p3, "replyText"    # Ljava/lang/String;
-    .param p4, "delayMs"    # J
+    .param p3, "delayMs"    # J
 
     .prologue
-    .line 95
+    .line 101
     if-nez p1, :cond_3
 
-    .line 134
-    :cond_2
+    .line 136
     :goto_2
     return-void
 
-    .line 99
+    .line 105
     :cond_3
     :try_start_3
-    sget-object v2, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sGen:Ljava/util/concurrent/atomic/AtomicInteger;
+    sget-object v7, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sGen:Ljava/util/concurrent/atomic/AtomicInteger;
 
-    invoke-virtual {v2}, Ljava/util/concurrent/atomic/AtomicInteger;->incrementAndGet()I
+    invoke-virtual {v7}, Ljava/util/concurrent/atomic/AtomicInteger;->incrementAndGet()I
 
-    move-result v4
-
-    .line 102
-    .local v4, "gen":I
-    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
-
-    move-result-wide v8
-
-    .line 103
-    .local v8, "now":J
-    move-object/from16 v0, p0
-
-    iget-wide v2, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseAt:J
-
-    sub-long v2, v8, v2
-
-    const-wide/16 v12, 0x7530
-
-    cmp-long v2, v2, v12
-
-    if-gez v2, :cond_5b
-
-    .line 104
-    const-string v2, "PostTeaser"
-
-    new-instance v3, Ljava/lang/StringBuilder;
-
-    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v5, "[TEASE] cooldown, skip ("
-
-    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    const-wide/16 v12, 0x7530
-
-    move-object/from16 v0, p0
-
-    iget-wide v14, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseAt:J
-
-    sub-long v14, v8, v14
-
-    sub-long/2addr v12, v14
-
-    invoke-virtual {v3, v12, v13}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    const-string v5, "ms left)"
-
-    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v3
-
-    invoke-static {v2, v3}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_40
-    .catch Ljava/lang/Throwable; {:try_start_3 .. :try_end_40} :catch_41
-
-    goto :goto_2
-
-    .line 131
-    .end local v4    # "gen":I
-    .end local v8    # "now":J
-    :catch_41
-    move-exception v10
-
-    .line 132
-    .local v10, "t":Ljava/lang/Throwable;
-    const-string v2, "PostTeaser"
-
-    new-instance v3, Ljava/lang/StringBuilder;
-
-    invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
-
-    const-string v5, "[TEASE] maybeTease error: "
-
-    invoke-virtual {v3, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3, v10}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
-
-    move-result-object v3
-
-    invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
-
-    move-result-object v3
-
-    invoke-static {v2, v3}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
-
-    goto :goto_2
+    move-result v2
 
     .line 108
-    .end local v10    # "t":Ljava/lang/Throwable;
-    .restart local v4    # "gen":I
-    .restart local v8    # "now":J
-    :cond_5b
-    :try_start_5b
-    invoke-static/range {p2 .. p2}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->effectiveLen(Ljava/lang/String;)I
+    .local v2, "gen":I
+    invoke-static {}, Ljava/lang/System;->currentTimeMillis()J
 
-    move-result v2
-
-    const/4 v3, 0x4
-
-    if-lt v2, v3, :cond_69
-
-    invoke-static/range {p3 .. p3}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->effectiveLen(Ljava/lang/String;)I
-
-    move-result v2
-
-    const/4 v3, 0x2
-
-    if-ge v2, v3, :cond_71
+    move-result-wide v4
 
     .line 109
-    :cond_69
-    const-string v2, "PostTeaser"
+    .local v4, "now":J
+    iget-wide v8, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseAt:J
 
-    const-string v3, "[TEASE] text too short, skip"
+    sub-long v8, v4, v8
 
-    invoke-static {v2, v3}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+    const-wide/16 v10, 0x7530
+
+    cmp-long v7, v8, v10
+
+    if-gez v7, :cond_57
+
+    .line 110
+    const-string v7, "PostTeaser"
+
+    new-instance v8, Ljava/lang/StringBuilder;
+
+    invoke-direct {v8}, Ljava/lang/StringBuilder;-><init>()V
+
+    const-string v9, "[TEASE] cooldown, skip ("
+
+    invoke-virtual {v8, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v8
+
+    const-wide/16 v10, 0x7530
+
+    iget-wide v12, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseAt:J
+
+    sub-long v12, v4, v12
+
+    sub-long/2addr v10, v12
+
+    invoke-virtual {v8, v10, v11}, Ljava/lang/StringBuilder;->append(J)Ljava/lang/StringBuilder;
+
+    move-result-object v8
+
+    const-string v9, "ms left)"
+
+    invoke-virtual {v8, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v8
+
+    invoke-virtual {v8}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
+
+    move-result-object v8
+
+    invoke-static {v7, v8}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+    :try_end_3c
+    .catch Ljava/lang/Throwable; {:try_start_3 .. :try_end_3c} :catch_3d
 
     goto :goto_2
 
-    .line 112
-    :cond_71
-    const-string v2, "\u6a21\u578b\u8c03\u7528\u5931\u8d25"
+    .line 133
+    .end local v2    # "gen":I
+    .end local v4    # "now":J
+    :catch_3d
+    move-exception v3
 
-    move-object/from16 v0, p3
+    .line 134
+    .local v3, "t":Ljava/lang/Throwable;
+    const-string v7, "PostTeaser"
 
-    invoke-virtual {v0, v2}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
+    new-instance v8, Ljava/lang/StringBuilder;
 
-    move-result v2
+    invoke-direct {v8}, Ljava/lang/StringBuilder;-><init>()V
 
-    if-nez v2, :cond_2
+    const-string v9, "[TEASE] maybeTease error: "
 
-    move-object/from16 v0, p0
+    invoke-virtual {v8, v9}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    iget-object v2, v0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->lastTeaseText:Ljava/lang/String;
+    move-result-object v8
 
-    move-object/from16 v0, p3
+    invoke-virtual {v8, v3}, Ljava/lang/StringBuilder;->append(Ljava/lang/Object;)Ljava/lang/StringBuilder;
 
-    invoke-virtual {v0, v2}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+    move-result-object v8
 
-    move-result v2
+    invoke-virtual {v8}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
-    if-nez v2, :cond_2
+    move-result-object v8
 
-    .line 116
+    invoke-static {v7, v8}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
+
+    goto :goto_2
+
+    .line 114
+    .end local v3    # "t":Ljava/lang/Throwable;
+    .restart local v2    # "gen":I
+    .restart local v4    # "now":J
+    :cond_57
+    :try_start_57
+    invoke-static/range {p2 .. p2}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->effectiveLen(Ljava/lang/String;)I
+
+    move-result v7
+
+    const/4 v8, 0x4
+
+    if-ge v7, v8, :cond_66
+
+    .line 115
+    const-string v7, "PostTeaser"
+
+    const-string v8, "[TEASE] text too short, skip"
+
+    invoke-static {v7, v8}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
+
+    goto :goto_2
+
+    .line 119
+    :cond_66
     invoke-virtual/range {p2 .. p2}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object v6
 
-    .line 117
+    .line 121
     .local v6, "u":Ljava/lang/String;
-    invoke-virtual/range {p3 .. p3}, Ljava/lang/String;->trim()Ljava/lang/String;
-
-    move-result-object v7
-
-    .line 119
-    .local v7, "r":Ljava/lang/String;
-    new-instance v11, Landroid/os/Handler;
+    new-instance v7, Landroid/os/Handler;
 
     invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
 
-    move-result-object v2
+    move-result-object v8
 
-    invoke-direct {v11, v2}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
+    invoke-direct {v7, v8}, Landroid/os/Handler;-><init>(Landroid/os/Looper;)V
 
-    new-instance v2, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;
+    new-instance v8, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;
 
-    move-object/from16 v3, p0
+    move-object/from16 v0, p1
 
-    move-object/from16 v5, p1
+    invoke-direct {v8, p0, v2, v0, v6}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;-><init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;ILandroid/content/Context;Ljava/lang/String;)V
 
-    invoke-direct/range {v2 .. v7}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;-><init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;ILandroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
+    move-wide/from16 v0, p3
 
-    move-wide/from16 v0, p4
+    invoke-virtual {v7, v8, v0, v1}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
+    :try_end_7f
+    .catch Ljava/lang/Throwable; {:try_start_57 .. :try_end_7f} :catch_3d
 
-    invoke-virtual {v11, v2, v0, v1}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
-    :try_end_a6
-    .catch Ljava/lang/Throwable; {:try_start_5b .. :try_end_a6} :catch_41
-
-    goto/16 :goto_2
+    goto :goto_2
 .end method

@@ -183,12 +183,12 @@ check_handler "PhicommWeatherHandler"
 check_handler "PhicommMusicSearchHandler"
 check_handler "PhicommChatHandler"
 
-# 检查讯飞 TTS 客户端
+# 检查豆包语音播放器(v88 起讯飞 TTS 已移除)
 if [ -d "original_v2/smali/com/phicomm/speaker/device/custom/tts" ]; then
     TTS_SMALI_COUNT=$(find original_v2/smali/com/phicomm/speaker/device/custom/tts -name "*.smali" 2>/dev/null | wc -l | tr -d ' ')
-    echo -e "  ${GREEN}✅${NC} XfyunTtsClient (${TTS_SMALI_COUNT} smali files)"
+    echo -e "  ${GREEN}✅${NC} DoubaoVoicePlayer (${TTS_SMALI_COUNT} smali files)"
 else
-    echo -e "  ${YELLOW}⚠️${NC} XfyunTtsClient (未找到，将使用原厂 TTS)"
+    echo -e "  ${YELLOW}⚠️${NC} DoubaoVoicePlayer (未找到，将使用原厂 TTS)"
 fi
 echo ""
 

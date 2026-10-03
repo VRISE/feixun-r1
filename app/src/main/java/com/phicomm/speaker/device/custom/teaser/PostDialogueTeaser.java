@@ -8,7 +8,7 @@ import com.phicomm.speaker.device.custom.ai.OpenAIClient;
 import com.phicomm.speaker.device.custom.config.AIConfig;
 import com.phicomm.speaker.device.custom.engine.PlaybackStateMonitor;
 import com.phicomm.speaker.device.custom.persona.PersonaConfig;
-import com.phicomm.speaker.device.custom.tts.XfyunTtsClient;
+import com.phicomm.speaker.device.custom.tts.DoubaoVoicePlayer;
 import com.unisound.vui.util.LogMgr;
 
 import java.util.concurrent.Callable;
@@ -30,9 +30,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 5. 【不留痕】调侃不入对话历史(ConversationHistory/PersonaConversationManager 均不写),
  *    只保留 PersonaConfig.EAVESDROPPER 的嘴贱提示词作为调侃的 systemPrompt。
  *
- * 触发链路: PhicommChatHandler 正常回复播完(onTTSEventPlayingEnd)
- *          → maybeTease(context, 用户那句话, 机器的回复)
- *          → 延迟 1.2s → 一次 LLM → 讯飞 TTS 播一句调侃 → 结束。
+ * v87: 调侃只喂【用户那句话】, 不看机器的回答 —— 调侃的对象是用户, 不是复述机器。
+ * v88: 语音统一用豆包随回复带回的音频; 讯飞 TTS 已移除(key 失效), 服务端没给语音就不播。
+ *
+ * 触发链路: PhicommChatHandler 正常回复播完(onTTSEventPlayingEnd / 豆包语音播完)
+ *          → maybeTease(context, 用户那句话)
+ *          → 延迟 1.2s → 一次 LLM(独立话题 r1-teaser) → 豆包语音播一句调侃 → 结束。
  */
 public class PostDialogueTeaser {
     private static final String TAG = "PostTeaser";
@@ -43,9 +46,14 @@ public class PostDialogueTeaser {
     private static final long LLM_BUDGET_MS = 15000;
     /** 两次调侃最小间隔(防刷屏) */
     private static final long TEASE_COOLDOWN_MS = 30000;
-    /** 用户有效发言/机器回复的最短长度(过滤"嗯""好的"之类短交互) */
+    /** 用户有效发言的最短长度(过滤"嗯""好的"之类短交互) */
     private static final int MIN_USER_LEN = 4;
-    private static final int MIN_REPLY_LEN = 2;
+
+    /**
+     * 调侃走独立的豆包话题 id。豆包链按 user 复用会话, 调侃如果和主对话共用一个 id,
+     * 下一轮主回答时豆包会把刚才那句调侃当上下文接着聊 —— 所以分开。
+     */
+    private static final String TEASE_TOPIC = "r1-teaser";
 
     private static volatile PostDialogueTeaser sInstance;
 
@@ -72,7 +80,6 @@ public class PostDialogueTeaser {
     private long lastTeaseAt = 0;
     private String lastTeaseText = null;
     private OpenAIClient llmClient;
-    private XfyunTtsClient ttsClient;
 
     private PostDialogueTeaser() {}
 
@@ -81,16 +88,15 @@ public class PostDialogueTeaser {
      * 默认延迟(仅普通模式兜底用);多轮模式由 ChatHandler 在静音超时、引擎回到唤醒态后再调。
      * 任何条件不满足都直接静默返回,绝不抛异常影响主流程。
      */
-    public void maybeTease(final Context context, final String userText, final String replyText) {
-        maybeTease(context, userText, replyText, TEASE_DELAY_MS);
+    public void maybeTease(final Context context, final String userText) {
+        maybeTease(context, userText, TEASE_DELAY_MS);
     }
 
     /**
      * v86: 带延迟版本。调用方保证此刻引擎不在"监听用户下一句"的状态(否则调侃会被
      * 麦克风收走变成自问自答)。中途任何新交互都会经 cancelPending() 作废本任务。
      */
-    public void maybeTease(final Context context, final String userText, final String replyText,
-                           final long delayMs) {
+    public void maybeTease(final Context context, final String userText, final long delayMs) {
         try {
             if (context == null) {
                 return;
@@ -104,17 +110,13 @@ public class PostDialogueTeaser {
                 LogMgr.d(TAG, "[TEASE] cooldown, skip (" + (TEASE_COOLDOWN_MS - (now - lastTeaseAt)) + "ms left)");
                 return;
             }
-            // 有效性过滤
-            if (effectiveLen(userText) < MIN_USER_LEN || effectiveLen(replyText) < MIN_REPLY_LEN) {
+            // 有效性过滤: 只看用户那句话(v87 起不再需要机器的回答)
+            if (effectiveLen(userText) < MIN_USER_LEN) {
                 LogMgr.d(TAG, "[TEASE] text too short, skip");
-                return;
-            }
-            if (replyText.contains("模型调用失败") || replyText.equals(lastTeaseText)) {
                 return;
             }
 
             final String u = userText.trim();
-            final String r = replyText.trim();
 
             new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                 @Override
@@ -125,7 +127,7 @@ public class PostDialogueTeaser {
                                 + " -> " + sGen.get() + "), skip");
                         return;
                     }
-                    runTease(context.getApplicationContext(), u, r);
+                    runTease(context.getApplicationContext(), u);
                 }
             }, delayMs);
         } catch (Throwable t) {
@@ -144,7 +146,7 @@ public class PostDialogueTeaser {
         return System.currentTimeMillis() < sEchoGuardUntil;
     }
 
-    private void runTease(final Context appContext, final String userText, final String replyText) {
+    private void runTease(final Context appContext, final String userText) {
         // v86: busy 挪到这里 —— 等待窗口期不再占住 busy, 新一轮调侃可以随时取代旧的
         if (!busy.compareAndSet(false, true)) {
             LogMgr.d(TAG, "[TEASE] busy, skip");
@@ -156,30 +158,35 @@ public class PostDialogueTeaser {
                 LogMgr.d(TAG, "[TEASE] audio playing, skip");
                 return;
             }
-            LogMgr.i(TAG, "[TEASE] start for: user=\"" + userText + "\" reply=\"" + replyText + "\"");
+            LogMgr.i(TAG, "[TEASE] start for: user=\"" + userText + "\"");
 
             // ---- 一次 LLM 调用,15 秒预算,匿名内部类(本工程 min-sdk 不支持 lambda) ----
-            final String dialogue =
-                    "用户:「" + userText + "」\n机器:「" + replyText + "」";
+            // v87: 只喂【用户那句话】。调侃的对象是用户, 不需要(也不要)看机器刚答了什么,
+            //      否则模型容易去复述/评价自己那条回答, 而不是吐槽用户。
+            final String dialogue = "用户刚才对智能音箱说:「" + userText + "」";
             final String sysPrompt = buildSystemPrompt();
             final String trigger =
-                    "上面是你刚旁听到的一段用户和智能音箱的对话记录。"
-                    + "请基于这段对话,用你的嘴贱风格对这位用户来一句简短调侃。"
-                    + "要求: 只回复调侃那一句话,不超过 25 个字,不要任何解释或前缀。";
+                    "上面是用户刚对智能音箱说的一句话。"
+                    + "请用你的嘴贱风格,针对他说的这句话来一句简短调侃。"
+                    + "要求: 只回复调侃那一句话,不超过 25 个字,不要任何解释或前缀,"
+                    + "也不要重复他说的话、不要回答他的问题。";
 
-            FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
+            FutureTask<OpenAIClient.Reply> future = new FutureTask<OpenAIClient.Reply>(
+                    new Callable<OpenAIClient.Reply>() {
                 @Override
-                public String call() throws Exception {
-                    return getLLM(appContext).chatWithHistory(trigger, dialogue, sysPrompt);
+                public OpenAIClient.Reply call() throws Exception {
+                    // 调侃走独立的豆包话题: 混进主话题的话, 豆包下一轮会把调侃当上下文接着聊
+                    return getLLM(appContext).chatWithHistoryEx(
+                            trigger, dialogue, sysPrompt, TEASE_TOPIC);
                 }
             });
             Thread worker = new Thread(future, "post-tease-llm");
             worker.setDaemon(true);
             worker.start();
 
-            String teaseText = null;
+            OpenAIClient.Reply reply = null;
             try {
-                teaseText = future.get(LLM_BUDGET_MS, TimeUnit.MILLISECONDS);
+                reply = future.get(LLM_BUDGET_MS, TimeUnit.MILLISECONDS);
             } catch (TimeoutException te) {
                 future.cancel(true);
                 LogMgr.w(TAG, "[TEASE] LLM timeout " + LLM_BUDGET_MS + "ms, discard");
@@ -187,6 +194,7 @@ public class PostDialogueTeaser {
                 LogMgr.e(TAG, "[TEASE] LLM error: " + ee);
             }
 
+            String teaseText = (reply == null) ? null : reply.text;
             if (teaseText == null || teaseText.trim().isEmpty()) {
                 LogMgr.d(TAG, "[TEASE] empty response, done");
                 return;
@@ -210,20 +218,29 @@ public class PostDialogueTeaser {
             sEchoGuardUntil = System.currentTimeMillis() + 25000;
 
             // ---- 播一句就结束(一次性,不重入) ----
-            getTTS().synthesizeAndPlay(appContext, teaseText, new XfyunTtsClient.TtsCallback() {
-                @Override
-                public void onSuccess(String audioPath) {
-                    // 播完(或开始播)把防护窗收紧到 2 秒余量, 尽快还用户正常对话
-                    sEchoGuardUntil = System.currentTimeMillis() + 2000;
-                    LogMgr.d(TAG, "[TEASE] tts ok: " + audioPath);
-                }
+            // v88: 只用豆包随回复带回的语音(整机一个音色)。讯飞 TTS 已彻底移除(key 失效),
+            //      没有音频就干脆不播 —— 绝不拿别的音色冒充。
+            byte[] teaseAudio = (reply == null) ? null : reply.audio;
+            if (teaseAudio != null && teaseAudio.length > 0) {
+                DoubaoVoicePlayer.play(appContext, teaseAudio, reply.audioFormat,
+                        new DoubaoVoicePlayer.PlayCallback() {
+                            @Override
+                            public void onComplete() {
+                                sEchoGuardUntil = System.currentTimeMillis() + 2000;
+                                LogMgr.d(TAG, "[TEASE] 豆包语音播完");
+                            }
 
-                @Override
-                public void onError(String error) {
-                    sEchoGuardUntil = System.currentTimeMillis() + 2000;
-                    LogMgr.e(TAG, "[TEASE] tts error: " + error);
-                }
-            });
+                            @Override
+                            public void onError(String error) {
+                                sEchoGuardUntil = System.currentTimeMillis() + 2000;
+                                LogMgr.e(TAG, "[TEASE] 豆包语音播放失败: " + error);
+                            }
+                        });
+            } else {
+                // 端点不是豆包链(比如直连智谱), 没有配套语音 → 本轮不调侃, 保持整机音色统一
+                sEchoGuardUntil = System.currentTimeMillis() + 2000;
+                LogMgr.w(TAG, "[TEASE] 服务端没给语音, 本轮不播(只用豆包音色)");
+            }
         } catch (Throwable t) {
             LogMgr.e(TAG, "[TEASE] runTease error: " + t);
         } finally {
@@ -249,13 +266,6 @@ public class PostDialogueTeaser {
             llmClient = new OpenAIClient(AIConfig.load(context));
         }
         return llmClient;
-    }
-
-    private synchronized XfyunTtsClient getTTS() {
-        if (ttsClient == null) {
-            ttsClient = new XfyunTtsClient();
-        }
-        return ttsClient;
     }
 
     /** 统计有效字符数(中文/字母/数字),过滤标点空白 */

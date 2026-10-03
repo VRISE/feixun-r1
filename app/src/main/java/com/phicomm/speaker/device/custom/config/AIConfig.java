@@ -95,6 +95,27 @@ public class AIConfig {
     private static final int DEFAULT_MAX_TOKENS = 1024;
 
     /**
+     * 回答用什么声音读出来。
+     *   doubao       → 豆包网页端自己的声音，走局域网豆包链
+     *                   （doubao-server 的 /v1/chat/completions 会在回复里
+     *                     带上 message.audio.data 的 mp3 base64）【默认】
+     *   空 / factory → 原厂 TTS（ctx.playTTS，引擎原生音色）
+     *
+     * ⚠️ doubao 只在 base_url 指向【豆包链的那道门】(默认 :7790) 时才拿得到音频；
+     *    指向智谱/方舟这类官方端点时服务端不认识 audio 字段，会被忽略，
+     *    此时自动退回原厂 TTS，不会出错。
+     *
+     * v88: 讯飞 TTS 已整体移除（key 失效且音色与豆包不统一），不再有 xfyun 选项。
+     */
+    private static final String DEFAULT_TTS = "doubao";
+
+    /**
+     * 豆包链按 user 分话题（同一个 user 复用同一个豆包会话，换 id = 另起话题）。
+     * 音箱固定用一个 id，这样豆包那边一直挂在同一个会话上，有连续记忆。
+     */
+    private static final String DEFAULT_USER = "r1-speaker";
+
+    /**
      * ── 强制下发开关 ──────────────────────────────────────────────
      * 默认 false = 「设备配置优先」：用户自己在 ai_config.ini 里填的值说了算，
      * 代码默认值只在文件没填时才兜底（这样用户改过的 key / 模型不会被升级覆盖掉）。
@@ -130,6 +151,8 @@ public class AIConfig {
     private int maxTokens;
     private String thinking;
     private int configVersion;
+    private String tts;
+    private String user;
     
     /**
      * 加载配置文件
@@ -212,6 +235,13 @@ public class AIConfig {
         if (this.apiKey == null || this.apiKey.isEmpty()) {
             this.apiKey = DEFAULT_API_KEY;
         }
+        // tts / user 只补默认值, 不覆盖用户填过的(否则每次升级都会把豆包音色冲掉)
+        if (this.tts == null) {
+            this.tts = DEFAULT_TTS;
+        }
+        if (this.user == null || this.user.isEmpty()) {
+            this.user = DEFAULT_USER;
+        }
     }
 
     /**
@@ -271,6 +301,8 @@ public class AIConfig {
             sb.append("temperature = ").append(temperature).append("\n");
             sb.append("max_tokens = ").append(maxTokens).append("\n");
             sb.append("thinking = ").append(thinking).append("\n");
+            sb.append("tts = ").append(tts == null ? "" : tts).append("\n");
+            sb.append("user = ").append(user == null ? "" : user).append("\n");
             sb.append("config_version = ").append(configVersion).append("\n");
             
             fos.write(sb.toString().getBytes("UTF-8"));
@@ -295,6 +327,8 @@ public class AIConfig {
         this.maxTokens = DEFAULT_MAX_TOKENS;
         this.thinking = DEFAULT_THINKING;
         this.configVersion = 0;   // 0 = 老配置文件(还没有版本字段), 会触发迁移
+        this.tts = DEFAULT_TTS;
+        this.user = DEFAULT_USER;
         
         try {
             FileInputStream fis = new FileInputStream(configFile);
@@ -365,6 +399,12 @@ public class AIConfig {
                                     LogMgr.e(TAG, "Invalid config_version value: " + value);
                                 }
                                 break;
+                            case "tts":
+                                if (!value.isEmpty()) this.tts = value;
+                                break;
+                            case "user":
+                                if (!value.isEmpty()) this.user = value;
+                                break;
                         }
                     }
                 }
@@ -392,6 +432,8 @@ public class AIConfig {
         config.maxTokens = DEFAULT_MAX_TOKENS;
         config.thinking = DEFAULT_THINKING;
         config.configVersion = CURRENT_CONFIG_VERSION;
+        config.tts = DEFAULT_TTS;
+        config.user = DEFAULT_USER;
         
         config.save(context);
         LogMgr.d(TAG, "Default config created");
@@ -433,6 +475,16 @@ public class AIConfig {
      */
     public String getThinking() {
         return thinking;
+    }
+
+    /** 回答用什么声音读: doubao / xfyun / 空=原厂 */
+    public String getTts() {
+        return tts == null ? "" : tts.trim();
+    }
+
+    /** 豆包链按这个 id 分话题(同一 id 复用同一个豆包会话) */
+    public String getUser() {
+        return (user == null || user.trim().isEmpty()) ? DEFAULT_USER : user.trim();
     }
     
     // Setter 方法(供后续修改配置使用)

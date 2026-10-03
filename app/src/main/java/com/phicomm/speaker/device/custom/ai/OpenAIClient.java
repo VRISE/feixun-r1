@@ -1,5 +1,6 @@
 package com.phicomm.speaker.device.custom.ai;
 
+import android.util.Base64;
 import android.util.Log;
 
 import com.phicomm.speaker.device.custom.config.AIConfig;
@@ -40,9 +41,28 @@ public class OpenAIClient {
     private static final long RETRY_BACKOFF_MS = 3000L;
 
     private AIConfig config;
-    
+
     public OpenAIClient(AIConfig config) {
         this.config = config;
+    }
+
+    /**
+     * 一次大模型调用的结果: 文本 + (可选)服务端顺带合成的语音。
+     *
+     * audio 只有走【豆包链那道门】时才会有 —— 豆包网页端的朗读接口
+     * (frontier VoiceGenie) 是按 message_id 去会话库里取"豆包刚答过的那条"来读的,
+     * 所以它能且只能读豆包自己的回答, 正好是音箱要的。
+     * 官方端点(智谱/方舟)不认识 audio 字段, 会直接忽略 → audio 为 null → 退回原厂 TTS。
+     */
+    public static class Reply {
+        /** 回答文本 */
+        public String text;
+        /** 语音字节(mp3/ogg), 没有则为 null */
+        public byte[] audio;
+        /** 音频格式, 如 mp3 */
+        public String audioFormat;
+        /** 服务端给的音频相对地址(兜底用, 一般直接用内联的 audio 字节) */
+        public String audioUrl;
     }
     
     /**
@@ -63,6 +83,16 @@ public class OpenAIClient {
      * @return 大模型回复文本,失败返回 null
      */
     public String chatWithHistory(String userInput, String conversationHistory, String systemPrompt) {
+        Reply r = chatWithHistoryEx(userInput, conversationHistory, systemPrompt, null);
+        return (r == null) ? null : r.text;
+    }
+
+    /**
+     * 带语音的调用。topicUser 给豆包链分话题用(同一个 id 复用同一个豆包会话,
+     * 传 null 则用配置里的 user)。
+     */
+    public Reply chatWithHistoryEx(String userInput, String conversationHistory, String systemPrompt,
+                                   String topicUser) {
         if (userInput == null || userInput.isEmpty()) {
             LogMgr.e(TAG, "Empty user input");
             return null;
@@ -70,7 +100,8 @@ public class OpenAIClient {
         
         try {
             // 1. 构建请求体
-            String requestBody = buildRequestBodyWithHistory(userInput, conversationHistory, systemPrompt);
+            String requestBody = buildRequestBodyWithHistory(userInput, conversationHistory,
+                    systemPrompt, topicUser);
             
             // 构建完整 URL
             String fullUrl = config.getBaseUrl();
@@ -99,11 +130,13 @@ public class OpenAIClient {
             LogMgr.d(TAG, response);
             
             // 3. 解析响应
-            String reply = parseResponse(response);
+            Reply reply = parseReply(response);
             
-            if (reply != null && !reply.isEmpty()) {
+            if (reply != null && reply.text != null && !reply.text.isEmpty()) {
                 LogMgr.d(TAG, "=== 大模型解析后回复 ===");
-                LogMgr.d(TAG, reply);
+                LogMgr.d(TAG, reply.text);
+                LogMgr.d(TAG, "[音频] " + (reply.audio == null ? "无 → 退回原厂 TTS"
+                        : reply.audio.length + " 字节 / " + reply.audioFormat));
                 return reply;
             } else {
                 LogMgr.e(TAG, "=== 大模型响应解析失败 ===");
@@ -124,7 +157,8 @@ public class OpenAIClient {
      * @param conversationHistory 格式化的对话历史(可选)
      * @param systemPrompt 系统提示词(可选)
      */
-    private String buildRequestBodyWithHistory(String userInput, String conversationHistory, String systemPrompt) {
+    private String buildRequestBodyWithHistory(String userInput, String conversationHistory,
+                                               String systemPrompt, String topicUser) {
         try {
             JSONObject json = new JSONObject();
             
@@ -184,6 +218,18 @@ public class OpenAIClient {
                 json.put("thinking", thinkingObj);
             }
 
+            // 豆包链专用: 让服务端顺带把这条回答用豆包自己的声音合成出来。
+            // 只有 tts=doubao 时才发; 官方端点(智谱/方舟)不认识这个字段会被忽略,
+            // 那时 audio 为 null, 音箱自动退回原厂 TTS, 不会出错。
+            if ("doubao".equalsIgnoreCase(config.getTts())) {
+                json.put("audio", new JSONObject());
+            }
+
+            // 豆包链按 user 分话题: 同一个 id 复用同一个豆包会话(跨轮有记忆),
+            // 换 id 就另起一个话题。调侃走另一个 id, 免得污染主对话。
+            json.put("user", (topicUser == null || topicUser.trim().isEmpty())
+                    ? config.getUser() : topicUser.trim());
+
             return json.toString();
             
         } catch (Exception e) {
@@ -236,6 +282,53 @@ public class OpenAIClient {
         }
     }
     
+    /**
+     * 解析 OpenAI 响应: 文本 + (豆包链顺带合成的)语音
+     *
+     * 豆包链会在 message.audio 里给回:
+     *   {"id": "...", "format": "mp3", "data": "<base64>", "url": "/v1/audio/<id>"}
+     * data 是整段 mp3 的 base64, 直接解码落盘就能播, 不用再发一次 HTTP 去取。
+     */
+    private Reply parseReply(String json) {
+        try {
+            JSONObject root = new JSONObject(json);
+
+            if (root.has("error")) {
+                JSONObject error = root.getJSONObject("error");
+                LogMgr.e(TAG, "API error: " + error.optString("message", "Unknown error"));
+                return null;
+            }
+
+            JSONArray choices = root.getJSONArray("choices");
+            if (choices.length() == 0) {
+                return null;
+            }
+            JSONObject message = choices.getJSONObject(0).getJSONObject("message");
+
+            Reply r = new Reply();
+            r.text = message.optString("content", "");
+
+            JSONObject audio = message.optJSONObject("audio");
+            if (audio != null) {
+                r.audioFormat = audio.optString("format", "mp3");
+                r.audioUrl = audio.optString("url", null);
+                String data = audio.optString("data", null);
+                if (data != null && data.length() > 0) {
+                    try {
+                        r.audio = Base64.decode(data, Base64.DEFAULT);
+                    } catch (Exception e) {
+                        LogMgr.e(TAG, "音频 base64 解码失败: " + e);
+                        r.audio = null;
+                    }
+                }
+            }
+            return r;
+        } catch (Exception e) {
+            LogMgr.e(TAG, "Failed to parse response: " + e);
+            return null;
+        }
+    }
+
     /**
      * HTTP POST JSON 请求
      * 复用 NetEaseMusicClient 的模式

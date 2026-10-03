@@ -8,7 +8,7 @@
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingMethod;
-    value = Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->maybeTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;J)V
+    value = Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->maybeTease(Landroid/content/Context;Ljava/lang/String;J)V
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;
@@ -24,18 +24,16 @@
 
 .field final synthetic val$gen:I
 
-.field final synthetic val$r:Ljava/lang/String;
-
 .field final synthetic val$u:Ljava/lang/String;
 
 
 # direct methods
-.method constructor <init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;ILandroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
-    .registers 6
+.method constructor <init>(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;ILandroid/content/Context;Ljava/lang/String;)V
+    .registers 5
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     .prologue
-    .line 119
+    .line 121
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->this$0:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     iput p2, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->val$gen:I
@@ -43,8 +41,6 @@
     iput-object p3, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->val$context:Landroid/content/Context;
 
     iput-object p4, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->val$u:Ljava/lang/String;
-
-    iput-object p5, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->val$r:Ljava/lang/String;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
@@ -54,10 +50,10 @@
 
 # virtual methods
 .method public run()V
-    .registers 5
+    .registers 4
 
     .prologue
-    .line 123
+    .line 125
     # getter for: Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sGen:Ljava/util/concurrent/atomic/AtomicInteger;
     invoke-static {}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$000()Ljava/util/concurrent/atomic/AtomicInteger;
 
@@ -71,7 +67,7 @@
 
     if-eq v0, v1, :cond_3f
 
-    .line 124
+    .line 126
     const-string v0, "PostTeaser"
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -96,7 +92,7 @@
 
     move-result-object v1
 
-    .line 125
+    .line 127
     # getter for: Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->sGen:Ljava/util/concurrent/atomic/AtomicInteger;
     invoke-static {}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$000()Ljava/util/concurrent/atomic/AtomicInteger;
 
@@ -120,14 +116,14 @@
 
     move-result-object v1
 
-    .line 124
+    .line 126
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 129
+    .line 131
     :goto_3e
     return-void
 
-    .line 128
+    .line 130
     :cond_3f
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->this$0:Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
@@ -139,10 +135,8 @@
 
     iget-object v2, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->val$u:Ljava/lang/String;
 
-    iget-object v3, p0, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser$1;->val$r:Ljava/lang/String;
-
-    # invokes: Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->runTease(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
-    invoke-static {v0, v1, v2, v3}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$100(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
+    # invokes: Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->runTease(Landroid/content/Context;Ljava/lang/String;)V
+    invoke-static {v0, v1, v2}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->access$100(Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;Landroid/content/Context;Ljava/lang/String;)V
 
     goto :goto_3e
 .end method

@@ -8,6 +8,7 @@ import com.phicomm.speaker.device.custom.ai.ConversationHistory;
 import com.phicomm.speaker.device.custom.ai.OpenAIClient;
 import com.phicomm.speaker.device.custom.ai.PersonaConversationManager;
 import com.phicomm.speaker.device.custom.config.AIConfig;
+import com.phicomm.speaker.device.custom.tts.DoubaoVoicePlayer;
 import com.phicomm.speaker.device.custom.engine.PlaybackStateMonitor;
 import com.phicomm.speaker.device.custom.persona.PersonaConfig;
 import com.phicomm.speaker.device.custom.persona.PersonaManager;
@@ -233,6 +234,9 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                 isProcessingRequest = true;  // ⭐ 标记任务开始
                 try {
                     String response;
+                    // v87: 豆包链可能随回复带回这条回答的语音(mp3), 有就用豆包自己的声音播
+                    byte[] llmAudio = null;
+                    String llmAudioFormat = null;
                     
                     // 检查是否是成语接龙启动指令
                     if (!isIdiomGameMode && (userInput.contains("成语接龙") || 
@@ -388,9 +392,15 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                                     + " hist_turns=" + personaHistory.size());
 
                             // 调用带 persona systemPrompt + 该 persona 历史
-                            response = openAIClient.chatWithHistory(userInput, historyText, activeSysPrompt);
+                            OpenAIClient.Reply r = openAIClient.chatWithHistoryEx(
+                                    userInput, historyText, activeSysPrompt, null);
+                            response = (r == null) ? null : r.text;
+                            llmAudio = (r == null) ? null : r.audio;
+                            llmAudioFormat = (r == null) ? null : r.audioFormat;
 
                             LogMgr.d(TAG, "大模型返回: " + response);
+                            LogMgr.d(TAG, "随回复带回的语音: "
+                                    + (llmAudio == null ? "无(用原厂 TTS)" : llmAudio.length + " 字节"));
 
                             // 保存到该 persona 的历史
                             if (response != null && !response.isEmpty()) {
@@ -411,13 +421,40 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                         ctx.stopWakeup();
                         ctx.stopASR();
                         
-                        writeLog("=== 调用原厂 TTS === " + response);
                         currentResponse = response;
                         // ⭐ v84: 本轮回复来自大模型 → 标记允许事后调侃(playingEnd 时消费)
                         if (!isIdiomGameMode) {
                             pendingTease = true;
                         }
-                        ctx.playTTS(response);
+
+                        // ⭐ v87: 豆包链随回复带回了这条回答的语音 → 用豆包自己的声音播。
+                        //    注意 MediaPlayer 播放不会触发引擎的 onTTSEventPlayingEnd,
+                        //    所以播完必须手动走 handleTtsPlayingEnd(), 否则多轮监听
+                        //    和事后调侃都会断在这一步。
+                        if (llmAudio != null && llmAudio.length > 0) {
+                            writeLog("=== 播放豆包语音 === " + response);
+                            LogMgr.i(TAG, "豆包语音播放回答: " + llmAudio.length + " 字节");
+                            final Context appCtx = ctx.androidContext();
+                            DoubaoVoicePlayer.play(appCtx, llmAudio, llmAudioFormat,
+                                    new DoubaoVoicePlayer.PlayCallback() {
+                                        @Override
+                                        public void onComplete() {
+                                            LogMgr.d(TAG, "豆包语音播完 → 手动走 TTS 结束流程");
+                                            handleTtsPlayingEnd();
+                                        }
+
+                                        @Override
+                                        public void onError(String error) {
+                                            LogMgr.e(TAG, "豆包语音播放失败, 退回原厂 TTS: " + error);
+                                            if (currentResponse != null) {
+                                                ctx.playTTS(currentResponse);
+                                            }
+                                        }
+                                    });
+                        } else {
+                            writeLog("=== 调用原厂 TTS === " + response);
+                            ctx.playTTS(response);
+                        }
                     } else {
                         // API 调用失败 - 统一回复
                         LogMgr.e(TAG, "=== API 返回 null, openAIClient=" + openAIClient + " ===");
@@ -468,7 +505,6 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
         final boolean teaseAfterAnswer = pendingTease && !isIdiomGameMode
                 && currentResponse != null && lastUserInput != null;
         final String teaseUser = lastUserInput;
-        final String teaseReply = currentResponse;
 
         // ⭐ v83/v84: 只调侃【大模型成功回复】的对话轮(pendingTease 在 playTTS 前置位,
         //    此处一次性消费)。传统指令(音乐/音量/关机等)不走大模型, 永远不会置位。
@@ -526,8 +562,8 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                         //    也不会被 ASR 收走变成自问自答。中途只要用户说话, 本定时器
                         //    就会被 eventReceived 取消, 调侃顺延到下一轮结束再算。
                         if (teaseAfterAnswer) {
-                            PostDialogueTeaser.get().maybeTease(ctx.androidContext(),
-                                    teaseUser, teaseReply, 800);
+                            // v87: 调侃只看【用户那句话】, 不看豆包的回答
+                            PostDialogueTeaser.get().maybeTease(ctx.androidContext(), teaseUser, 800);
                         }
                     }
                 }
@@ -554,7 +590,7 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        PostDialogueTeaser.get().maybeTease(appCtx, teaseUser, teaseReply, 0);
+                        PostDialogueTeaser.get().maybeTease(appCtx, teaseUser, 0);
                     }
                 }, 2500);
             }

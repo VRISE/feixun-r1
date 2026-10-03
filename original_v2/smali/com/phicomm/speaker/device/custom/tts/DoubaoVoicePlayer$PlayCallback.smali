@@ -1,11 +1,11 @@
-.class public interface abstract Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient$PlayCallback;
+.class public interface abstract Lcom/phicomm/speaker/device/custom/tts/DoubaoVoicePlayer$PlayCallback;
 .super Ljava/lang/Object;
-.source "XfyunTtsClient.java"
+.source "DoubaoVoicePlayer.java"
 
 
 # annotations
 .annotation system Ldalvik/annotation/EnclosingClass;
-    value = Lcom/phicomm/speaker/device/custom/tts/XfyunTtsClient;
+    value = Lcom/phicomm/speaker/device/custom/tts/DoubaoVoicePlayer;
 .end annotation
 
 .annotation system Ldalvik/annotation/InnerClass;

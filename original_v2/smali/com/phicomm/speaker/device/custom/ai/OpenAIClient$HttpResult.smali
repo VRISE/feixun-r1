@@ -27,7 +27,7 @@
     .registers 1
 
     .prologue
-    .line 244
+    .line 337
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
 
     return-void
@@ -38,7 +38,7 @@
     .param p1, "x0"    # Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$1;
 
     .prologue
-    .line 244
+    .line 337
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/ai/OpenAIClient$HttpResult;-><init>()V
 
     return-void
