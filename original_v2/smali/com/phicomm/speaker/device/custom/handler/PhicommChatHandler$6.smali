@@ -31,7 +31,7 @@
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     .prologue
-    .line 590
+    .line 600
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$6;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     iput-object p2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$6;->val$appCtx:Landroid/content/Context;
@@ -49,7 +49,7 @@
     .registers 7
 
     .prologue
-    .line 593
+    .line 603
     invoke-static {}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->get()Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     move-result-object v0
@@ -62,6 +62,6 @@
 
     invoke-virtual {v0, v1, v2, v4, v5}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->maybeTease(Landroid/content/Context;Ljava/lang/String;J)V
 
-    .line 594
+    .line 604
     return-void
 .end method

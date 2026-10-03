@@ -524,7 +524,7 @@
     .prologue
     const/4 v1, 0x0
 
-    .line 685
+    .line 695
     array-length v3, p2
 
     move v2, v1
@@ -534,7 +534,7 @@
 
     aget-object v0, p2, v2
 
-    .line 686
+    .line 696
     .local v0, "keyword":Ljava/lang/String;
     invoke-virtual {p1, v0}, Ljava/lang/String;->contains(Ljava/lang/CharSequence;)Z
 
@@ -542,15 +542,15 @@
 
     if-eqz v4, :cond_f
 
-    .line 687
+    .line 697
     const/4 v1, 0x1
 
-    .line 690
+    .line 700
     .end local v0    # "keyword":Ljava/lang/String;
     :cond_e
     return v1
 
-    .line 685
+    .line 695
     .restart local v0    # "keyword":Ljava/lang/String;
     :cond_f
     add-int/lit8 v2, v2, 0x1
@@ -566,7 +566,7 @@
 
     const/4 v4, 0x0
 
-    .line 603
+    .line 613
     :try_start_2
     iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
@@ -574,7 +574,7 @@
     :try_end_7
     .catch Ljava/lang/Throwable; {:try_start_2 .. :try_end_7} :catch_35
 
-    .line 609
+    .line 619
     :goto_7
     iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutHandler:Landroid/os/Handler;
 
@@ -582,10 +582,10 @@
 
     invoke-virtual {v2, v3}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    .line 612
+    .line 622
     const/4 v1, 0x0
 
-    .line 613
+    .line 623
     .local v1, "waitCount":I
     :goto_f
     iget-boolean v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isProcessingRequest:Z
@@ -596,7 +596,7 @@
 
     if-ge v1, v2, :cond_27
 
-    .line 615
+    .line 625
     const-wide/16 v2, 0x64
 
     :try_start_19
@@ -604,16 +604,16 @@
     :try_end_1c
     .catch Ljava/lang/InterruptedException; {:try_start_19 .. :try_end_1c} :catch_1f
 
-    .line 616
+    .line 626
     add-int/lit8 v1, v1, 0x1
 
     goto :goto_f
 
-    .line 617
+    .line 627
     :catch_1f
     move-exception v0
 
-    .line 618
+    .line 628
     .local v0, "e":Ljava/lang/InterruptedException;
     invoke-static {}, Ljava/lang/Thread;->currentThread()Ljava/lang/Thread;
 
@@ -621,30 +621,30 @@
 
     invoke-virtual {v2}, Ljava/lang/Thread;->interrupt()V
 
-    .line 624
+    .line 634
     .end local v0    # "e":Ljava/lang/InterruptedException;
     :cond_27
     iput-boolean v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
 
-    .line 625
+    .line 635
     iput v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->idiomGameTurn:I
 
-    .line 626
+    .line 636
     iput-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->lastUserIdiom:Ljava/lang/String;
 
-    .line 629
+    .line 639
     iput-boolean v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isMultiTurnMode:Z
 
-    .line 630
+    .line 640
     iput-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->conversationHistory:Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
 
-    .line 632
+    .line 642
     invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->reset()V
 
-    .line 633
+    .line 643
     return-void
 
-    .line 606
+    .line 616
     .end local v1    # "waitCount":I
     :catch_35
     move-exception v2
@@ -663,7 +663,7 @@
 
     const/4 v7, 0x0
 
-    .line 701
+    .line 711
     if-eqz p1, :cond_c
 
     invoke-virtual {p1}, Ljava/lang/String;->isEmpty()Z
@@ -679,11 +679,11 @@
     .local v5, "text":Ljava/lang/String;
     move-object v6, p1
 
-    .line 737
+    .line 747
     :goto_e
     return-object v6
 
-    .line 706
+    .line 716
     .end local v5    # "text":Ljava/lang/String;
     .restart local p1    # "text":Ljava/lang/String;
     :cond_f
@@ -691,7 +691,7 @@
 
     move-result-object p1
 
-    .line 709
+    .line 719
     invoke-virtual {p1}, Ljava/lang/String;->length()I
 
     move-result v6
@@ -704,10 +704,10 @@
     .restart local v5    # "text":Ljava/lang/String;
     move-object v6, p1
 
-    .line 710
+    .line 720
     goto :goto_e
 
-    .line 715
+    .line 725
     .end local v5    # "text":Ljava/lang/String;
     .restart local p1    # "text":Ljava/lang/String;
     :cond_1c
@@ -763,13 +763,13 @@
 
     aput-object v6, v4, v10
 
-    .line 716
+    .line 726
     .local v4, "separators":[Ljava/lang/String;
     invoke-virtual {p1}, Ljava/lang/String;->length()I
 
     move-result v1
 
-    .line 718
+    .line 728
     .local v1, "firstSeparatorIndex":I
     array-length v8, v4
 
@@ -780,13 +780,13 @@
 
     aget-object v3, v4, v6
 
-    .line 719
+    .line 729
     .local v3, "sep":Ljava/lang/String;
     invoke-virtual {p1, v3}, Ljava/lang/String;->indexOf(Ljava/lang/String;)I
 
     move-result v2
 
-    .line 720
+    .line 730
     .local v2, "index":I
     const/4 v9, -0x1
 
@@ -794,16 +794,16 @@
 
     if-ge v2, v1, :cond_5e
 
-    .line 721
+    .line 731
     move v1, v2
 
-    .line 718
+    .line 728
     :cond_5e
     add-int/lit8 v6, v6, 0x1
 
     goto :goto_50
 
-    .line 726
+    .line 736
     .end local v2    # "index":I
     .end local v3    # "sep":Ljava/lang/String;
     :cond_61
@@ -813,7 +813,7 @@
 
     if-ge v1, v6, :cond_7b
 
-    .line 727
+    .line 737
     invoke-virtual {p1, v7, v1}, Ljava/lang/String;->substring(II)Ljava/lang/String;
 
     move-result-object v6
@@ -822,7 +822,7 @@
 
     move-result-object v0
 
-    .line 730
+    .line 740
     .local v0, "firstPart":Ljava/lang/String;
     invoke-virtual {v0}, Ljava/lang/String;->length()I
 
@@ -830,7 +830,7 @@
 
     if-gt v6, v10, :cond_7b
 
-    .line 732
+    .line 742
     invoke-direct {p0, v0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->extractFourCharIdiom(Ljava/lang/String;)Ljava/lang/String;
 
     move-result-object v6
@@ -841,7 +841,7 @@
     .restart local v5    # "text":Ljava/lang/String;
     goto :goto_e
 
-    .line 737
+    .line 747
     .end local v0    # "firstPart":Ljava/lang/String;
     .end local v5    # "text":Ljava/lang/String;
     .restart local p1    # "text":Ljava/lang/String;
@@ -864,7 +864,7 @@
     .prologue
     const/4 v5, 0x4
 
-    .line 745
+    .line 755
     if-eqz p1, :cond_9
 
     invoke-virtual {p1}, Ljava/lang/String;->isEmpty()Z
@@ -873,20 +873,20 @@
 
     if-eqz v4, :cond_a
 
-    .line 767
+    .line 777
     .end local p1    # "text":Ljava/lang/String;
     :cond_9
     :goto_9
     return-object p1
 
-    .line 750
+    .line 760
     .restart local p1    # "text":Ljava/lang/String;
     :cond_a
     new-instance v1, Ljava/lang/StringBuilder;
 
     invoke-direct {v1}, Ljava/lang/StringBuilder;-><init>()V
 
-    .line 751
+    .line 761
     .local v1, "chineseOnly":Ljava/lang/StringBuilder;
     const/4 v3, 0x0
 
@@ -898,12 +898,12 @@
 
     if-ge v3, v4, :cond_29
 
-    .line 752
+    .line 762
     invoke-virtual {p1, v3}, Ljava/lang/String;->charAt(I)C
 
     move-result v0
 
-    .line 754
+    .line 764
     .local v0, "c":C
     const/16 v4, 0x4e00
 
@@ -913,23 +913,23 @@
 
     if-gt v0, v4, :cond_26
 
-    .line 755
+    .line 765
     invoke-virtual {v1, v0}, Ljava/lang/StringBuilder;->append(C)Ljava/lang/StringBuilder;
 
-    .line 751
+    .line 761
     :cond_26
     add-int/lit8 v3, v3, 0x1
 
     goto :goto_10
 
-    .line 759
+    .line 769
     .end local v0    # "c":C
     :cond_29
     invoke-virtual {v1}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v2
 
-    .line 762
+    .line 772
     .local v2, "cleaned":Ljava/lang/String;
     invoke-virtual {v2}, Ljava/lang/String;->length()I
 
@@ -937,7 +937,7 @@
 
     if-gt v4, v5, :cond_3b
 
-    .line 763
+    .line 773
     invoke-virtual {v2}, Ljava/lang/String;->isEmpty()Z
 
     move-result v4
@@ -948,7 +948,7 @@
 
     goto :goto_9
 
-    .line 767
+    .line 777
     :cond_3b
     const/4 v4, 0x0
 
@@ -971,7 +971,7 @@
 
     const/4 v3, 0x1
 
-    .line 494
+    .line 504
     const-string v5, "PhicommChat"
 
     new-instance v6, Ljava/lang/StringBuilder;
@@ -1008,10 +1008,10 @@
 
     invoke-static {v5, v6}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 500
+    .line 510
     invoke-static {v4}, Lcom/phicomm/speaker/device/custom/engine/PlaybackStateMonitor;->setTTSPlaying(Z)V
 
-    .line 505
+    .line 515
     iget-boolean v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->pendingTease:Z
 
     if-eqz v5, :cond_72
@@ -1030,45 +1030,45 @@
 
     move v1, v3
 
-    .line 507
+    .line 517
     .local v1, "teaseAfterAnswer":Z
     :goto_40
     iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->lastUserInput:Ljava/lang/String;
 
-    .line 511
+    .line 521
     .local v2, "teaseUser":Ljava/lang/String;
     iput-boolean v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->pendingTease:Z
 
-    .line 513
+    .line 523
     iget-boolean v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
 
     if-eqz v4, :cond_74
 
-    .line 515
+    .line 525
     const-string v4, "PhicommChat"
 
     const-string v5, "\u6210\u8bed\u63a5\u9f99\u6a21\u5f0f:\u8fdb\u5165 ASR \u7ee7\u7eed\u8046\u542c"
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 516
+    .line 526
     invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->reset()V
 
-    .line 519
+    .line 529
     new-instance v4, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;
 
     invoke-direct {v4, p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$2;-><init>(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)V
 
     iput-object v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutRunnable:Ljava/lang/Runnable;
 
-    .line 532
+    .line 542
     iget-object v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutHandler:Landroid/os/Handler;
 
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutRunnable:Ljava/lang/Runnable;
 
     invoke-virtual {v4, v5, v10, v11}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
-    .line 535
+    .line 545
     new-instance v4, Landroid/os/Handler;
 
     invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
@@ -1083,7 +1083,7 @@
 
     invoke-virtual {v4, v5, v8, v9}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
-    .line 597
+    .line 607
     :cond_71
     :goto_71
     return v3
@@ -1093,10 +1093,10 @@
     :cond_72
     move v1, v4
 
-    .line 505
+    .line 515
     goto :goto_40
 
-    .line 543
+    .line 553
     .restart local v1    # "teaseAfterAnswer":Z
     .restart local v2    # "teaseUser":Ljava/lang/String;
     :cond_74
@@ -1104,31 +1104,31 @@
 
     if-eqz v4, :cond_a2
 
-    .line 545
+    .line 555
     const-string v4, "PhicommChat"
 
     const-string v5, "\u591a\u8f6e\u5bf9\u8bdd\u6a21\u5f0f:\u8fdb\u5165 ASR \u7ee7\u7eed\u8046\u542c"
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 546
+    .line 556
     invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->reset()V
 
-    .line 549
+    .line 559
     new-instance v4, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;
 
     invoke-direct {v4, p0, v1, v2}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$4;-><init>(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;ZLjava/lang/String;)V
 
     iput-object v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutRunnable:Ljava/lang/Runnable;
 
-    .line 571
+    .line 581
     iget-object v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutHandler:Landroid/os/Handler;
 
     iget-object v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutRunnable:Ljava/lang/Runnable;
 
     invoke-virtual {v4, v5, v10, v11}, Landroid/os/Handler;->postDelayed(Ljava/lang/Runnable;J)Z
 
-    .line 574
+    .line 584
     new-instance v4, Landroid/os/Handler;
 
     invoke-static {}, Landroid/os/Looper;->getMainLooper()Landroid/os/Looper;
@@ -1145,7 +1145,7 @@
 
     goto :goto_71
 
-    .line 584
+    .line 594
     :cond_a2
     const-string v4, "PhicommChat"
 
@@ -1153,13 +1153,13 @@
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 585
+    .line 595
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->exit()V
 
-    .line 588
+    .line 598
     if-eqz v1, :cond_71
 
-    .line 589
+    .line 599
     iget-object v4, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
 
     if-eqz v4, :cond_cc
@@ -1170,7 +1170,7 @@
 
     move-result-object v0
 
-    .line 590
+    .line 600
     .local v0, "appCtx":Landroid/content/Context;
     :goto_b8
     new-instance v4, Landroid/os/Handler;
@@ -1191,7 +1191,7 @@
 
     goto :goto_71
 
-    .line 589
+    .line 599
     .end local v0    # "appCtx":Landroid/content/Context;
     :cond_cc
     const/4 v0, 0x0
@@ -1758,12 +1758,12 @@
 
     const/4 v5, 0x0
 
-    .line 638
+    .line 648
     iget-boolean v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->eventReceived:Z
 
     if-eqz v2, :cond_63
 
-    .line 639
+    .line 649
     const-string v2, "PhicommChat"
 
     new-instance v3, Ljava/lang/StringBuilder;
@@ -1800,27 +1800,27 @@
 
     invoke-static {v2, v3}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 642
+    .line 652
     invoke-static {}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->get()Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;
 
     move-result-object v2
 
     invoke-virtual {v2}, Lcom/phicomm/speaker/device/custom/teaser/PostDialogueTeaser;->cancelPending()V
 
-    .line 643
+    .line 653
     invoke-interface {p1}, Lcom/unisound/vui/engine/ANTHandlerContext;->cancelTTS()V
 
-    .line 646
+    .line 656
     iget-object v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutHandler:Landroid/os/Handler;
 
     iget-object v3, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->timeoutRunnable:Ljava/lang/Runnable;
 
     invoke-virtual {v2, v3}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    .line 649
+    .line 659
     const/4 v1, 0x0
 
-    .line 650
+    .line 660
     .local v1, "waitCount":I
     :goto_3e
     iget-boolean v2, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isProcessingRequest:Z
@@ -1831,7 +1831,7 @@
 
     if-ge v1, v2, :cond_56
 
-    .line 652
+    .line 662
     const-wide/16 v2, 0x64
 
     :try_start_48
@@ -1839,16 +1839,16 @@
     :try_end_4b
     .catch Ljava/lang/InterruptedException; {:try_start_48 .. :try_end_4b} :catch_4e
 
-    .line 653
+    .line 663
     add-int/lit8 v1, v1, 0x1
 
     goto :goto_3e
 
-    .line 654
+    .line 664
     :catch_4e
     move-exception v0
 
-    .line 655
+    .line 665
     .local v0, "e":Ljava/lang/InterruptedException;
     invoke-static {}, Ljava/lang/Thread;->currentThread()Ljava/lang/Thread;
 
@@ -1856,27 +1856,27 @@
 
     invoke-virtual {v2}, Ljava/lang/Thread;->interrupt()V
 
-    .line 661
+    .line 671
     .end local v0    # "e":Ljava/lang/InterruptedException;
     :cond_56
     iput-boolean v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isIdiomGameMode:Z
 
-    .line 662
+    .line 672
     iput v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->idiomGameTurn:I
 
-    .line 663
+    .line 673
     iput-object v6, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->lastUserIdiom:Ljava/lang/String;
 
-    .line 666
+    .line 676
     iput-boolean v5, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->isMultiTurnMode:Z
 
-    .line 667
+    .line 677
     iput-object v6, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->conversationHistory:Lcom/phicomm/speaker/device/custom/ai/ConversationHistory;
 
-    .line 669
+    .line 679
     invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->reset()V
 
-    .line 671
+    .line 681
     .end local v1    # "waitCount":I
     :cond_63
     return-void
@@ -1950,7 +1950,7 @@
     .line 217
     invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->reset()V
 
-    .line 478
+    .line 488
     :goto_28
     return-void
 
@@ -2111,7 +2111,7 @@
     .param p1, "ctx"    # Lcom/unisound/vui/engine/ANTHandlerContext;
 
     .prologue
-    .line 482
+    .line 492
     const-string v0, "PhicommChat"
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -2148,7 +2148,7 @@
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 487
+    .line 497
     invoke-direct {p0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->handleTtsPlayingEnd()Z
 
     move-result v0
@@ -2160,19 +2160,19 @@
     .registers 2
 
     .prologue
-    .line 675
+    .line 685
     const/4 v0, 0x0
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->currentResponse:Ljava/lang/String;
 
-    .line 676
+    .line 686
     const/4 v0, 0x0
 
     iput-boolean v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->pendingTease:Z
 
-    .line 678
+    .line 688
     invoke-super {p0}, Lcom/unisound/vui/handler/SimpleUserEventInboundHandler;->reset()V
 
-    .line 679
+    .line 689
     return-void
 .end method

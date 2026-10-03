@@ -27,7 +27,7 @@
     .param p1, "this$0"    # Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     .prologue
-    .line 535
+    .line 545
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$3;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -41,7 +41,7 @@
     .registers 2
 
     .prologue
-    .line 538
+    .line 548
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$3;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
 
     # getter for: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
@@ -51,6 +51,6 @@
 
     invoke-interface {v0}, Lcom/unisound/vui/engine/ANTHandlerContext;->enterASR()V
 
-    .line 539
+    .line 549
     return-void
 .end method

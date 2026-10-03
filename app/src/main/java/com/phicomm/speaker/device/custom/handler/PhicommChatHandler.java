@@ -380,6 +380,13 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                             }
                         }
                         
+                        // ⭐ v90: 大模型请求期间就把"机器要说话"占住。
+                        //    豆包链一轮要 10 秒左右, 期间普通模式的调侃延迟(2.5s)早就到了,
+                        //    而回答的语音还没落盘开播 → 调侃和回答两个声音叠在一起播。
+                        //    占住状态后调侃会自觉闭嘴, 播完由播放器/结束回调复位。
+                        PlaybackStateMonitor.setTTSPlaying(true);
+                        PostDialogueTeaser.get().cancelPending();
+
                         if (openAIClient != null) {
                             // ⭐ 按当前 active persona 取独立对话历史 + 对应 systemPrompt
                             String activePersonaId = PersonaManager.getCurrentPersonaId();
@@ -458,6 +465,8 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                     } else {
                         // API 调用失败 - 统一回复
                         LogMgr.e(TAG, "=== API 返回 null, openAIClient=" + openAIClient + " ===");
+                        // v90: 没有语音要播了, 放行调侃(否则状态挂死 30s)
+                        PlaybackStateMonitor.setTTSPlaying(false);
                         ctx.playTTS("模型调用失败");
                         if (isIdiomGameMode) {
                             isIdiomGameMode = false;
@@ -466,6 +475,7 @@ public class PhicommChatHandler extends SimpleUserEventInboundHandler<NLU> {
                 } catch (Exception e) {
                     LogMgr.e(TAG, "chat failed: " + e);
                     e.printStackTrace();
+                    PlaybackStateMonitor.setTTSPlaying(false);
                     ctx.playTTS("模型调用失败");
                     if (isIdiomGameMode) {
                         isIdiomGameMode = false;

@@ -27,7 +27,7 @@
     .param p1, "this$1"    # Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;
 
     .prologue
-    .line 439
+    .line 446
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1$1;->this$1:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;
 
     invoke-direct {p0}, Ljava/lang/Object;-><init>()V
@@ -41,14 +41,14 @@
     .registers 3
 
     .prologue
-    .line 442
+    .line 449
     const-string v0, "PhicommChat"
 
     const-string v1, "\u8c46\u5305\u8bed\u97f3\u64ad\u5b8c \u2192 \u624b\u52a8\u8d70 TTS \u7ed3\u675f\u6d41\u7a0b"
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 443
+    .line 450
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1$1;->this$1:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;
 
     iget-object v0, v0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
@@ -56,7 +56,7 @@
     # invokes: Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->handleTtsPlayingEnd()Z
     invoke-static {v0}, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;->access$1100(Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;)Z
 
-    .line 444
+    .line 451
     return-void
 .end method
 
@@ -65,7 +65,7 @@
     .param p1, "error"    # Ljava/lang/String;
 
     .prologue
-    .line 448
+    .line 455
     const-string v0, "PhicommChat"
 
     new-instance v1, Ljava/lang/StringBuilder;
@@ -88,7 +88,7 @@
 
     invoke-static {v0, v1}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 449
+    .line 456
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1$1;->this$1:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;
 
     iget-object v0, v0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->this$0:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler;
@@ -100,7 +100,7 @@
 
     if-eqz v0, :cond_31
 
-    .line 450
+    .line 457
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1$1;->this$1:Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;
 
     iget-object v0, v0, Lcom/phicomm/speaker/device/custom/handler/PhicommChatHandler$1;->val$ctx:Lcom/unisound/vui/engine/ANTHandlerContext;
@@ -116,7 +116,7 @@
 
     invoke-interface {v0, v1}, Lcom/unisound/vui/engine/ANTHandlerContext;->playTTS(Ljava/lang/String;)V
 
-    .line 452
+    .line 459
     :cond_31
     return-void
 .end method
