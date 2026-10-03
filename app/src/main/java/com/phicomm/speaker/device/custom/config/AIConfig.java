@@ -140,7 +140,7 @@ public class AIConfig {
      * 而是靠这个版本号触发"只更新模型参数、保留 key"的迁移。
      * 以后再换模型: 改上面的默认值 + 把这里 +1。
      */
-    private static final int CURRENT_CONFIG_VERSION = 5;
+    private static final int CURRENT_CONFIG_VERSION = 6;
 
     // 配置项
     private String provider;
@@ -155,19 +155,31 @@ public class AIConfig {
     private String user;
 
     /**
-     * ── 备用端点（降级用）────────────────────────────────────────────
-     * 主端点(上面的 base_url)调不通时,自动改用这套去调,保证音箱不会"哑"。
+     * ── 三级兜底链 ──────────────────────────────────────────────────
+     * 音箱调大模型时按顺序一级一级往下退，任何一级成功就停：
      *
-     * 典型场景: 主端点指向局域网里的豆包链(那台机器关机 / 豆包登录态过期),
-     *          备用端点直连智谱 GLM(公网,只要网络通就能用)。
+     *   第 1 级  主端点  base_url / api_key / model
+     *            一般是局域网里的豆包链，唯一能提供【豆包音色语音】的一级。
+     *   第 2 级  fallback_*       —— 推荐填火山方舟 Doubao-Seed-2.0-lite
+     *   第 3 级  fallback2_*      —— 推荐填智谱 GLM-4.5-Flash（免费）
      *
-     * ⚠️ 备用端点拿不到豆包语音(语音是豆包链才有的),所以降级时自动用原厂 TTS 播。
+     * 常见故障对应的落点：
+     *   局域网那台机器关机 / 豆包登录态过期 → 退到第 2 级（方舟豆包，公网直连）
+     *   方舟欠费 / Key 失效 / 网络不通      → 退到第 3 级（智谱 GLM）
+     *   三级全挂                            → 播"调用失败"
      *
-     * 三个字段都不填也能工作: 那时备用端点 = 代码内置的智谱 GLM-4.5-Flash 默认值。
+     * ⚠️ 第 2、3 级拿不到豆包语音（语音只有豆包链才有），降级时自动改用原厂 TTS 播报，
+     *    音色会变回原厂机器音 —— 这是正常的降级表现，不是故障。
+     *
+     * 某一级没配 Key（或 Key 是占位符）→ 该级直接跳过，不浪费 15 秒连接超时。
+     * 某一级跟前面某级地址+模型完全一样 → 自动去重跳过（省一次无效重试）。
      */
     private String fallbackBaseUrl;
     private String fallbackApiKey;
     private String fallbackModel;
+    private String fallback2BaseUrl;
+    private String fallback2ApiKey;
+    private String fallback2Model;
 
     /**
      * 加载配置文件
@@ -224,6 +236,10 @@ public class AIConfig {
         LogMgr.d(TAG, "Config loaded: provider=" + config.provider + ", model=" + config.model
                 + ", max_tokens=" + config.maxTokens + ", thinking=" + config.thinking
                 + ", version=" + config.configVersion);
+        // 三级兜底链, 打出来方便一眼看出哪级配了哪级没配
+        LogMgr.d(TAG, "[CHAIN] L1 " + config.getBaseUrl() + " / " + config.getModel()
+                + " | L2 " + config.getFallbackBaseUrl() + " / " + config.getFallbackModel()
+                + " | L3 " + config.getFallback2BaseUrl() + " / " + config.getFallback2Model());
         return config;
     }
 
@@ -237,7 +253,17 @@ public class AIConfig {
      */
     private void migrate() {
         this.provider = DEFAULT_PROVIDER;
-        this.model = DEFAULT_MODEL;
+
+        // model 只在用户仍用【代码默认端点】时才刷成默认值。
+        // 一旦用户把 base_url 指向自己的端点(典型: 局域网豆包链, model=doubao),
+        // 那个 model 名是这个端点认的标识, 升级时冲掉会直接把链路打回官方端点。
+        // (实测踩过: v5→v6 迁移把豆包链的 model=doubao 覆盖成 GLM-4.5-Flash)
+        if (this.baseUrl == null || DEFAULT_BASE_URL.equals(this.baseUrl.trim())) {
+            this.model = DEFAULT_MODEL;
+        } else {
+            LogMgr.d(TAG, "migrate: 自定义端点 " + this.baseUrl + ", 保留 model=" + this.model);
+        }
+
         this.temperature = DEFAULT_TEMPERATURE;
         this.maxTokens = DEFAULT_MAX_TOKENS;
         this.thinking = DEFAULT_THINKING;
@@ -266,6 +292,15 @@ public class AIConfig {
         }
         if (this.fallbackModel == null || this.fallbackModel.isEmpty()) {
             this.fallbackModel = DEFAULT_MODEL;
+        }
+        if (this.fallback2BaseUrl == null || this.fallback2BaseUrl.isEmpty()) {
+            this.fallback2BaseUrl = DEFAULT_BASE_URL;
+        }
+        if (this.fallback2ApiKey == null || this.fallback2ApiKey.isEmpty()) {
+            this.fallback2ApiKey = DEFAULT_API_KEY;
+        }
+        if (this.fallback2Model == null || this.fallback2Model.isEmpty()) {
+            this.fallback2Model = DEFAULT_MODEL;
         }
     }
 
@@ -335,6 +370,12 @@ public class AIConfig {
                     .append(eq(fallbackApiKey, DEFAULT_API_KEY) ? "" : fallbackApiKey).append("\n");
             sb.append("fallback_model = ")
                     .append(eq(fallbackModel, DEFAULT_MODEL) ? "" : fallbackModel).append("\n");
+            sb.append("fallback2_base_url = ")
+                    .append(eq(fallback2BaseUrl, DEFAULT_BASE_URL) ? "" : fallback2BaseUrl).append("\n");
+            sb.append("fallback2_api_key = ")
+                    .append(eq(fallback2ApiKey, DEFAULT_API_KEY) ? "" : fallback2ApiKey).append("\n");
+            sb.append("fallback2_model = ")
+                    .append(eq(fallback2Model, DEFAULT_MODEL) ? "" : fallback2Model).append("\n");
             sb.append("config_version = ").append(configVersion).append("\n");
             
             fos.write(sb.toString().getBytes("UTF-8"));
@@ -364,7 +405,10 @@ public class AIConfig {
         this.fallbackBaseUrl = DEFAULT_BASE_URL;
         this.fallbackApiKey = DEFAULT_API_KEY;
         this.fallbackModel = DEFAULT_MODEL;
-        
+        this.fallback2BaseUrl = DEFAULT_BASE_URL;
+        this.fallback2ApiKey = DEFAULT_API_KEY;
+        this.fallback2Model = DEFAULT_MODEL;
+
         try {
             FileInputStream fis = new FileInputStream(configFile);
             BufferedReader reader = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
@@ -449,6 +493,15 @@ public class AIConfig {
                             case "fallback_model":
                                 if (!value.isEmpty()) this.fallbackModel = value;
                                 break;
+                            case "fallback2_base_url":
+                                if (!value.isEmpty()) this.fallback2BaseUrl = value;
+                                break;
+                            case "fallback2_api_key":
+                                if (!value.isEmpty()) this.fallback2ApiKey = value;
+                                break;
+                            case "fallback2_model":
+                                if (!value.isEmpty()) this.fallback2Model = value;
+                                break;
                         }
                     }
                 }
@@ -481,7 +534,10 @@ public class AIConfig {
         config.fallbackBaseUrl = DEFAULT_BASE_URL;
         config.fallbackApiKey = DEFAULT_API_KEY;
         config.fallbackModel = DEFAULT_MODEL;
-        
+        config.fallback2BaseUrl = DEFAULT_BASE_URL;
+        config.fallback2ApiKey = DEFAULT_API_KEY;
+        config.fallback2Model = DEFAULT_MODEL;
+
         config.save(context);
         LogMgr.d(TAG, "Default config created");
     }
@@ -557,9 +613,33 @@ public class AIConfig {
         return getFallbackBaseUrl().equals(baseUrl == null ? "" : baseUrl.trim());
     }
 
+    /**
+     * 第 3 级端点地址(前两级都调不通时用)。没配过就是代码默认的智谱端点。
+     * 第三层兜底一般用免费的智谱 GLM-4.5-Flash。
+     */
+    public String getFallback2BaseUrl() {
+        return (fallback2BaseUrl == null || fallback2BaseUrl.trim().isEmpty())
+                ? DEFAULT_BASE_URL : fallback2BaseUrl.trim();
+    }
+
+    /** 第 3 级端点 Key */
+    public String getFallback2ApiKey() {
+        return (fallback2ApiKey == null || fallback2ApiKey.trim().isEmpty())
+                ? DEFAULT_API_KEY : fallback2ApiKey.trim();
+    }
+
+    /** 第 3 级端点的模型名(默认 GLM-4.5-Flash) */
+    public String getFallback2Model() {
+        return (fallback2Model == null || fallback2Model.trim().isEmpty())
+                ? DEFAULT_MODEL : fallback2Model.trim();
+    }
+
     public void setFallbackBaseUrl(String v) { this.fallbackBaseUrl = v; }
     public void setFallbackApiKey(String v) { this.fallbackApiKey = v; }
     public void setFallbackModel(String v) { this.fallbackModel = v; }
+    public void setFallback2BaseUrl(String v) { this.fallback2BaseUrl = v; }
+    public void setFallback2ApiKey(String v) { this.fallback2ApiKey = v; }
+    public void setFallback2Model(String v) { this.fallback2Model = v; }
     
     // Setter 方法(供后续修改配置使用)
     

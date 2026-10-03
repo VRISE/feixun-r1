@@ -102,23 +102,38 @@ vi ai_config.local.ini                          # 填 api_key，选一组 base_u
 
 关键字段说明：`thinking = disabled` 关闭深度思考（语音交互追求秒回，智谱与豆包都支持；非智谱端点填 `auto` 表示不发送该字段）；`max_tokens = 1024` 对 TTS 播报足够。
 
-### 4. 豆包音色 + 自动降级（可选，推荐这样配）
+### 4. 豆包音色 + 三级兜底链（可选，推荐这样配）
 
-主端点可以指向局域网里另一台机器上跑的「豆包链」（对话和语音都用豆包网页端自己的声音），
-那台机器关机或豆包登录态过期时，音箱会**自动降级**到备用端点，不至于一问三不知：
+主端点可以指向局域网里另一台机器上跑的「豆包链」（对话和语音都用豆包网页端自己的声音）。
+音箱按 **L1 → L2 → L3** 顺序调用，任何一级答上来就停，任何一级挂了就往下退：
 
 ```ini
-base_url = http://192.168.5.176:7790/v1/chat/completions   # 主：局域网豆包链
+# L1 主：局域网豆包链（唯一有豆包音色的一级）
+base_url = http://192.168.5.176:7790/v1/chat/completions
 model    = doubao
 tts      = doubao          # 让服务端把这条回答用豆包的声音合成回来
-fallback_base_url = https://open.bigmodel.cn/api/paas/v4/chat/completions  # 备：直连 GLM
-fallback_api_key  = 你的智谱 Key
-fallback_model    = GLM-4.5-Flash
+
+# L2 备一：火山方舟 Doubao-Seed-2.0-lite（公网直连）
+fallback_base_url = https://ark.cn-beijing.volces.com/api/v3/chat/completions
+fallback_api_key  = 你的方舟 Key
+fallback_model    = doubao-seed-2-0-lite-260215
+
+# L3 备二：智谱 GLM-4.5-Flash（免费那档）
+fallback2_base_url = https://open.bigmodel.cn/api/paas/v4/chat/completions
+fallback2_api_key  = 你的智谱 Key
+fallback2_model    = GLM-4.5-Flash
 ```
 
-降级行为：主端点失败 → 立刻改用备用端点重调一次；5 分钟内不再试探主端点（省掉每次 15 秒的连接等待），
-之后自动恢复优先走主端点。备用端点**没有豆包语音**，这段时间会用音箱原厂 TTS 播报（音色变回机器音，属正常降级表现）。
-`fallback_*` 三个都不填也能工作，那时备用端点 = 代码内置的智谱 GLM-4.5-Flash。
+| 故障 | 落点 |
+|---|---|
+| 豆包链那台机器关机 / 豆包登录态过期 | 退到 L2（方舟豆包） |
+| 方舟欠费 / Key 失效 / 网络不通 | 退到 L3（智谱 GLM） |
+| 三级全挂 | 播「调用失败」 |
+
+降级细节：某一级失败后会被封 **5 分钟**（5 分钟内不再试探它，省掉每次 15 秒的连接等待），
+到期自动恢复优先走更高级；三级同时都在冷却时会一次性全部解封重来，不会让音箱连续 5 分钟哑掉。
+L2/L3 **没有豆包语音**，降级期间用音箱原厂 TTS 播报（音色变回机器音，属正常降级表现）。
+某一级没配 Key、或地址模型跟上一级重复，会直接跳过不空跑。
 
 ## 四、项目结构
 
@@ -149,7 +164,8 @@ fallback_model    = GLM-4.5-Flash
 | 安装后启动崩溃 `Resources$NotFoundException` | 用了 gradle 直接编译套壳，资源 ID 冲突。必须走 `build_and_deploy.sh` 的 smali 注入流程，保留原厂资源表 |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | 外壳必须是 `device_original.apk`（原厂签名），脚本已处理 |
 | 说「调用失败」 | ① ini 里没填有效 Key；② 换了慢模型（见上文 GLM-4.7 教训）；③ `logcat -s OpenAIClient` 看具体 HTTP 错误（401=Key 错，429=限流） |
-| 音色突然变回原厂机器音 | 主端点（豆包链）不可用时已自动降级到备用端点，日志搜 `[FALLBACK]`。检查那台机器是否开机 / 豆包登录态是否过期 |
+| 音色突然变回原厂机器音 | 已自动降级到 L2/L3（它们没有豆包音色），日志搜 `[FALLBACK]` / `[CHAIN]`。检查豆包链那台机器是否开机 / 豆包登录态是否过期 |
+| 说话很久才回答或直接失败 | 某一级在硬等 15 秒连接超时。确认 L2/L3 的 Key 有效；日志 `[CHAIN] 尝试 L?` 可看出卡在哪一级 |
 | 说话没反应 / 唤醒失效 | `adb logcat | grep -E "AIConfig|OpenAIClient|NLUDispatcher"` 抓日志定位 |
 | git status 一堆 original_v2 的 M | 每次打包都会重写 smali，属正常，提交前按需取舍 |
 

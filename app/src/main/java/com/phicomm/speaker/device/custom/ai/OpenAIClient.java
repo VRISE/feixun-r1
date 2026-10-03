@@ -14,6 +14,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * OpenAI 兼容 API 客户端
@@ -41,15 +42,29 @@ public class OpenAIClient {
     private static final long RETRY_BACKOFF_MS = 3000L;
 
     /**
-     * 主端点(豆包链)挂了之后,多久之内不再试探,直接走备用端点。
+     * 某一级端点挂了之后,多久之内不再试探,直接往下一级退。
      *
-     * 不能每轮都先试主端点:局域网那台机器关机时,连不上要等满 CONNECT_TIMEOUT(15s)
+     * 不能每轮都从头试:局域网那台机器关机时,连不上要等满 CONNECT_TIMEOUT(15s)
      * 才算失败,用户每问一句都要干等十几秒。所以判定挂了就"封"一段时间。
      */
-    private static final long PRIMARY_DOWN_COOLDOWN_MS = 5 * 60 * 1000L;
+    private static final long DOWN_COOLDOWN_MS = 5 * 60 * 1000L;
 
-    /** 主端点最近的存活状态(跨实例共享: 主对话和调侃各有一个 client 实例) */
-    private static volatile long sPrimaryDownUntil = 0L;
+    /** 三级兜底链: 有下一级可退时, 本级最多试几次就让位(硬失败等 3×15s 太久) */
+    private static final int ATTEMPTS_WITH_FALLBACK = 2;
+
+    /** 链上每一级的冷却到期时间(static: 主对话/调侃各有一个 client 实例, 状态要共享) */
+    private static final long[] sDownUntil = new long[3];
+
+    /** 链上的一级端点 */
+    private static class Endpoint {
+        String name;        // 日志用: "L1主端点" / "L2备用" / "L3备用"
+        int slot;           // 冷却槽下标(和链上的位置解耦, 跳过某级也不会串位)
+        String url;
+        String key;
+        String model;
+        boolean wantAudio;  // 只有豆包链能合成语音
+        String topicUser;   // 豆包链话题 id, null = 不发
+    }
 
     private AIConfig config;
 
@@ -110,62 +125,119 @@ public class OpenAIClient {
         }
 
         boolean wantAudio = "doubao".equalsIgnoreCase(config.getTts());
+        String primaryTopic = (topicUser == null || topicUser.trim().isEmpty())
+                ? config.getUser() : topicUser.trim();
 
-        // 有备用端点可退时, 主端点最多重试 2 次就让位:
-        // 局域网那台机器关机属于硬失败, 连等 3×15s 才降级, 用户会以为音箱坏了。
-        boolean hasFallback = !config.isFallbackSameAsPrimary()
-                && !isPlaceholderKey(config.getFallbackApiKey());
-        int primaryAttempts = hasFallback ? 2 : MAX_ATTEMPTS;
+        // ---- 组装三级兜底链 ----
+        //   L1 主端点(局域网豆包链, 唯一能给豆包音色的一级)
+        //   L2 fallback_*     (火山方舟 Doubao-Seed-2.0-lite)
+        //   L3 fallback2_*    (智谱 GLM-4.5-Flash, 免费那档)
+        // 没配 Key / 跟前面某级重复的级会被自动剔除, 链最短可以只有 1 级。
+        ArrayList<Endpoint> chain = new ArrayList<Endpoint>();
+        addEndpoint(chain, "L1主端点", 0,
+                config.getBaseUrl(), config.getApiKey(), config.getModel(), wantAudio, primaryTopic);
+        addEndpoint(chain, "L2备用", 1,
+                config.getFallbackBaseUrl(), config.getFallbackApiKey(), config.getFallbackModel(),
+                false, null);
+        addEndpoint(chain, "L3备用", 2,
+                config.getFallback2BaseUrl(), config.getFallback2ApiKey(), config.getFallback2Model(),
+                false, null);
 
-        // ---- 1) 先走主端点(一般是局域网里的豆包链) ----
-        long now = System.currentTimeMillis();
-        boolean primaryDown = now < sPrimaryDownUntil;
-        if (!primaryDown) {
-            String primaryTopic = (topicUser == null || topicUser.trim().isEmpty())
-                    ? config.getUser() : topicUser.trim();
-            Reply r = callEndpoint(config.getBaseUrl(), config.getApiKey(), config.getModel(),
-                    config.getThinking(), wantAudio, primaryTopic, primaryAttempts,
+        if (chain.isEmpty()) {
+            LogMgr.e(TAG, "[FALLBACK] 三级端点都没配 Key, 无从下手(见 ai_config.ini)");
+            return null;
+        }
+
+        // 三级都在冷却(比如整栋楼断网 5 分钟) → 全部解封重来一遍。
+        // 否则链上没有一级可试, 音箱会连续 5 分钟一句话都答不上来。
+        long now0 = System.currentTimeMillis();
+        boolean anyAlive = false;
+        for (int i = 0; i < chain.size(); i++) {
+            if (now0 >= sDownUntil[chain.get(i).slot]) { anyAlive = true; break; }
+        }
+        if (!anyAlive) {
+            LogMgr.w(TAG, "[FALLBACK] 链上每一级都在冷却, 全部解封重新试一遍");
+            for (int i = 0; i < sDownUntil.length; i++) sDownUntil[i] = 0L;
+        }
+
+        // ---- 一级一级往下退, 谁先答上来就用谁 ----
+        for (int i = 0; i < chain.size(); i++) {
+            Endpoint e = chain.get(i);
+            long now = System.currentTimeMillis();
+
+            if (now < sDownUntil[e.slot]) {
+                LogMgr.d(TAG, "[FALLBACK] " + e.name + " 冷却中(剩余 "
+                        + ((sDownUntil[e.slot] - now) / 1000) + "s), 跳过");
+                continue;
+            }
+
+            boolean isLast = (i == chain.size() - 1);
+            int attempts = isLast ? MAX_ATTEMPTS : ATTEMPTS_WITH_FALLBACK;
+
+            LogMgr.d(TAG, "[CHAIN] 尝试 " + e.name + " (" + (i + 1) + "/" + chain.size() + "): "
+                    + e.url + " model=" + e.model);
+            // 备用级: 不发 audio(合成不了豆包音色) / 不带话题 id。
+            // thinking 沿用主配置: 智谱和方舟都认 {"type":"disabled"}, 关掉能快好几倍
+            // (方舟实测开思考 9.6s、关思考 1.8s); 非智谱端点请把 ini 的 thinking 设为 auto。
+            Reply r = callEndpoint(e.url, e.key, e.model, config.getThinking(),
+                    e.wantAudio, e.topicUser, attempts,
                     userInput, conversationHistory, systemPrompt);
+
             if (r != null && r.text != null && !r.text.isEmpty()) {
-                sPrimaryDownUntil = 0L;   // 主端点活了, 取消封禁
+                sDownUntil[e.slot] = 0L;   // 这一级活了, 解除封禁
+                if (i > 0) {
+                    LogMgr.w(TAG, "[FALLBACK] 已降级到 " + e.name + " (" + e.url
+                            + " model=" + e.model + "), 回复: " + r.text);
+                }
                 return r;
             }
-            // 主端点不可用 → 封一段时间, 这段时间内不再浪费 15s 去连它
-            sPrimaryDownUntil = System.currentTimeMillis() + PRIMARY_DOWN_COOLDOWN_MS;
-            LogMgr.w(TAG, "[FALLBACK] 主端点不可用, " + (PRIMARY_DOWN_COOLDOWN_MS / 1000)
-                    + "s 内直接走备用端点");
-        } else {
-            LogMgr.d(TAG, "[FALLBACK] 主端点冷却中(剩余 "
-                    + ((sPrimaryDownUntil - now) / 1000) + "s), 直接用备用端点");
+
+            // 这一级不可用 → 封一段时间, 期间不再浪费 15s 去连它
+            sDownUntil[e.slot] = System.currentTimeMillis() + DOWN_COOLDOWN_MS;
+            LogMgr.w(TAG, "[FALLBACK] " + e.name + " 不可用, " + (DOWN_COOLDOWN_MS / 1000)
+                    + "s 内不再试探" + (isLast ? "(已是最后一级)" : ", 退到下一级"));
         }
 
-        // ---- 2) 降级到备用端点 ----
-        if (config.isFallbackSameAsPrimary()) {
-            LogMgr.e(TAG, "[FALLBACK] 备用端点与主端点相同, 放弃降级");
-            return null;
-        }
-
-        String fbUrl = config.getFallbackBaseUrl();
-        String fbKey = config.getFallbackApiKey();
-        String fbModel = config.getFallbackModel();
-        if (fbKey == null || fbKey.isEmpty() || isPlaceholderKey(fbKey)) {
-            LogMgr.e(TAG, "[FALLBACK] 备用端点没配 Key, 无法降级(见 ai_config.ini 的 fallback_api_key)");
-            return null;
-        }
-
-        LogMgr.w(TAG, "[FALLBACK] 改用备用端点: " + fbUrl + " model=" + fbModel);
-        // 备用端点: 不发 audio(它合成不了豆包音色) / 不带话题 id。
-        // thinking 沿用主配置: 智谱和方舟都认 {"type":"disabled"}, 关掉能快好几倍
-        // (方舟实测开思考 9.6s、关思考 1.8s); 非智谱端点请把 ini 的 thinking 设为 auto。
-        Reply r = callEndpoint(fbUrl, fbKey, fbModel, config.getThinking(), false, null, MAX_ATTEMPTS,
-                userInput, conversationHistory, systemPrompt);
-
-        if (r != null && r.text != null && !r.text.isEmpty()) {
-            LogMgr.i(TAG, "[FALLBACK] 备用端点已接手, 回复: " + r.text);
-            return r;
-        }
-        LogMgr.e(TAG, "[FALLBACK] 备用端点也没成功");
+        LogMgr.e(TAG, "[FALLBACK] " + chain.size() + " 级端点全部失败");
         return null;
+    }
+
+    /**
+     * 往链上加一级。三种情况直接不加(省掉必然失败的一次 15s 连接):
+     *   1) 没配 Key 或 Key 是占位符 → 调了也是 401
+     *   2) 地址为空
+     *   3) 地址和模型跟链上已有的一级完全一样 → 同一个端点重试没意义
+     */
+    private void addEndpoint(ArrayList<Endpoint> chain, String name, int slot,
+                             String url, String key, String model,
+                             boolean wantAudio, String topicUser) {
+        if (url == null || url.trim().isEmpty()) {
+            LogMgr.d(TAG, "[CHAIN] " + name + " 未配地址, 跳过");
+            return;
+        }
+        if (isPlaceholderKey(key)) {
+            LogMgr.d(TAG, "[CHAIN] " + name + " 未配 Key, 跳过");
+            return;
+        }
+        String u = url.trim();
+        String m = (model == null) ? "" : model.trim();
+        for (int i = 0; i < chain.size(); i++) {
+            Endpoint old = chain.get(i);
+            if (u.equals(old.url) && m.equals(old.model)) {
+                LogMgr.d(TAG, "[CHAIN] " + name + " 与 " + old.name + " 重复, 跳过");
+                return;
+            }
+        }
+
+        Endpoint e = new Endpoint();
+        e.name = name;
+        e.slot = slot;
+        e.url = u;
+        e.key = key.trim();
+        e.model = m;
+        e.wantAudio = wantAudio;
+        e.topicUser = topicUser;
+        chain.add(e);
     }
 
     /**
