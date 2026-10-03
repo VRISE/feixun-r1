@@ -112,7 +112,7 @@ vi ai_config.local.ini                          # 填 api_key，选一组 base_u
 │   │   ├── config/                # AIConfig 配置加载与迁移
 │   │   ├── teaser/                # 对话后调侃
 │   │   ├── persona/               # 多人格管理
-│   │   ├── music/  tts/  engine/  # 音乐客户端 / 讯飞 TTS / 播放状态监控
+│   │   ├── music/  tts/  engine/  # 音乐客户端 / 豆包语音播放 / 播放状态监控
 │   │   └── ...
 │   └── ui/ExampleANTEngineInitializer.java   # pipeline 注册入口
 ├── original_v2/smali/             # smali 注入目标（打包时被脚本重写）
