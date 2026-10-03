@@ -102,6 +102,24 @@ vi ai_config.local.ini                          # 填 api_key，选一组 base_u
 
 关键字段说明：`thinking = disabled` 关闭深度思考（语音交互追求秒回，智谱与豆包都支持；非智谱端点填 `auto` 表示不发送该字段）；`max_tokens = 1024` 对 TTS 播报足够。
 
+### 4. 豆包音色 + 自动降级（可选，推荐这样配）
+
+主端点可以指向局域网里另一台机器上跑的「豆包链」（对话和语音都用豆包网页端自己的声音），
+那台机器关机或豆包登录态过期时，音箱会**自动降级**到备用端点，不至于一问三不知：
+
+```ini
+base_url = http://192.168.5.176:7790/v1/chat/completions   # 主：局域网豆包链
+model    = doubao
+tts      = doubao          # 让服务端把这条回答用豆包的声音合成回来
+fallback_base_url = https://open.bigmodel.cn/api/paas/v4/chat/completions  # 备：直连 GLM
+fallback_api_key  = 你的智谱 Key
+fallback_model    = GLM-4.5-Flash
+```
+
+降级行为：主端点失败 → 立刻改用备用端点重调一次；5 分钟内不再试探主端点（省掉每次 15 秒的连接等待），
+之后自动恢复优先走主端点。备用端点**没有豆包语音**，这段时间会用音箱原厂 TTS 播报（音色变回机器音，属正常降级表现）。
+`fallback_*` 三个都不填也能工作，那时备用端点 = 代码内置的智谱 GLM-4.5-Flash。
+
 ## 四、项目结构
 
 ```
@@ -131,6 +149,7 @@ vi ai_config.local.ini                          # 填 api_key，选一组 base_u
 | 安装后启动崩溃 `Resources$NotFoundException` | 用了 gradle 直接编译套壳，资源 ID 冲突。必须走 `build_and_deploy.sh` 的 smali 注入流程，保留原厂资源表 |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE` | 外壳必须是 `device_original.apk`（原厂签名），脚本已处理 |
 | 说「调用失败」 | ① ini 里没填有效 Key；② 换了慢模型（见上文 GLM-4.7 教训）；③ `logcat -s OpenAIClient` 看具体 HTTP 错误（401=Key 错，429=限流） |
+| 音色突然变回原厂机器音 | 主端点（豆包链）不可用时已自动降级到备用端点，日志搜 `[FALLBACK]`。检查那台机器是否开机 / 豆包登录态是否过期 |
 | 说话没反应 / 唤醒失效 | `adb logcat | grep -E "AIConfig|OpenAIClient|NLUDispatcher"` 抓日志定位 |
 | git status 一堆 original_v2 的 M | 每次打包都会重写 smali，属正常，提交前按需取舍 |
 

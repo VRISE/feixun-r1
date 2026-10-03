@@ -40,6 +40,17 @@ public class OpenAIClient {
     /** 重试等待基数: 第 n 次重试等待 BASE * n 毫秒 */
     private static final long RETRY_BACKOFF_MS = 3000L;
 
+    /**
+     * 主端点(豆包链)挂了之后,多久之内不再试探,直接走备用端点。
+     *
+     * 不能每轮都先试主端点:局域网那台机器关机时,连不上要等满 CONNECT_TIMEOUT(15s)
+     * 才算失败,用户每问一句都要干等十几秒。所以判定挂了就"封"一段时间。
+     */
+    private static final long PRIMARY_DOWN_COOLDOWN_MS = 5 * 60 * 1000L;
+
+    /** 主端点最近的存活状态(跨实例共享: 主对话和调侃各有一个 client 实例) */
+    private static volatile long sPrimaryDownUntil = 0L;
+
     private AIConfig config;
 
     public OpenAIClient(AIConfig config) {
@@ -97,41 +108,113 @@ public class OpenAIClient {
             LogMgr.e(TAG, "Empty user input");
             return null;
         }
-        
+
+        boolean wantAudio = "doubao".equalsIgnoreCase(config.getTts());
+
+        // 有备用端点可退时, 主端点最多重试 2 次就让位:
+        // 局域网那台机器关机属于硬失败, 连等 3×15s 才降级, 用户会以为音箱坏了。
+        boolean hasFallback = !config.isFallbackSameAsPrimary()
+                && !isPlaceholderKey(config.getFallbackApiKey());
+        int primaryAttempts = hasFallback ? 2 : MAX_ATTEMPTS;
+
+        // ---- 1) 先走主端点(一般是局域网里的豆包链) ----
+        long now = System.currentTimeMillis();
+        boolean primaryDown = now < sPrimaryDownUntil;
+        if (!primaryDown) {
+            String primaryTopic = (topicUser == null || topicUser.trim().isEmpty())
+                    ? config.getUser() : topicUser.trim();
+            Reply r = callEndpoint(config.getBaseUrl(), config.getApiKey(), config.getModel(),
+                    config.getThinking(), wantAudio, primaryTopic, primaryAttempts,
+                    userInput, conversationHistory, systemPrompt);
+            if (r != null && r.text != null && !r.text.isEmpty()) {
+                sPrimaryDownUntil = 0L;   // 主端点活了, 取消封禁
+                return r;
+            }
+            // 主端点不可用 → 封一段时间, 这段时间内不再浪费 15s 去连它
+            sPrimaryDownUntil = System.currentTimeMillis() + PRIMARY_DOWN_COOLDOWN_MS;
+            LogMgr.w(TAG, "[FALLBACK] 主端点不可用, " + (PRIMARY_DOWN_COOLDOWN_MS / 1000)
+                    + "s 内直接走备用端点");
+        } else {
+            LogMgr.d(TAG, "[FALLBACK] 主端点冷却中(剩余 "
+                    + ((sPrimaryDownUntil - now) / 1000) + "s), 直接用备用端点");
+        }
+
+        // ---- 2) 降级到备用端点 ----
+        if (config.isFallbackSameAsPrimary()) {
+            LogMgr.e(TAG, "[FALLBACK] 备用端点与主端点相同, 放弃降级");
+            return null;
+        }
+
+        String fbUrl = config.getFallbackBaseUrl();
+        String fbKey = config.getFallbackApiKey();
+        String fbModel = config.getFallbackModel();
+        if (fbKey == null || fbKey.isEmpty() || isPlaceholderKey(fbKey)) {
+            LogMgr.e(TAG, "[FALLBACK] 备用端点没配 Key, 无法降级(见 ai_config.ini 的 fallback_api_key)");
+            return null;
+        }
+
+        LogMgr.w(TAG, "[FALLBACK] 改用备用端点: " + fbUrl + " model=" + fbModel);
+        // 备用端点: 不发 audio(它合成不了豆包音色) / 不带话题 id。
+        // thinking 沿用主配置: 智谱和方舟都认 {"type":"disabled"}, 关掉能快好几倍
+        // (方舟实测开思考 9.6s、关思考 1.8s); 非智谱端点请把 ini 的 thinking 设为 auto。
+        Reply r = callEndpoint(fbUrl, fbKey, fbModel, config.getThinking(), false, null, MAX_ATTEMPTS,
+                userInput, conversationHistory, systemPrompt);
+
+        if (r != null && r.text != null && !r.text.isEmpty()) {
+            LogMgr.i(TAG, "[FALLBACK] 备用端点已接手, 回复: " + r.text);
+            return r;
+        }
+        LogMgr.e(TAG, "[FALLBACK] 备用端点也没成功");
+        return null;
+    }
+
+    /**
+     * 打一次端点。所有参数显式传入,主/备端点共用同一套逻辑。
+     *
+     * @param thinking   "auto" = 不发 thinking 字段(兼容非智谱端点)
+     * @param wantAudio  是否请求服务端顺便合成语音(只有豆包链支持)
+     * @param topicUser  豆包链话题 id, null = 不发 user 字段
+     */
+    private Reply callEndpoint(String baseUrl, String apiKey, String model, String thinking,
+                               boolean wantAudio, String topicUser, int maxAttempts,
+                               String userInput, String conversationHistory, String systemPrompt) {
+        if (baseUrl == null || baseUrl.isEmpty()) {
+            LogMgr.e(TAG, "callEndpoint: baseUrl 为空");
+            return null;
+        }
         try {
             // 1. 构建请求体
             String requestBody = buildRequestBodyWithHistory(userInput, conversationHistory,
-                    systemPrompt, topicUser);
-            
+                    systemPrompt, model, thinking, wantAudio, topicUser);
+
             // 构建完整 URL
-            String fullUrl = config.getBaseUrl();
+            String fullUrl = baseUrl;
             if (!fullUrl.endsWith("/chat/completions")) {
                 fullUrl = fullUrl.endsWith("/") ? fullUrl + "chat/completions" : fullUrl + "/chat/completions";
             }
-            
+
             LogMgr.d(TAG, "=== [DEBUG] 大模型 API 调用 ===");
-            LogMgr.d(TAG, "[DEBUG] BaseURL: " + config.getBaseUrl());
             LogMgr.d(TAG, "[DEBUG] FullURL: " + fullUrl);
-            LogMgr.d(TAG, "[DEBUG] Model: " + config.getModel());
-            LogMgr.d(TAG, "[DEBUG] APIKey: " + config.getApiKey().substring(0, Math.min(8, config.getApiKey().length())) + "...");
+            LogMgr.d(TAG, "[DEBUG] Model: " + model);
+            LogMgr.d(TAG, "[DEBUG] APIKey: " + mask(apiKey));
             LogMgr.d(TAG, "[DEBUG] Temperature: " + config.getTemperature());
             LogMgr.d(TAG, "[DEBUG] MaxTokens: " + config.getMaxTokens());
             LogMgr.d(TAG, "[DEBUG] RequestBody: " + requestBody);
-            
-            // 2. 发送 HTTP POST 请求
-            String response = httpPostJson(fullUrl, requestBody);
-            
+
+            // 2. 发送 HTTP POST 请求(maxAttempts 由调用方给: 主端点可降级时少重试, 早点让位)
+            String response = httpPostJson(fullUrl, requestBody, apiKey, maxAttempts);
+
             if (response == null || response.isEmpty()) {
                 LogMgr.e(TAG, "=== 大模型 API 返回空响应 ===");
                 return null;
             }
-            
+
             LogMgr.d(TAG, "=== 大模型 API 原始响应 ===");
             LogMgr.d(TAG, response);
-            
+
             // 3. 解析响应
             Reply reply = parseReply(response);
-            
+
             if (reply != null && reply.text != null && !reply.text.isEmpty()) {
                 LogMgr.d(TAG, "=== 大模型解析后回复 ===");
                 LogMgr.d(TAG, reply.text);
@@ -142,13 +225,23 @@ public class OpenAIClient {
                 LogMgr.e(TAG, "=== 大模型响应解析失败 ===");
                 return null;
             }
-            
+
         } catch (Exception e) {
             LogMgr.e(TAG, "=== 大模型 API 调用异常 ===");
             LogMgr.e(TAG, e.toString());
             e.printStackTrace();
             return null;
         }
+    }
+
+    private static String mask(String key) {
+        if (key == null) return "null";
+        return key.substring(0, Math.min(8, key.length())) + "...";
+    }
+
+    /** 占位 key(没填真的) → 降级也没意义 */
+    private static boolean isPlaceholderKey(String key) {
+        return key == null || key.isEmpty() || key.startsWith("YOUR_");
     }
     
     /**
@@ -158,12 +251,13 @@ public class OpenAIClient {
      * @param systemPrompt 系统提示词(可选)
      */
     private String buildRequestBodyWithHistory(String userInput, String conversationHistory,
-                                               String systemPrompt, String topicUser) {
+                                               String systemPrompt, String model, String thinking,
+                                               boolean wantAudio, String topicUser) {
         try {
             JSONObject json = new JSONObject();
             
             // model
-            json.put("model", config.getModel());
+            json.put("model", model);
             
             // messages
             JSONArray messages = new JSONArray();
@@ -210,7 +304,6 @@ public class OpenAIClient {
             //   disabled = 关闭思考(推荐): 音箱是语音短交互,不需要深度推理,
             //     关掉后省掉 600+ reasoning tokens,响应明显变快。
             //   enabled  = 打开思考; auto = 不发送该字段(兼容 OpenAI 等非智谱端点)。
-            String thinking = config.getThinking();
             if (thinking != null && !thinking.trim().isEmpty()
                     && !"auto".equalsIgnoreCase(thinking.trim())) {
                 JSONObject thinkingObj = new JSONObject();
@@ -221,14 +314,16 @@ public class OpenAIClient {
             // 豆包链专用: 让服务端顺带把这条回答用豆包自己的声音合成出来。
             // 只有 tts=doubao 时才发; 官方端点(智谱/方舟)不认识这个字段会被忽略,
             // 那时 audio 为 null, 音箱自动退回原厂 TTS, 不会出错。
-            if ("doubao".equalsIgnoreCase(config.getTts())) {
+            if (wantAudio) {
                 json.put("audio", new JSONObject());
             }
 
             // 豆包链按 user 分话题: 同一个 id 复用同一个豆包会话(跨轮有记忆),
             // 换 id 就另起一个话题。调侃走另一个 id, 免得污染主对话。
-            json.put("user", (topicUser == null || topicUser.trim().isEmpty())
-                    ? config.getUser() : topicUser.trim());
+            // 备用端点不是豆包链 → 不发这个字段。
+            if (topicUser != null && !topicUser.trim().isEmpty()) {
+                json.put("user", topicUser.trim());
+            }
 
             return json.toString();
             
@@ -346,17 +441,17 @@ public class OpenAIClient {
      * 免费额度下智谱会返回 429「账户已达到速率限制」, 偶发超时也常见,
      * 所以这里对可恢复的错误做退避重试, 避免用户一句话就说"调用失败"。
      */
-    private String httpPostJson(String urlStr, String jsonBody) {
+    private String httpPostJson(String urlStr, String jsonBody, String apiKey, int maxAttempts) {
         HttpResult last = null;
 
-        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-            HttpResult r = httpPostJsonOnce(urlStr, jsonBody);
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            HttpResult r = httpPostJsonOnce(urlStr, jsonBody, apiKey);
             if (r.body != null) {
                 return r.body;
             }
 
             last = r;
-            if (!r.retryable || attempt >= MAX_ATTEMPTS) {
+            if (!r.retryable || attempt >= maxAttempts) {
                 break;
             }
 
@@ -374,7 +469,7 @@ public class OpenAIClient {
         return null;
     }
 
-    private HttpResult httpPostJsonOnce(String urlStr, String jsonBody) {
+    private HttpResult httpPostJsonOnce(String urlStr, String jsonBody, String apiKey) {
         HttpResult result = new HttpResult();
         HttpURLConnection conn = null;
         BufferedReader reader = null;
@@ -399,7 +494,7 @@ public class OpenAIClient {
             // 设置请求头
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
             conn.setRequestProperty("Accept", "application/json");
-            conn.setRequestProperty("Authorization", "Bearer " + config.getApiKey());
+            conn.setRequestProperty("Authorization", "Bearer " + apiKey);
             conn.setRequestProperty("User-Agent", "R1-Speaker/1.0");
             
             // 发送请求体

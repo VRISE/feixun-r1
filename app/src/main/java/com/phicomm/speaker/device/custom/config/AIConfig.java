@@ -153,7 +153,22 @@ public class AIConfig {
     private int configVersion;
     private String tts;
     private String user;
-    
+
+    /**
+     * ── 备用端点（降级用）────────────────────────────────────────────
+     * 主端点(上面的 base_url)调不通时,自动改用这套去调,保证音箱不会"哑"。
+     *
+     * 典型场景: 主端点指向局域网里的豆包链(那台机器关机 / 豆包登录态过期),
+     *          备用端点直连智谱 GLM(公网,只要网络通就能用)。
+     *
+     * ⚠️ 备用端点拿不到豆包语音(语音是豆包链才有的),所以降级时自动用原厂 TTS 播。
+     *
+     * 三个字段都不填也能工作: 那时备用端点 = 代码内置的智谱 GLM-4.5-Flash 默认值。
+     */
+    private String fallbackBaseUrl;
+    private String fallbackApiKey;
+    private String fallbackModel;
+
     /**
      * 加载配置文件
      * 如果文件不存在,创建默认配置
@@ -242,6 +257,16 @@ public class AIConfig {
         if (this.user == null || this.user.isEmpty()) {
             this.user = DEFAULT_USER;
         }
+        // 备用端点: 没填就整个退回"代码默认的智谱 GLM"(见 getFallback* 的兜底逻辑)
+        if (this.fallbackBaseUrl == null || this.fallbackBaseUrl.isEmpty()) {
+            this.fallbackBaseUrl = DEFAULT_BASE_URL;
+        }
+        if (this.fallbackApiKey == null || this.fallbackApiKey.isEmpty()) {
+            this.fallbackApiKey = DEFAULT_API_KEY;
+        }
+        if (this.fallbackModel == null || this.fallbackModel.isEmpty()) {
+            this.fallbackModel = DEFAULT_MODEL;
+        }
     }
 
     /**
@@ -303,6 +328,13 @@ public class AIConfig {
             sb.append("thinking = ").append(thinking).append("\n");
             sb.append("tts = ").append(tts == null ? "" : tts).append("\n");
             sb.append("user = ").append(user == null ? "" : user).append("\n");
+            // 备用端点: 与代码默认值相同时写空, 免得把默认端点固化进文件
+            sb.append("fallback_base_url = ")
+                    .append(eq(fallbackBaseUrl, DEFAULT_BASE_URL) ? "" : fallbackBaseUrl).append("\n");
+            sb.append("fallback_api_key = ")
+                    .append(eq(fallbackApiKey, DEFAULT_API_KEY) ? "" : fallbackApiKey).append("\n");
+            sb.append("fallback_model = ")
+                    .append(eq(fallbackModel, DEFAULT_MODEL) ? "" : fallbackModel).append("\n");
             sb.append("config_version = ").append(configVersion).append("\n");
             
             fos.write(sb.toString().getBytes("UTF-8"));
@@ -329,6 +361,9 @@ public class AIConfig {
         this.configVersion = 0;   // 0 = 老配置文件(还没有版本字段), 会触发迁移
         this.tts = DEFAULT_TTS;
         this.user = DEFAULT_USER;
+        this.fallbackBaseUrl = DEFAULT_BASE_URL;
+        this.fallbackApiKey = DEFAULT_API_KEY;
+        this.fallbackModel = DEFAULT_MODEL;
         
         try {
             FileInputStream fis = new FileInputStream(configFile);
@@ -405,6 +440,15 @@ public class AIConfig {
                             case "user":
                                 if (!value.isEmpty()) this.user = value;
                                 break;
+                            case "fallback_base_url":
+                                if (!value.isEmpty()) this.fallbackBaseUrl = value;
+                                break;
+                            case "fallback_api_key":
+                                if (!value.isEmpty()) this.fallbackApiKey = value;
+                                break;
+                            case "fallback_model":
+                                if (!value.isEmpty()) this.fallbackModel = value;
+                                break;
                         }
                     }
                 }
@@ -434,6 +478,9 @@ public class AIConfig {
         config.configVersion = CURRENT_CONFIG_VERSION;
         config.tts = DEFAULT_TTS;
         config.user = DEFAULT_USER;
+        config.fallbackBaseUrl = DEFAULT_BASE_URL;
+        config.fallbackApiKey = DEFAULT_API_KEY;
+        config.fallbackModel = DEFAULT_MODEL;
         
         config.save(context);
         LogMgr.d(TAG, "Default config created");
@@ -486,6 +533,33 @@ public class AIConfig {
     public String getUser() {
         return (user == null || user.trim().isEmpty()) ? DEFAULT_USER : user.trim();
     }
+
+    /** 备用端点地址(主端点调不通时用)。没配过就是代码默认的智谱端点。 */
+    public String getFallbackBaseUrl() {
+        return (fallbackBaseUrl == null || fallbackBaseUrl.trim().isEmpty())
+                ? DEFAULT_BASE_URL : fallbackBaseUrl.trim();
+    }
+
+    /** 备用端点 Key(主端点调不通时用) */
+    public String getFallbackApiKey() {
+        return (fallbackApiKey == null || fallbackApiKey.trim().isEmpty())
+                ? DEFAULT_API_KEY : fallbackApiKey.trim();
+    }
+
+    /** 备用端点的模型名 */
+    public String getFallbackModel() {
+        return (fallbackModel == null || fallbackModel.trim().isEmpty())
+                ? DEFAULT_MODEL : fallbackModel.trim();
+    }
+
+    /** 备用端点是否等于主端点(那就没必要降级了,省一次无效重试) */
+    public boolean isFallbackSameAsPrimary() {
+        return getFallbackBaseUrl().equals(baseUrl == null ? "" : baseUrl.trim());
+    }
+
+    public void setFallbackBaseUrl(String v) { this.fallbackBaseUrl = v; }
+    public void setFallbackApiKey(String v) { this.fallbackApiKey = v; }
+    public void setFallbackModel(String v) { this.fallbackModel = v; }
     
     // Setter 方法(供后续修改配置使用)
     

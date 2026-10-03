@@ -52,6 +52,12 @@
 
 .field private configVersion:I
 
+.field private fallbackApiKey:Ljava/lang/String;
+
+.field private fallbackBaseUrl:Ljava/lang/String;
+
+.field private fallbackModel:Ljava/lang/String;
+
 .field private maxTokens:I
 
 .field private model:Ljava/lang/String;
@@ -82,21 +88,21 @@
     .registers 4
 
     .prologue
-    .line 252
+    .line 277
     const/4 v0, 0x0
 
-    .line 276
+    .line 301
     .local v0, "changed":Z
     if-eqz v0, :cond_a
 
-    .line 277
+    .line 302
     const-string v1, "AIConfig"
 
     const-string v2, "Applied forced defaults from code (FORCE_* switches)"
 
     invoke-static {v1, v2}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 279
+    .line 304
     :cond_a
     return v0
 .end method
@@ -106,73 +112,88 @@
     .param p0, "context"    # Landroid/content/Context;
 
     .prologue
-    .line 426
+    .line 470
     new-instance v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;
 
     invoke-direct {v0}, Lcom/phicomm/speaker/device/custom/config/AIConfig;-><init>()V
 
-    .line 427
+    .line 471
     .local v0, "config":Lcom/phicomm/speaker/device/custom/config/AIConfig;
     const-string v1, "openai"
 
     iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->provider:Ljava/lang/String;
 
-    .line 428
+    .line 472
     const-string v1, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
     iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
 
-    .line 429
+    .line 473
     const-string v1, "YOUR_ZHIPU_API_KEY_HERE"
 
     iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
-    .line 430
+    .line 474
     const-string v1, "GLM-4.5-Flash"
 
     iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->model:Ljava/lang/String;
 
-    .line 431
+    .line 475
     const v1, 0x3f333333    # 0.7f
 
     iput v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->temperature:F
 
-    .line 432
+    .line 476
     const/16 v1, 0x400
 
     iput v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->maxTokens:I
 
-    .line 433
+    .line 477
     const-string v1, "disabled"
 
     iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->thinking:Ljava/lang/String;
 
-    .line 434
+    .line 478
     const/4 v1, 0x5
 
     iput v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->configVersion:I
 
-    .line 435
+    .line 479
     const-string v1, "doubao"
 
     iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
-    .line 436
+    .line 480
     const-string v1, "r1-speaker"
 
     iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
 
-    .line 438
+    .line 481
+    const-string v1, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+
+    iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    .line 482
+    const-string v1, "YOUR_ZHIPU_API_KEY_HERE"
+
+    iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    .line 483
+    const-string v1, "GLM-4.5-Flash"
+
+    iput-object v1, v0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    .line 485
     invoke-virtual {v0, p0}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->save(Landroid/content/Context;)V
 
-    .line 439
+    .line 486
     const-string v1, "AIConfig"
 
     const-string v2, "Default config created"
 
     invoke-static {v1, v2}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 440
+    .line 487
     return-void
 .end method
 
@@ -182,7 +203,7 @@
     .param p1, "b"    # Ljava/lang/String;
 
     .prologue
-    .line 283
+    .line 308
     if-nez p0, :cond_8
 
     if-nez p1, :cond_6
@@ -210,7 +231,7 @@
     .param p0, "key"    # Ljava/lang/String;
 
     .prologue
-    .line 217
+    .line 232
     if-eqz p0, :cond_18
 
     invoke-virtual {p0}, Ljava/lang/String;->trim()Ljava/lang/String;
@@ -254,7 +275,7 @@
     .prologue
     const/4 v6, 0x5
 
-    .line 162
+    .line 177
     new-instance v2, Ljava/io/File;
 
     invoke-virtual {p0}, Landroid/content/Context;->getFilesDir()Ljava/io/File;
@@ -265,7 +286,7 @@
 
     invoke-direct {v2, v3, v4}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
 
-    .line 164
+    .line 179
     .local v2, "configFile":Ljava/io/File;
     invoke-virtual {v2}, Ljava/io/File;->exists()Z
 
@@ -273,36 +294,36 @@
 
     if-nez v3, :cond_1c
 
-    .line 165
+    .line 180
     const-string v3, "AIConfig"
 
     const-string v4, "Config file not found, creating default config"
 
     invoke-static {v3, v4}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 166
+    .line 181
     invoke-static {p0}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->createDefaultConfig(Landroid/content/Context;)V
 
-    .line 172
+    .line 187
     :cond_1c
     new-instance v1, Lcom/phicomm/speaker/device/custom/config/AIConfig;
 
     invoke-direct {v1}, Lcom/phicomm/speaker/device/custom/config/AIConfig;-><init>()V
 
-    .line 173
+    .line 188
     .local v1, "config":Lcom/phicomm/speaker/device/custom/config/AIConfig;
     invoke-direct {v1, v2}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->readFromFile(Ljava/io/File;)V
 
-    .line 175
+    .line 190
     const/4 v0, 0x0
 
-    .line 180
+    .line 195
     .local v0, "changed":Z
     iget v3, v1, Lcom/phicomm/speaker/device/custom/config/AIConfig;->configVersion:I
 
     if-ge v3, v6, :cond_57
 
-    .line 181
+    .line 196
     const-string v3, "AIConfig"
 
     new-instance v4, Ljava/lang/StringBuilder;
@@ -343,13 +364,13 @@
 
     invoke-static {v3, v4}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 183
+    .line 198
     invoke-direct {v1}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->migrate()V
 
-    .line 184
+    .line 199
     const/4 v0, 0x1
 
-    .line 188
+    .line 203
     :cond_57
     invoke-direct {v1}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->applyForcedDefaults()Z
 
@@ -357,10 +378,10 @@
 
     if-eqz v3, :cond_5e
 
-    .line 189
+    .line 204
     const/4 v0, 0x1
 
-    .line 193
+    .line 208
     :cond_5e
     iget-object v3, v1, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
@@ -378,32 +399,32 @@
 
     if-nez v3, :cond_7a
 
-    .line 194
+    .line 209
     const-string v3, "AIConfig"
 
     const-string v4, "api_key is placeholder, adopting DEFAULT_API_KEY from code"
 
     invoke-static {v3, v4}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 195
+    .line 210
     const-string v3, "YOUR_ZHIPU_API_KEY_HERE"
 
     iput-object v3, v1, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
-    .line 196
+    .line 211
     const/4 v0, 0x1
 
-    .line 199
+    .line 214
     :cond_7a
     if-eqz v0, :cond_81
 
-    .line 200
+    .line 215
     iput v6, v1, Lcom/phicomm/speaker/device/custom/config/AIConfig;->configVersion:I
 
-    .line 201
+    .line 216
     invoke-virtual {v1, p0}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->save(Landroid/content/Context;)V
 
-    .line 204
+    .line 219
     :cond_81
     iget-object v3, v1, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
@@ -413,7 +434,7 @@
 
     if-eqz v3, :cond_a5
 
-    .line 205
+    .line 220
     const-string v3, "AIConfig"
 
     new-instance v4, Ljava/lang/StringBuilder;
@@ -426,7 +447,7 @@
 
     move-result-object v4
 
-    .line 206
+    .line 221
     invoke-virtual {v2}, Ljava/io/File;->getAbsolutePath()Ljava/lang/String;
 
     move-result-object v5
@@ -439,10 +460,10 @@
 
     move-result-object v4
 
-    .line 205
+    .line 220
     invoke-static {v3, v4}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 209
+    .line 224
     :cond_a5
     const-string v3, "AIConfig"
 
@@ -516,7 +537,7 @@
 
     invoke-static {v3, v4}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 212
+    .line 227
     return-object v1
 .end method
 
@@ -524,37 +545,37 @@
     .registers 2
 
     .prologue
-    .line 224
+    .line 239
     const-string v0, "openai"
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->provider:Ljava/lang/String;
 
-    .line 225
+    .line 240
     const-string v0, "GLM-4.5-Flash"
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->model:Ljava/lang/String;
 
-    .line 226
+    .line 241
     const v0, 0x3f333333    # 0.7f
 
     iput v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->temperature:F
 
-    .line 227
+    .line 242
     const/16 v0, 0x400
 
     iput v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->maxTokens:I
 
-    .line 228
+    .line 243
     const-string v0, "disabled"
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->thinking:Ljava/lang/String;
 
-    .line 229
+    .line 244
     const/4 v0, 0x5
 
     iput v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->configVersion:I
 
-    .line 232
+    .line 247
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
 
     if-eqz v0, :cond_24
@@ -567,13 +588,13 @@
 
     if-eqz v0, :cond_28
 
-    .line 233
+    .line 248
     :cond_24
     const-string v0, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
 
-    .line 235
+    .line 250
     :cond_28
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
@@ -587,24 +608,24 @@
 
     if-eqz v0, :cond_38
 
-    .line 236
+    .line 251
     :cond_34
     const-string v0, "YOUR_ZHIPU_API_KEY_HERE"
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
-    .line 239
+    .line 254
     :cond_38
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
     if-nez v0, :cond_40
 
-    .line 240
+    .line 255
     const-string v0, "doubao"
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
-    .line 242
+    .line 257
     :cond_40
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
 
@@ -618,14 +639,74 @@
 
     if-eqz v0, :cond_50
 
-    .line 243
+    .line 258
     :cond_4c
     const-string v0, "r1-speaker"
 
     iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
 
-    .line 245
+    .line 261
     :cond_50
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    if-eqz v0, :cond_5c
+
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_60
+
+    .line 262
+    :cond_5c
+    const-string v0, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+
+    iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    .line 264
+    :cond_60
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    if-eqz v0, :cond_6c
+
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_70
+
+    .line 265
+    :cond_6c
+    const-string v0, "YOUR_ZHIPU_API_KEY_HERE"
+
+    iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    .line 267
+    :cond_70
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    if-eqz v0, :cond_7c
+
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_80
+
+    .line 268
+    :cond_7c
+    const-string v0, "GLM-4.5-Flash"
+
+    iput-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    .line 270
+    :cond_80
     return-void
 .end method
 
@@ -640,61 +721,76 @@
 
     const/4 v9, 0x0
 
-    .line 322
+    .line 354
     const-string v8, "openai"
 
     iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->provider:Ljava/lang/String;
 
-    .line 323
+    .line 355
     const-string v8, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
 
     iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
 
-    .line 324
+    .line 356
     const-string v8, "YOUR_ZHIPU_API_KEY_HERE"
 
     iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
-    .line 325
+    .line 357
     const-string v8, "GLM-4.5-Flash"
 
     iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->model:Ljava/lang/String;
 
-    .line 326
+    .line 358
     const v8, 0x3f333333    # 0.7f
 
     iput v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->temperature:F
 
-    .line 327
+    .line 359
     const/16 v8, 0x400
 
     iput v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->maxTokens:I
 
-    .line 328
+    .line 360
     const-string v8, "disabled"
 
     iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->thinking:Ljava/lang/String;
 
-    .line 329
+    .line 361
     iput v9, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->configVersion:I
 
-    .line 330
+    .line 362
     const-string v8, "doubao"
 
     iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
-    .line 331
+    .line 363
     const-string v8, "r1-speaker"
 
     iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
 
-    .line 334
-    :try_start_2a
+    .line 364
+    const-string v8, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+
+    iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    .line 365
+    const-string v8, "YOUR_ZHIPU_API_KEY_HERE"
+
+    iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    .line 366
+    const-string v8, "GLM-4.5-Flash"
+
+    iput-object v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    .line 369
+    :try_start_36
     new-instance v1, Ljava/io/FileInputStream;
 
     invoke-direct {v1, p1}, Ljava/io/FileInputStream;-><init>(Ljava/io/File;)V
 
-    .line 335
+    .line 370
     .local v1, "fis":Ljava/io/FileInputStream;
     new-instance v6, Ljava/io/BufferedReader;
 
@@ -706,32 +802,32 @@
 
     invoke-direct {v6, v8}, Ljava/io/BufferedReader;-><init>(Ljava/io/Reader;)V
 
-    .line 338
+    .line 373
     .local v6, "reader":Ljava/io/BufferedReader;
     const/4 v2, 0x0
 
-    .line 340
+    .line 375
     .local v2, "inAiSection":Z
-    :cond_3c
-    :goto_3c
+    :cond_48
+    :goto_48
     invoke-virtual {v6}, Ljava/io/BufferedReader;->readLine()Ljava/lang/String;
 
     move-result-object v4
 
     .local v4, "line":Ljava/lang/String;
-    if-eqz v4, :cond_1ce
+    if-eqz v4, :cond_21c
 
-    .line 341
+    .line 376
     invoke-virtual {v4}, Ljava/lang/String;->trim()Ljava/lang/String;
 
     move-result-object v4
 
-    .line 344
+    .line 379
     invoke-virtual {v4}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     const-string v8, "#"
 
@@ -739,7 +835,7 @@
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     const-string v8, ";"
 
@@ -747,42 +843,42 @@
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
-    .line 349
+    .line 384
     const-string v8, "[AI]"
 
     invoke-virtual {v4, v8}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v8
 
-    if-eqz v8, :cond_66
+    if-eqz v8, :cond_72
 
-    .line 350
+    .line 385
     const/4 v2, 0x1
 
-    .line 351
-    goto :goto_3c
+    .line 386
+    goto :goto_48
 
-    .line 352
-    :cond_66
+    .line 387
+    :cond_72
     const-string v8, "["
 
     invoke-virtual {v4, v8}, Ljava/lang/String;->startsWith(Ljava/lang/String;)Z
 
     move-result v8
 
-    if-eqz v8, :cond_70
+    if-eqz v8, :cond_7c
 
-    .line 353
+    .line 388
     const/4 v2, 0x0
 
-    .line 354
-    goto :goto_3c
+    .line 389
+    goto :goto_48
 
-    .line 358
-    :cond_70
-    if-eqz v2, :cond_3c
+    .line 393
+    :cond_7c
+    if-eqz v2, :cond_48
 
     const-string v8, "="
 
@@ -790,9 +886,9 @@
 
     move-result v8
 
-    if-eqz v8, :cond_3c
+    if-eqz v8, :cond_48
 
-    .line 359
+    .line 394
     const-string v8, "="
 
     const/4 v12, 0x2
@@ -801,13 +897,13 @@
 
     move-result-object v5
 
-    .line 360
+    .line 395
     .local v5, "parts":[Ljava/lang/String;
     array-length v8, v5
 
-    if-ne v8, v11, :cond_3c
+    if-ne v8, v11, :cond_48
 
-    .line 361
+    .line 396
     const/4 v8, 0x0
 
     aget-object v8, v5, v8
@@ -816,7 +912,7 @@
 
     move-result-object v3
 
-    .line 362
+    .line 397
     .local v3, "key":Ljava/lang/String;
     const/4 v8, 0x1
 
@@ -826,7 +922,7 @@
 
     move-result-object v7
 
-    .line 365
+    .line 400
     .local v7, "value":Ljava/lang/String;
     const/4 v8, -0x1
 
@@ -834,29 +930,29 @@
 
     move-result v12
 
-    sparse-switch v12, :sswitch_data_1fc
+    sparse-switch v12, :sswitch_data_24a
 
-    :cond_9a
-    :goto_9a
-    packed-switch v8, :pswitch_data_226
+    :cond_a6
+    :goto_a6
+    packed-switch v8, :pswitch_data_280
 
-    goto :goto_3c
+    goto :goto_48
 
-    .line 367
-    :pswitch_9e
+    .line 402
+    :pswitch_aa
     invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->provider:Ljava/lang/String;
-    :try_end_a6
-    .catch Ljava/lang/Exception; {:try_start_2a .. :try_end_a6} :catch_a7
+    :try_end_b2
+    .catch Ljava/lang/Exception; {:try_start_36 .. :try_end_b2} :catch_b3
 
-    goto :goto_3c
+    goto :goto_48
 
-    .line 417
+    .line 461
     .end local v1    # "fis":Ljava/io/FileInputStream;
     .end local v2    # "inAiSection":Z
     .end local v3    # "key":Ljava/lang/String;
@@ -864,10 +960,10 @@
     .end local v5    # "parts":[Ljava/lang/String;
     .end local v6    # "reader":Ljava/io/BufferedReader;
     .end local v7    # "value":Ljava/lang/String;
-    :catch_a7
+    :catch_b3
     move-exception v0
 
-    .line 418
+    .line 462
     .local v0, "e":Ljava/lang/Exception;
     const-string v8, "AIConfig"
 
@@ -891,12 +987,12 @@
 
     invoke-static {v8, v9}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 420
+    .line 464
     .end local v0    # "e":Ljava/lang/Exception;
-    :goto_c0
+    :goto_cc
     return-void
 
-    .line 365
+    .line 400
     .restart local v1    # "fis":Ljava/io/FileInputStream;
     .restart local v2    # "inAiSection":Z
     .restart local v3    # "key":Ljava/lang/String;
@@ -904,196 +1000,235 @@
     .restart local v5    # "parts":[Ljava/lang/String;
     .restart local v6    # "reader":Ljava/io/BufferedReader;
     .restart local v7    # "value":Ljava/lang/String;
-    :sswitch_c1
-    :try_start_c1
+    :sswitch_cd
+    :try_start_cd
     const-string v12, "provider"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     move v8, v9
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_cb
+    :sswitch_d7
     const-string v12, "base_url"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     move v8, v10
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_d5
+    :sswitch_e1
     const-string v12, "api_key"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     move v8, v11
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_df
+    :sswitch_eb
     const-string v12, "model"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     const/4 v8, 0x3
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_e9
+    :sswitch_f5
     const-string v12, "temperature"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     const/4 v8, 0x4
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_f3
+    :sswitch_ff
     const-string v12, "max_tokens"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     const/4 v8, 0x5
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_fd
+    :sswitch_109
     const-string v12, "thinking"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     const/4 v8, 0x6
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_107
+    :sswitch_113
     const-string v12, "config_version"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     const/4 v8, 0x7
 
-    goto :goto_9a
+    goto :goto_a6
 
-    :sswitch_111
+    :sswitch_11d
     const-string v12, "tts"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     const/16 v8, 0x8
 
-    goto/16 :goto_9a
+    goto/16 :goto_a6
 
-    :sswitch_11d
+    :sswitch_129
     const-string v12, "user"
 
     invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
 
     move-result v12
 
-    if-eqz v12, :cond_9a
+    if-eqz v12, :cond_a6
 
     const/16 v8, 0x9
 
-    goto/16 :goto_9a
+    goto/16 :goto_a6
 
-    .line 370
-    :pswitch_129
+    :sswitch_135
+    const-string v12, "fallback_base_url"
+
+    invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v12
+
+    if-eqz v12, :cond_a6
+
+    const/16 v8, 0xa
+
+    goto/16 :goto_a6
+
+    :sswitch_141
+    const-string v12, "fallback_api_key"
+
+    invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v12
+
+    if-eqz v12, :cond_a6
+
+    const/16 v8, 0xb
+
+    goto/16 :goto_a6
+
+    :sswitch_14d
+    const-string v12, "fallback_model"
+
+    invoke-virtual {v3, v12}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v12
+
+    if-eqz v12, :cond_a6
+
+    const/16 v8, 0xc
+
+    goto/16 :goto_a6
+
+    .line 405
+    :pswitch_159
     invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 373
-    :pswitch_133
+    .line 408
+    :pswitch_163
     invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 376
-    :pswitch_13d
+    .line 411
+    :pswitch_16d
     invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->model:Ljava/lang/String;
-    :try_end_145
-    .catch Ljava/lang/Exception; {:try_start_c1 .. :try_end_145} :catch_a7
+    :try_end_175
+    .catch Ljava/lang/Exception; {:try_start_cd .. :try_end_175} :catch_b3
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 380
-    :pswitch_147
-    :try_start_147
+    .line 415
+    :pswitch_177
+    :try_start_177
     invoke-static {v7}, Ljava/lang/Float;->parseFloat(Ljava/lang/String;)F
 
     move-result v8
 
     iput v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->temperature:F
-    :try_end_14d
-    .catch Ljava/lang/NumberFormatException; {:try_start_147 .. :try_end_14d} :catch_14f
-    .catch Ljava/lang/Exception; {:try_start_147 .. :try_end_14d} :catch_a7
+    :try_end_17d
+    .catch Ljava/lang/NumberFormatException; {:try_start_177 .. :try_end_17d} :catch_17f
+    .catch Ljava/lang/Exception; {:try_start_177 .. :try_end_17d} :catch_b3
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 381
-    :catch_14f
+    .line 416
+    :catch_17f
     move-exception v0
 
-    .line 382
+    .line 417
     .local v0, "e":Ljava/lang/NumberFormatException;
-    :try_start_150
+    :try_start_180
     const-string v8, "AIConfig"
 
     new-instance v12, Ljava/lang/StringBuilder;
@@ -1115,33 +1250,33 @@
     move-result-object v12
 
     invoke-static {v8, v12}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_168
-    .catch Ljava/lang/Exception; {:try_start_150 .. :try_end_168} :catch_a7
+    :try_end_198
+    .catch Ljava/lang/Exception; {:try_start_180 .. :try_end_198} :catch_b3
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 387
+    .line 422
     .end local v0    # "e":Ljava/lang/NumberFormatException;
-    :pswitch_16a
-    :try_start_16a
+    :pswitch_19a
+    :try_start_19a
     invoke-static {v7}, Ljava/lang/Integer;->parseInt(Ljava/lang/String;)I
 
     move-result v8
 
     iput v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->maxTokens:I
-    :try_end_170
-    .catch Ljava/lang/NumberFormatException; {:try_start_16a .. :try_end_170} :catch_172
-    .catch Ljava/lang/Exception; {:try_start_16a .. :try_end_170} :catch_a7
+    :try_end_1a0
+    .catch Ljava/lang/NumberFormatException; {:try_start_19a .. :try_end_1a0} :catch_1a2
+    .catch Ljava/lang/Exception; {:try_start_19a .. :try_end_1a0} :catch_b3
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 388
-    :catch_172
+    .line 423
+    :catch_1a2
     move-exception v0
 
-    .line 389
+    .line 424
     .restart local v0    # "e":Ljava/lang/NumberFormatException;
-    :try_start_173
+    :try_start_1a3
     const-string v8, "AIConfig"
 
     new-instance v12, Ljava/lang/StringBuilder;
@@ -1164,44 +1299,44 @@
 
     invoke-static {v8, v12}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 393
+    .line 428
     .end local v0    # "e":Ljava/lang/NumberFormatException;
-    :pswitch_18d
+    :pswitch_1bd
     invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->thinking:Ljava/lang/String;
-    :try_end_195
-    .catch Ljava/lang/Exception; {:try_start_173 .. :try_end_195} :catch_a7
+    :try_end_1c5
+    .catch Ljava/lang/Exception; {:try_start_1a3 .. :try_end_1c5} :catch_b3
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 397
-    :pswitch_197
-    :try_start_197
+    .line 432
+    :pswitch_1c7
+    :try_start_1c7
     invoke-static {v7}, Ljava/lang/Integer;->parseInt(Ljava/lang/String;)I
 
     move-result v8
 
     iput v8, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->configVersion:I
-    :try_end_19d
-    .catch Ljava/lang/NumberFormatException; {:try_start_197 .. :try_end_19d} :catch_19f
-    .catch Ljava/lang/Exception; {:try_start_197 .. :try_end_19d} :catch_a7
+    :try_end_1cd
+    .catch Ljava/lang/NumberFormatException; {:try_start_1c7 .. :try_end_1cd} :catch_1cf
+    .catch Ljava/lang/Exception; {:try_start_1c7 .. :try_end_1cd} :catch_b3
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 398
-    :catch_19f
+    .line 433
+    :catch_1cf
     move-exception v0
 
-    .line 399
+    .line 434
     .restart local v0    # "e":Ljava/lang/NumberFormatException;
-    :try_start_1a0
+    :try_start_1d0
     const-string v8, "AIConfig"
 
     new-instance v12, Ljava/lang/StringBuilder;
@@ -1224,44 +1359,80 @@
 
     invoke-static {v8, v12}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 403
+    .line 438
     .end local v0    # "e":Ljava/lang/NumberFormatException;
-    :pswitch_1ba
+    :pswitch_1ea
     invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 406
-    :pswitch_1c4
+    .line 441
+    :pswitch_1f4
     invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
 
     move-result v8
 
-    if-nez v8, :cond_3c
+    if-nez v8, :cond_48
 
     iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
 
-    goto/16 :goto_3c
+    goto/16 :goto_48
 
-    .line 413
+    .line 444
+    :pswitch_1fe
+    invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v8
+
+    if-nez v8, :cond_48
+
+    iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    goto/16 :goto_48
+
+    .line 447
+    :pswitch_208
+    invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v8
+
+    if-nez v8, :cond_48
+
+    iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    goto/16 :goto_48
+
+    .line 450
+    :pswitch_212
+    invoke-virtual {v7}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v8
+
+    if-nez v8, :cond_48
+
+    iput-object v7, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    goto/16 :goto_48
+
+    .line 457
     .end local v3    # "key":Ljava/lang/String;
     .end local v5    # "parts":[Ljava/lang/String;
     .end local v7    # "value":Ljava/lang/String;
-    :cond_1ce
+    :cond_21c
     invoke-virtual {v6}, Ljava/io/BufferedReader;->close()V
 
-    .line 414
+    .line 458
     invoke-virtual {v1}, Ljava/io/FileInputStream;->close()V
 
-    .line 416
+    .line 460
     const-string v8, "AIConfig"
 
     new-instance v9, Ljava/lang/StringBuilder;
@@ -1297,38 +1468,44 @@
     move-result-object v9
 
     invoke-static {v8, v9}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
-    :try_end_1fa
-    .catch Ljava/lang/Exception; {:try_start_1a0 .. :try_end_1fa} :catch_a7
+    :try_end_248
+    .catch Ljava/lang/Exception; {:try_start_1d0 .. :try_end_248} :catch_b3
 
-    goto/16 :goto_c0
+    goto/16 :goto_cc
 
-    .line 365
-    :sswitch_data_1fc
+    .line 400
+    :sswitch_data_24a
     .sparse-switch
-        -0x6696d4ff -> :sswitch_cb
-        -0x3adbfa0f -> :sswitch_c1
-        -0x2fb05546 -> :sswitch_d5
-        -0x1fca1b25 -> :sswitch_107
-        0x1c1f3 -> :sswitch_111
-        0x36ebcb -> :sswitch_11d
-        0x633fb29 -> :sswitch_df
-        0x132cc574 -> :sswitch_e9
-        0x48fd95b0 -> :sswitch_fd
-        0x5070c4d5 -> :sswitch_f3
+        -0x6696d4ff -> :sswitch_d7
+        -0x3adbfa0f -> :sswitch_cd
+        -0x2fb05546 -> :sswitch_e1
+        -0x1fca1b25 -> :sswitch_113
+        -0x5d09a3 -> :sswitch_141
+        0x1c1f3 -> :sswitch_11d
+        0x36ebcb -> :sswitch_129
+        0x633fb29 -> :sswitch_eb
+        0x101bd38c -> :sswitch_14d
+        0x132cc574 -> :sswitch_f5
+        0x48fd95b0 -> :sswitch_109
+        0x5070c4d5 -> :sswitch_ff
+        0x547f53be -> :sswitch_135
     .end sparse-switch
 
-    :pswitch_data_226
+    :pswitch_data_280
     .packed-switch 0x0
-        :pswitch_9e
-        :pswitch_129
-        :pswitch_133
-        :pswitch_13d
-        :pswitch_147
-        :pswitch_16a
-        :pswitch_18d
-        :pswitch_197
-        :pswitch_1ba
-        :pswitch_1c4
+        :pswitch_aa
+        :pswitch_159
+        :pswitch_163
+        :pswitch_16d
+        :pswitch_177
+        :pswitch_19a
+        :pswitch_1bd
+        :pswitch_1c7
+        :pswitch_1ea
+        :pswitch_1f4
+        :pswitch_1fe
+        :pswitch_208
+        :pswitch_212
     .end packed-switch
 .end method
 
@@ -1338,7 +1515,7 @@
     .registers 2
 
     .prologue
-    .line 453
+    .line 500
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
     return-object v0
@@ -1348,7 +1525,7 @@
     .registers 2
 
     .prologue
-    .line 449
+    .line 496
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
 
     return-object v0
@@ -1358,17 +1535,137 @@
     .registers 2
 
     .prologue
-    .line 469
+    .line 516
     iget v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->configVersion:I
 
     return v0
+.end method
+
+.method public getFallbackApiKey()Ljava/lang/String;
+    .registers 2
+
+    .prologue
+    .line 545
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    if-eqz v0, :cond_10
+
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_13
+
+    .line 546
+    :cond_10
+    const-string v0, "YOUR_ZHIPU_API_KEY_HERE"
+
+    .line 545
+    :goto_12
+    return-object v0
+
+    .line 546
+    :cond_13
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    goto :goto_12
+.end method
+
+.method public getFallbackBaseUrl()Ljava/lang/String;
+    .registers 2
+
+    .prologue
+    .line 539
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    if-eqz v0, :cond_10
+
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_13
+
+    .line 540
+    :cond_10
+    const-string v0, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+
+    .line 539
+    :goto_12
+    return-object v0
+
+    .line 540
+    :cond_13
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    goto :goto_12
+.end method
+
+.method public getFallbackModel()Ljava/lang/String;
+    .registers 2
+
+    .prologue
+    .line 551
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    if-eqz v0, :cond_10
+
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    invoke-virtual {v0}, Ljava/lang/String;->isEmpty()Z
+
+    move-result v0
+
+    if-eqz v0, :cond_13
+
+    .line 552
+    :cond_10
+    const-string v0, "GLM-4.5-Flash"
+
+    .line 551
+    :goto_12
+    return-object v0
+
+    .line 552
+    :cond_13
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    goto :goto_12
 .end method
 
 .method public getMaxTokens()I
     .registers 2
 
     .prologue
-    .line 465
+    .line 512
     iget v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->maxTokens:I
 
     return v0
@@ -1378,7 +1675,7 @@
     .registers 2
 
     .prologue
-    .line 457
+    .line 504
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->model:Ljava/lang/String;
 
     return-object v0
@@ -1388,7 +1685,7 @@
     .registers 2
 
     .prologue
-    .line 445
+    .line 492
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->provider:Ljava/lang/String;
 
     return-object v0
@@ -1398,7 +1695,7 @@
     .registers 2
 
     .prologue
-    .line 461
+    .line 508
     iget v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->temperature:F
 
     return v0
@@ -1408,7 +1705,7 @@
     .registers 2
 
     .prologue
-    .line 477
+    .line 524
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->thinking:Ljava/lang/String;
 
     return-object v0
@@ -1418,7 +1715,7 @@
     .registers 2
 
     .prologue
-    .line 482
+    .line 529
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
     if-nez v0, :cond_7
@@ -1442,7 +1739,7 @@
     .registers 2
 
     .prologue
-    .line 487
+    .line 534
     iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
 
     if-eqz v0, :cond_10
@@ -1475,12 +1772,44 @@
     goto :goto_12
 .end method
 
+.method public isFallbackSameAsPrimary()Z
+    .registers 3
+
+    .prologue
+    .line 557
+    invoke-virtual {p0}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->getFallbackBaseUrl()Ljava/lang/String;
+
+    move-result-object v1
+
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
+
+    if-nez v0, :cond_f
+
+    const-string v0, ""
+
+    :goto_a
+    invoke-virtual {v1, v0}, Ljava/lang/String;->equals(Ljava/lang/Object;)Z
+
+    move-result v0
+
+    return v0
+
+    :cond_f
+    iget-object v0, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
+
+    invoke-virtual {v0}, Ljava/lang/String;->trim()Ljava/lang/String;
+
+    move-result-object v0
+
+    goto :goto_a
+.end method
+
 .method public save(Landroid/content/Context;)V
     .registers 9
     .param p1, "context"    # Landroid/content/Context;
 
     .prologue
-    .line 290
+    .line 315
     new-instance v0, Ljava/io/File;
 
     invoke-virtual {p1}, Landroid/content/Context;->getFilesDir()Ljava/io/File;
@@ -1491,20 +1820,20 @@
 
     invoke-direct {v0, v4, v5}, Ljava/io/File;-><init>(Ljava/io/File;Ljava/lang/String;)V
 
-    .line 293
+    .line 318
     .local v0, "configFile":Ljava/io/File;
     :try_start_b
     new-instance v2, Ljava/io/FileOutputStream;
 
     invoke-direct {v2, v0}, Ljava/io/FileOutputStream;-><init>(Ljava/io/File;)V
 
-    .line 294
+    .line 319
     .local v2, "fos":Ljava/io/FileOutputStream;
     new-instance v3, Ljava/lang/StringBuilder;
 
     invoke-direct {v3}, Ljava/lang/StringBuilder;-><init>()V
 
-    .line 296
+    .line 321
     .local v3, "sb":Ljava/lang/StringBuilder;
     const-string v4, "[AI]"
 
@@ -1516,7 +1845,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 297
+    .line 322
     const-string v4, "provider = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1533,7 +1862,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 298
+    .line 323
     const-string v4, "base_url = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1550,7 +1879,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 299
+    .line 324
     const-string v4, "api_key = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1567,7 +1896,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 300
+    .line 325
     const-string v4, "model = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1584,7 +1913,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 301
+    .line 326
     const-string v4, "temperature = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1601,7 +1930,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 302
+    .line 327
     const-string v4, "max_tokens = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1618,7 +1947,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 303
+    .line 328
     const-string v4, "thinking = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1635,7 +1964,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 304
+    .line 329
     const-string v4, "tts = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1644,7 +1973,7 @@
 
     iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
-    if-nez v4, :cond_ff
+    if-nez v4, :cond_150
 
     const-string v4, ""
 
@@ -1657,7 +1986,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 305
+    .line 330
     const-string v4, "user = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1666,7 +1995,7 @@
 
     iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
 
-    if-nez v4, :cond_102
+    if-nez v4, :cond_154
 
     const-string v4, ""
 
@@ -1679,7 +2008,94 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 306
+    .line 332
+    const-string v4, "fallback_base_url = "
+
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v5
+
+    .line 333
+    iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    const-string v6, "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+
+    invoke-static {v4, v6}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->eq(Ljava/lang/String;Ljava/lang/String;)Z
+
+    move-result v4
+
+    if-eqz v4, :cond_158
+
+    const-string v4, ""
+
+    :goto_d3
+    invoke-virtual {v5, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    const-string v5, "\n"
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    .line 334
+    const-string v4, "fallback_api_key = "
+
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v5
+
+    .line 335
+    iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    const-string v6, "YOUR_ZHIPU_API_KEY_HERE"
+
+    invoke-static {v4, v6}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->eq(Ljava/lang/String;Ljava/lang/String;)Z
+
+    move-result v4
+
+    if-eqz v4, :cond_15c
+
+    const-string v4, ""
+
+    :goto_ee
+    invoke-virtual {v5, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    const-string v5, "\n"
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    .line 336
+    const-string v4, "fallback_model = "
+
+    invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v5
+
+    .line 337
+    iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
+    const-string v6, "GLM-4.5-Flash"
+
+    invoke-static {v4, v6}, Lcom/phicomm/speaker/device/custom/config/AIConfig;->eq(Ljava/lang/String;Ljava/lang/String;)Z
+
+    move-result v4
+
+    if-eqz v4, :cond_15f
+
+    const-string v4, ""
+
+    :goto_109
+    invoke-virtual {v5, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    move-result-object v4
+
+    const-string v5, "\n"
+
+    invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
+
+    .line 338
     const-string v4, "config_version = "
 
     invoke-virtual {v3, v4}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
@@ -1696,7 +2112,7 @@
 
     invoke-virtual {v4, v5}, Ljava/lang/StringBuilder;->append(Ljava/lang/String;)Ljava/lang/StringBuilder;
 
-    .line 308
+    .line 340
     invoke-virtual {v3}, Ljava/lang/StringBuilder;->toString()Ljava/lang/String;
 
     move-result-object v4
@@ -1709,10 +2125,10 @@
 
     invoke-virtual {v2, v4}, Ljava/io/FileOutputStream;->write([B)V
 
-    .line 309
+    .line 341
     invoke-virtual {v2}, Ljava/io/FileOutputStream;->close()V
 
-    .line 311
+    .line 343
     const-string v4, "AIConfig"
 
     new-instance v5, Ljava/lang/StringBuilder;
@@ -1739,35 +2155,53 @@
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->d(Ljava/lang/String;Ljava/lang/String;)V
 
-    .line 315
+    .line 347
     .end local v2    # "fos":Ljava/io/FileOutputStream;
     .end local v3    # "sb":Ljava/lang/StringBuilder;
-    :goto_fe
+    :goto_14f
     return-void
 
-    .line 304
+    .line 329
     .restart local v2    # "fos":Ljava/io/FileOutputStream;
     .restart local v3    # "sb":Ljava/lang/StringBuilder;
-    :cond_ff
+    :cond_150
     iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->tts:Ljava/lang/String;
 
-    goto :goto_a3
+    goto/16 :goto_a3
 
-    .line 305
-    :cond_102
+    .line 330
+    :cond_154
     iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->user:Ljava/lang/String;
-    :try_end_104
-    .catch Ljava/lang/Exception; {:try_start_b .. :try_end_104} :catch_105
 
-    goto :goto_b8
+    goto/16 :goto_b8
 
-    .line 312
+    .line 333
+    :cond_158
+    iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    goto/16 :goto_d3
+
+    .line 335
+    :cond_15c
+    iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    goto :goto_ee
+
+    .line 337
+    :cond_15f
+    iget-object v4, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+    :try_end_161
+    .catch Ljava/lang/Exception; {:try_start_b .. :try_end_161} :catch_162
+
+    goto :goto_109
+
+    .line 344
     .end local v2    # "fos":Ljava/io/FileOutputStream;
     .end local v3    # "sb":Ljava/lang/StringBuilder;
-    :catch_105
+    :catch_162
     move-exception v1
 
-    .line 313
+    .line 345
     .local v1, "e":Ljava/lang/Exception;
     const-string v4, "AIConfig"
 
@@ -1791,7 +2225,7 @@
 
     invoke-static {v4, v5}, Lcom/unisound/vui/util/LogMgr;->e(Ljava/lang/String;Ljava/lang/String;)V
 
-    goto :goto_fe
+    goto :goto_14f
 .end method
 
 .method public setApiKey(Ljava/lang/String;)V
@@ -1799,10 +2233,10 @@
     .param p1, "apiKey"    # Ljava/lang/String;
 
     .prologue
-    .line 501
+    .line 575
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->apiKey:Ljava/lang/String;
 
-    .line 502
+    .line 576
     return-void
 .end method
 
@@ -1811,10 +2245,43 @@
     .param p1, "baseUrl"    # Ljava/lang/String;
 
     .prologue
-    .line 497
+    .line 571
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->baseUrl:Ljava/lang/String;
 
-    .line 498
+    .line 572
+    return-void
+.end method
+
+.method public setFallbackApiKey(Ljava/lang/String;)V
+    .registers 2
+    .param p1, "v"    # Ljava/lang/String;
+
+    .prologue
+    .line 561
+    iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackApiKey:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public setFallbackBaseUrl(Ljava/lang/String;)V
+    .registers 2
+    .param p1, "v"    # Ljava/lang/String;
+
+    .prologue
+    .line 560
+    iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackBaseUrl:Ljava/lang/String;
+
+    return-void
+.end method
+
+.method public setFallbackModel(Ljava/lang/String;)V
+    .registers 2
+    .param p1, "v"    # Ljava/lang/String;
+
+    .prologue
+    .line 562
+    iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->fallbackModel:Ljava/lang/String;
+
     return-void
 .end method
 
@@ -1823,10 +2290,10 @@
     .param p1, "maxTokens"    # I
 
     .prologue
-    .line 513
+    .line 587
     iput p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->maxTokens:I
 
-    .line 514
+    .line 588
     return-void
 .end method
 
@@ -1835,10 +2302,10 @@
     .param p1, "model"    # Ljava/lang/String;
 
     .prologue
-    .line 505
+    .line 579
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->model:Ljava/lang/String;
 
-    .line 506
+    .line 580
     return-void
 .end method
 
@@ -1847,10 +2314,10 @@
     .param p1, "provider"    # Ljava/lang/String;
 
     .prologue
-    .line 493
+    .line 567
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->provider:Ljava/lang/String;
 
-    .line 494
+    .line 568
     return-void
 .end method
 
@@ -1859,10 +2326,10 @@
     .param p1, "temperature"    # F
 
     .prologue
-    .line 509
+    .line 583
     iput p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->temperature:F
 
-    .line 510
+    .line 584
     return-void
 .end method
 
@@ -1871,9 +2338,9 @@
     .param p1, "thinking"    # Ljava/lang/String;
 
     .prologue
-    .line 517
+    .line 591
     iput-object p1, p0, Lcom/phicomm/speaker/device/custom/config/AIConfig;->thinking:Ljava/lang/String;
 
-    .line 518
+    .line 592
     return-void
 .end method
